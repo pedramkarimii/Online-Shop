@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "online-shop"
+version = "0.1.0"
+description = "Online Shop is an open-source e-commerce platform built with Django, PostgreSQL, Tailwind CSS, AJAX, Redis, Celery, and Docker. It offers robust features such as user authentication, product management, shopping cart functionality, and secure payment processing."
+authors = ["pedramkarimii <pedram.9060@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+django = "^5.0.4"
+djangorestframework = "^3.15.1"
+python-decouple = "^3.8"
+pillow = "^10.3.0"
+django-jazzmin = "^2.6.1"
+psycopg2-binary = "^2.9.9"
+pytz = "^2024.1"
+
+
+[tool.poetry.group.dev.dependencies]
+isort = "^5.13.2"
+ruff = "^0.3.7"
+pre-commit = "^3.7.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
