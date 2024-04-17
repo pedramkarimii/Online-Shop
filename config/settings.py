@@ -29,7 +29,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
-    'app.account.authenticate.EmailAuthBackend',
+    'apps.account.authenticate.EmailAuthBackend',
 ]
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -59,7 +59,7 @@ TEMPLATES = [
 ]
 
 # Applications
-APPLICATIONS = ["core", "account", "customer", "order", "product"]
+APPLICATIONS = ["core", "account", "order", "product"]
 
 # Serving
 STATIC_URL = "static/"
@@ -93,7 +93,7 @@ if DEBUG:
     CACHES = {
         "default": {
             "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
-            "LOCATION": BASE_DIR / "tmp/cache",
+            "LOCATION": BASE_DIR / "utility/cache",
         }
     }
     # Logging
