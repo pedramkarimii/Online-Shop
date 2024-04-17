@@ -22,27 +22,45 @@ project incorporates various features and technologies to facilitate product bro
 
 - **Responsive Design**: Ensures a consistent user experience across devices.
 
-## Technologies Used
+## List of technologies, frameworks, libraries, and tools Used
 
-- **Django**: High-level Python web framework.
+- **Python**: High-level programming language known for its simplicity and versatility.
 
-- **Django Rest Framework**: Toolkit for building Web APIs.
+- **Django**: Web framework for rapid development of secure and maintainable websites.
 
-- **python-decouple**: Environment variable handler.
+- **Django Rest Framework**: Toolkit for building Web APIs quickly and efficiently.
 
-- **Pillow**: Python Imaging Library.
+- **python-decouple**: Library for separating settings from code for better configuration management.
 
-- **Django-Jazzmin**: Customizable admin panel.
+- **Pillow**: Python Imaging Library for image processing tasks.
+
+- **Django-Jazzmin**: Customizable admin panel for Django projects.
 
 - **Psycopg2-Binary**: PostgreSQL adapter for Python.
 
-- **Pytz**: Library for working with time zones.
+- **Pytz**: Library for working with time zones in Python.
 
-- **Isort**: Python import sorter.
+- **Selenium**: Browser automation framework for web application testing.
 
-- **Ruff**: Tool for fixing linting errors.
+- **Isort**: Python import sorter for organizing import statements.
 
-- **Pre-Commit**: Framework for managing pre-commit hooks.
+- **Ruff**: Tool for fixing linting errors in Python code.
+
+- **Pre-Commit**: Framework for managing pre-commit hooks in Git repositories.
+
+- **Docker**: Containerization platform for packaging and deploying applications.
+
+- **Redis**: In-memory data structure store commonly used for caching and message queuing.
+
+- **Celery**: Distributed task queue for asynchronous task processing in web applications.
+
+- **Tailwind CSS**: Utility-first CSS framework for building responsive and customizable user interfaces.
+
+- **AJAX Fetch**: Technique for making asynchronous HTTP requests from web pages using JavaScript.
+
+## Entity-Relationship Diagram for Online Shop
+
+![ERD](ERD/ERD_Online_Shop.pdf)
 
 ## Setup
 
@@ -56,6 +74,7 @@ project incorporates various features and technologies to facilitate product bro
 - django-jazzmin (version >= 2.6.1)
 - psycopg2-binary (version >= 2.9.9)
 - pytz (version >= 2024.1)
+- selenium (version >= 4.19.0)
 - isort (version >= 5.13.2)
 - ruff (version >= 0.3.7)
 - pre-commit (version >= 3.7.0)
@@ -83,9 +102,7 @@ project incorporates various features and technologies to facilitate product bro
 4. **Set Up Django Environment**:
 
     ```bash
-    python manage.py makemigrations
-    python manage.py migrate
-    python manage.py createsuperuser
+    . utility/cleaner.sh
     ```
 
 5. **Start the Development Server**:
@@ -110,14 +127,9 @@ To fork the Tiny Instagram project and contribute to it:
 4. **Commit and Push Changes**: Commit your changes to your forked repository and push them to GitHub.
 5. **Create a Pull Request**: Create a pull request to propose your changes and merge them into the main repository.
 
-## Additional Resources
-
-- [ERD Diagram (PDF)](ERD.pdf)
-
 ## Contributors
 
 - Pedram Karimi (@pedramkarimii) - Owner
-
 
 ## License
 
