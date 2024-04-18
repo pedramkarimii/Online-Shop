@@ -23,8 +23,8 @@ class OrderPayment(models.Model):
     order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name="order_payments")
     amount = models.DecimalField(max_digits=10, decimal_places=2, validators=[validators.MinValueValidator(0)])
     cardholder_name = models.CharField(max_length=100, validators=[validators.MinLengthValidator(3)])
-    card_number = models.CharField(max_length=16, validators=[
-        validators.RegexValidator(r'^\d{16}$', _('Enter a valid 16-digit card number.'))])
+    card_number = models.CharField(max_length=12, validators=[
+        validators.RegexValidator(r'^\d{12}$', _('Enter a valid 12-digit card number.'))])
     expiration_date = models.DateField()
     cvv = models.CharField(max_length=4, validators=[
         validators.RegexValidator(r'^\d{3,4}$', _('Enter a valid 3 or 4-digit CVV.'))])
@@ -56,17 +56,20 @@ class OrderPayment(models.Model):
 
 class CodeDiscount(mixin.TimestampsStatusFlagMixin):
     """Model representing a discount code associated with a product or category."""
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_code_discounts')
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='order_code_discounts')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_code_discounts')
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='category_code_discounts')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_code_discounts', null=True, blank=True)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='order_code_discounts', null=True,
+                              blank=True)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_code_discounts', null=True,
+                                blank=True)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='category_code_discounts', null=True,
+                                 blank=True)
     code = models.CharField(max_length=100)
     percentage_discount = models.IntegerField(null=True, blank=True,
                                               validators=[validators.MinValueValidator(0)])
     numerical_discount = models.IntegerField(null=True, blank=True,
                                              validators=[validators.MinValueValidator(0)])
-    expiration_date = models.DateTimeField(null=True, blank=True, editable=False)
-    is_use = models.BooleanField(default=False)
+    expiration_date = models.DateTimeField(null=True, blank=True)
+    is_use = models.SmallIntegerField(default=0)
     is_expired = models.BooleanField(default=False)
 
     objects = managers.CodeDiscountManager()
@@ -74,7 +77,7 @@ class CodeDiscount(mixin.TimestampsStatusFlagMixin):
 
     def __str__(self):
         """Return a string representation of the CodeDiscount."""
-        return f'{self.code} - {self.percentage_discount} - {self.numerical_discount}'
+        return f'{self.code} - %{self.percentage_discount} - ${self.numerical_discount} - {self.expiration_date} - {self.is_expired}'
 
     class Meta:
         """Additional metadata about the CodeDiscount model."""
@@ -103,7 +106,7 @@ class WarehouseKeeper(mixin.TimestampsStatusFlagMixin):
 
     def __str__(self):
         """Return a string representation of the WarehouseKeeper."""
-        return f'{self.user.name} - {self.product.name} - {self.quantity}'
+        return f'{self.user} - {self.product} - {self.quantity}'
 
     class Meta:
         """Additional metadata about the WarehouseKeeper model."""
