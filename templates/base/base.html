@@ -1,10 +1,14 @@
-<!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% include "base/header.html" %}
+{% block title %}
+<title>home</title>
+{% endblock %}
+<body class=" bg-gradient-to-r from-gray-800 via-gary-200 to-gary-800">
+{% include 'base/navbar.html' %}
+{% include 'base/messages.html' %}
+{% block home %} {% endblock %}
 
+<footer>{% include "base/footer.html" %}</footer>
 </body>
+
 </html>
