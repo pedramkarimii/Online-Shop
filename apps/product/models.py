@@ -50,7 +50,7 @@ class Media(mixin.TimestampsStatusFlagMixin):
     """
     product = models.ForeignKey('Product', on_delete=models.CASCADE, related_name='media_products')
     product_picture = models.ImageField(
-        upload_to=partial(maker, "media_picture/%Y/%m/", keys=["name"]), max_length=255, blank=True,
+        upload_to=partial(maker, "media_picture/%Y/%m/", keys=["product"]), max_length=255, blank=True,
         null=True, validators=[validators.FileExtensionValidator(
             allowed_extensions=['jpg', 'jpeg', 'png', 'gif'])])
 
@@ -240,7 +240,7 @@ class Comment(mixin.TimestampsStatusFlagMixin):
         """
         Method to return a string representation of the Comment object.
         """
-        return f'{self.user.name} - {self.product.name} - {self.comment}'
+        return f'{self.user.name} - {self.comment} - {self.product.name} '
 
     class Meta:
         """
