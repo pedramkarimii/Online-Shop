@@ -1,10 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-
-</body>
-</html>
+<div class="bg-lime-600 ">
+    {% if messages %}
+    {% for msg in messages %}
+    {% if "success" in msg.tags %}
+    <p class=" mb-4  bg-gradient-to-r from-lime-800 via-lime-500 to-lime-100 {{ msg.tags }}">{{ msg }}</p>
+    {% elif "warning" in msg.tags %}
+    <p class=" mb-4  bg-gradient-to-r from-orange-800 via-orange-500 to-orange-100 {{ msg.tags }}">{{ msg }}</p>
+    {% else %}
+    <p class=" mb-4 bg-gradient-to-r from-red-800 via-red-500 to-red-100 {{ msg.tags }}">{{ msg }}</p>
+    {% endif %}
+    {% endfor %}
+    {% endif %}
+</div>
