@@ -11,8 +11,6 @@ class OrderItem(mixin.TimestampsStatusFlagMixin):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_order_items")
     product = models.ForeignKey('product.Product', on_delete=models.CASCADE, related_name="product_order_items")
-    warehouse_keeper = models.ForeignKey('core.WarehouseKeeper', on_delete=models.CASCADE,
-                                         related_name="warehouse_keeper_order_items")
     total_price = models.IntegerField(default=0)
     quantity = models.PositiveIntegerField(default=1, validators=[validators.MinValueValidator(1)])
     objects = managers.OrderItemManager()
@@ -23,12 +21,12 @@ class OrderItem(mixin.TimestampsStatusFlagMixin):
 
     class Meta:
         """Additional metadata about the OrderItem model."""
-        ordering = ['-create_time']
+        ordering = ('-create_time',)
         verbose_name = 'Order Item'
         verbose_name_plural = 'Order Items'
         indexes = [
             models.Index(
-                fields=['user', 'product', 'warehouse_keeper'], name='order_item')]
+                fields=('user', 'product'), name='order_item')]
 
 
 class Order(mixin.TimestampsStatusFlagMixin):
@@ -41,7 +39,8 @@ class Order(mixin.TimestampsStatusFlagMixin):
     )
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_orders")
     order_items = models.ForeignKey(OrderItem, on_delete=models.CASCADE, related_name="order_items_order")
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new',
+    address = models.ForeignKey(Address, on_delete=models.CASCADE, related_name="address_order")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES,
                               validators=[validators.RegexValidator(
                                   regex=r'^(new|paid|delivered|cancelled)$', message=_('Invalid status'), )])
     objects = managers.OrderManager()
@@ -81,13 +80,11 @@ class StatusOrder(models.Model):
     time_cancelled_order = models.DateTimeField(null=True, blank=True)
     cancelled_order = models.BooleanField(default=False)
 
-    deliver = models.BooleanField(default=False)
-
     objects = managers.StatusOrderManager()
 
     def __str__(self):
         """Return a string representation of the StatusOrder."""
-        return f'{self.order} - {self.deliver}'
+        return f'{self.order} - {self.deliver_order}'
 
     class Meta:
         """Additional metadata about the StatusOrder model."""
