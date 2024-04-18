@@ -90,7 +90,7 @@ class MediaAdmin(admin.ModelAdmin):
 
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
-    list_display = ('user', 'product', 'reply', 'is_reply', 'comment')
+    list_display = ('user', 'product', 'comment', 'reply', 'is_reply')
     search_fields = ('user', 'product', 'reply', 'is_reply', 'comment')
     ordering = ('-create_time', '-update_time')
     list_filter = ('user', 'product', 'reply', 'is_reply', 'comment')
