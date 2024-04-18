@@ -2,7 +2,7 @@ import uuid
 from django.test import TestCase
 from django.utils import timezone
 from apps.core.models import OrderPayment, WarehouseKeeper, CodeDiscount
-from apps.account.models import User
+from apps.account.models import User, Address
 from apps.order.models import Order, OrderItem
 from datetime import timedelta
 from decimal import Decimal
@@ -25,12 +25,21 @@ class CodeDiscountTestCase(TestCase):
         self.warehouse_keeper = WarehouseKeeper.objects.create(user=self.user, brand=self.brand, product=self.product)
 
         # Assuming you have a valid OrderItem instance named 'order_item'
-        self.order_item = OrderItem.objects.create(user=self.user, product=self.product,
-                                                   warehouse_keeper=self.warehouse_keeper, quantity=1,
+        self.order_item = OrderItem.objects.create(user=self.user, product=self.product, quantity=1,
                                                    total_price=Decimal(10))
-
+        self.address = Address.objects.create(
+            user=self.user,
+            address_name="Home",
+            country="Iran",
+            city="Tehran",
+            street="123 Main St",
+            building_number="5A",
+            floor_number="3",
+            postal_code="12345",
+            notes="This is a test address"
+        )
         # Create an order with the order item
-        self.order = Order.objects.create(user=self.user, order_items=self.order_item)
+        self.order = Order.objects.create(user=self.user, order_items=self.order_item, address=self.address)
 
         # Create a code discount with the brand
         self.code_discount = CodeDiscount.objects.create(user=self.user, category=self.category, order=self.order,
@@ -39,20 +48,12 @@ class CodeDiscountTestCase(TestCase):
     def test_create_code_discount(self):
         expiration_date = timezone.now() + timedelta(days=30)
 
-        # Create an order item for the product
-        order_item = OrderItem.objects.create(user=self.user, product=self.product,
-                                              warehouse_keeper=self.warehouse_keeper, quantity=1,
-                                              total_price=Decimal(10))
-
-        # Create an order with the order item
-        order = Order.objects.create(user=self.user, order_items=order_item)
-
         # Create a code discount with the order
         code_discount = CodeDiscount.objects.create(
             user=self.user,
+            order=self.order,
             product=self.product,
             category=self.category,
-            order=order,
             code="DISCOUNT123",
             percentage_discount=10,
             expiration_date=expiration_date,
@@ -189,16 +190,24 @@ class OrderPaymentTestCase(TestCase):
                                           location="Test Location")
         product = Product.objects.create(user=self.user, category=self.category, brand=self.brand, name="Test Product",
                                          description="Test Description", price=100, quantity=10)
-        # Create a WarehouseKeeper instance
-        warehouse_keeper = WarehouseKeeper.objects.create(user=self.user, brand=self.brand, product=product,
-                                                          quantity=10)
-
+        # Create a Address instance
+        self.address = Address.objects.create(
+            user=self.user,
+            address_name="Home",
+            country="Iran",
+            city="Tehran",
+            street="123 Main St",
+            building_number="5A",
+            floor_number="3",
+            postal_code="12345",
+            notes="This is a test address"
+        )
         # Now, create the OrderItem instance and associate it with the WarehouseKeeper
-        order_item = OrderItem.objects.create(user=self.user, product=product, warehouse_keeper=warehouse_keeper)
+        order_item = OrderItem.objects.create(user=self.user, product=product)
 
         # Now, create the Order instance and associate it with the OrderItem
         with transaction.atomic():
-            self.order = Order.objects.create(user=self.user, order_items=order_item)
+            self.order = Order.objects.create(user=self.user, order_items=order_item, address=self.address)
 
     def test_create_order_payment(self):
         expiration_date = timezone.now() + timedelta(days=30)
