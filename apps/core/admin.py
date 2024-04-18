@@ -9,27 +9,34 @@ class CodeDiscountAdmin(admin.ModelAdmin):
     """
 
     list_display = (
+        'user', 'order', 'product', 'category',
         'code', 'percentage_discount', 'numerical_discount',
-        'expiration_date', 'is_expired', 'is_active'
+        'expiration_date', 'is_use', 'is_expired', 'is_active', 'is_deleted',
     )
-    search_fields = ('code', 'percentage_discount', 'numerical_discount',)
+    search_fields = ('user', 'order', 'product', 'category', 'code', 'percentage_discount', 'numerical_discount',)
     ordering = ('-create_time', '-update_time')
-    list_filter = ('code', 'percentage_discount', 'numerical_discount', 'is_expired', 'is_active')
+    list_filter = (
+        'user', 'order', 'product', 'category', 'code', 'percentage_discount', 'numerical_discount', 'expiration_date',
+        'is_expired', 'is_active')
     date_hierarchy = 'create_time'
     list_per_page = 30
-    readonly_fields = ('create_time', 'update_time')
+    readonly_fields = ('is_use', 'is_deleted', 'is_active', 'expiration_date', 'create_time', 'update_time')
     fieldsets = (
-        ('Information', {
-            'fields': ('code', 'percentage_discount', 'numerical_discount', 'expiration_date')
+        ('Creation Code discount', {
+            'fields': ('user', 'order', 'product', 'category', 'code', 'percentage_discount', 'numerical_discount',
+                       'expiration_date')
         }),
         ('Data', {
-            'fields': ('create_time', 'update_time')
+            'fields': ('is_use', 'is_deleted', 'is_active', 'create_time', 'update_time')
         }),
     )
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('code', 'percentage_discount', 'numerical_discount', 'expiration_date')
+            'fields': (
+                'user', 'order', 'product', 'category', 'code', 'percentage_discount', 'numerical_discount', 'is_use',
+                'is_deleted', 'is_active',
+                'expiration_date')
         }),
     )
 
