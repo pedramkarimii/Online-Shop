@@ -264,6 +264,33 @@ class Comment(mixin.TimestampsStatusFlagMixin):
         ]
 
 
+class FavoritesBasket(mixin.TimestampsStatusFlagMixin):
+    """Model representing a user's favorite or basket products."""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_favorites_baskets')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_favorites_baskets')
+    available = models.BooleanField(default=True)
+    quantity = models.PositiveSmallIntegerField(default=1)
+
+    objects = managers.FavoritesBasketManager()
+    soft_delete = soft_delete_manager.DeleteManager()
+
+    def __str__(self):
+        """Return a string representation of the FavoritesBasket."""
+        return f'{self.user.name} - {self.product.name} - {self.available} - {self.quantity}'
+
+    class Meta:
+        """Additional metadata about the FavoritesBasket model."""
+        ordering = ('user',)
+        verbose_name = 'Favorites Basket'
+        verbose_name_plural = 'Favorites Baskets'
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'product'], name='unique_favorites_basket')
+        ]
+        indexes = [
+            models.Index(fields=['user', 'product'], name='indexes_favorites_basket')
+        ]
+
+
 class CodeDiscount(mixin.TimestampsStatusFlagMixin):
     """Model representing a discount code associated with a product or category."""
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_code_discounts', null=True, blank=True)
