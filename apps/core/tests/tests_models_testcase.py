@@ -87,10 +87,10 @@ class CodeDiscountTestCase(TestCase):
 
     def test_soft_delete_code_discount(self):
         CodeDiscount.soft_delete.filter(id=self.code_discount.id).delete()
-        soft_deleted_CodeDiscount = CodeDiscount.soft_delete.archive().filter(id=self.code_discount.id).values(
+        soft_deleted_code_discount = CodeDiscount.soft_delete.archive().filter(id=self.code_discount.id).values(
             'is_deleted').first()
-        self.assertIsNotNone(soft_deleted_CodeDiscount)
-        self.assertTrue(soft_deleted_CodeDiscount['is_deleted'])
+        self.assertIsNotNone(soft_deleted_code_discount)
+        self.assertTrue(soft_deleted_code_discount['is_deleted'])
 
     def test_code_discount_code_uniqueness(self):
         # Generate a unique code
@@ -187,6 +187,20 @@ class WarehouseKeeperTestCase(TestCase):
         warehouse_keeper.delete()
         with self.assertRaises(WarehouseKeeper.DoesNotExist):  # noqa
             WarehouseKeeper.objects.get(id=warehouse_keeper.id)
+
+    def test_soft_delete_warehouse_keeper(self):
+        warehouse_keeper = WarehouseKeeper.objects.create(
+            user=self.user,
+            brand=self.brand,
+            product=self.product,
+            quantity=5,
+            available=True
+        )
+        WarehouseKeeper.soft_delete.filter(id=warehouse_keeper.id).delete()
+        soft_deleted_code_discount = WarehouseKeeper.soft_delete.archive().filter(id=warehouse_keeper.id).values(
+            'is_deleted').first()
+        self.assertIsNotNone(soft_deleted_code_discount)
+        self.assertTrue(soft_deleted_code_discount['is_deleted'])
 
 
 class OrderPaymentTestCase(TestCase):
