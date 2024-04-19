@@ -1,10 +1,11 @@
+from datetime import timedelta
 from decimal import Decimal
+from django.db import transaction
 from django.test import TestCase
 from django.utils import timezone
-from apps.core.models import WarehouseKeeper, CodeDiscount
-from apps.order.models import StatusOrder, Order, OrderItem
+from apps.order.models import StatusOrder, Order, OrderItem, OrderPayment
 from apps.account.models import User, Address
-from apps.product.models import Category, Brand, Product
+from apps.product.models import Category, Brand, Product, WarehouseKeeper, CodeDiscount
 
 
 class OrderItemTestCase(TestCase):
@@ -204,3 +205,85 @@ class StatusOrderTestCase(TestCase):
         # Try to retrieve the deleted instance, it should raise a DoesNotExist exception
         with self.assertRaises(StatusOrder.DoesNotExist):  # noqa
             StatusOrder.objects.get(id=status_order.id)
+
+
+class OrderPaymentTestCase(TestCase):
+    def setUp(self):
+        self.user = User.objects.create(username="testuser", email="test@example.com")
+        self.category = Category.objects.create(name="Test Category")
+        self.brand = Brand.objects.create(user=self.user, name="Test Brand", description="Test Description",
+                                          location="Test Location")
+        product = Product.objects.create(user=self.user, category=self.category, brand=self.brand, name="Test Product",
+                                         description="Test Description", price=100, quantity=10)
+        # Create a Address instance
+        self.address = Address.objects.create(
+            user=self.user,
+            address_name="Home",
+            country="Iran",
+            city="Tehran",
+            street="123 Main St",
+            building_number="5A",
+            floor_number="3",
+            postal_code="12345",
+            notes="This is a test address"
+        )
+        # Now, create the OrderItem instance and associate it with the WarehouseKeeper
+        order_item = OrderItem.objects.create(user=self.user, product=product)
+
+        # Now, create the Order instance and associate it with the OrderItem
+        with transaction.atomic():
+            self.order = Order.objects.create(user=self.user, order_items=order_item, address=self.address)
+
+    def test_create_order_payment(self):
+        expiration_date = timezone.now() + timedelta(days=30)
+        order_payment = OrderPayment.objects.create(
+            user=self.user,
+            order=self.order,
+            amount=Decimal('100.00'),
+            cardholder_name="John Doe",
+            card_number="1234567890123456",
+            expiration_date=expiration_date,
+            cvv="123",
+            transaction_id="123456",
+            payment_method="credit_card",
+            status="pending",
+            payment_time=timezone.now(),
+        )
+        self.assertIsNotNone(order_payment)
+
+    def test_update_order_payment(self):
+        order_payment = OrderPayment.objects.create(
+            user=self.user,
+            order=self.order,
+            amount=Decimal('100.00'),
+            cardholder_name="John Doe",
+            card_number="1234567890123456",
+            expiration_date=timezone.now() + timedelta(days=30),
+            cvv="123",
+            transaction_id="123456",
+            payment_method="credit_card",
+            status="pending",
+            payment_time=timezone.now(),
+        )
+        order_payment.amount = Decimal('200.00')
+        order_payment.save()
+        updated_order_payment = OrderPayment.objects.get(id=order_payment.id)
+        self.assertEqual(updated_order_payment.amount, Decimal('200.00'))
+
+    def test_delete_order_payment(self):
+        order_payment = OrderPayment.objects.create(
+            user=self.user,
+            order=self.order,
+            amount=Decimal('100.00'),
+            cardholder_name="John Doe",
+            card_number="1234567890123456",
+            expiration_date=timezone.now() + timedelta(days=30),
+            cvv="123",
+            transaction_id="123456",
+            payment_method="credit_card",
+            status="pending",
+            payment_time=timezone.now(),
+        )
+        order_payment.delete()
+        with self.assertRaises(OrderPayment.DoesNotExist):  # noqa
+            OrderPayment.objects.get(id=order_payment.id)
