@@ -85,6 +85,13 @@ class CodeDiscountTestCase(TestCase):
         with self.assertRaises(CodeDiscount.DoesNotExist):  # noqa
             CodeDiscount.objects.get(pk=self.code_discount.pk)
 
+    def test_soft_delete_code_discount(self):
+        CodeDiscount.soft_delete.filter(id=self.code_discount.id).delete()
+        soft_deleted_CodeDiscount = CodeDiscount.soft_delete.archive().filter(id=self.code_discount.id).values(
+            'is_deleted').first()
+        self.assertIsNotNone(soft_deleted_CodeDiscount)
+        self.assertTrue(soft_deleted_CodeDiscount['is_deleted'])
+
     def test_code_discount_code_uniqueness(self):
         # Generate a unique code
         code = str(uuid.uuid4())
