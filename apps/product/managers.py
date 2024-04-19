@@ -1,6 +1,174 @@
 from django.contrib.postgres.search import TrigramSimilarity
 from django.db import models
-from django.db.models import F, Q
+from django.db.models import F, Q, Sum
+import pytz
+from django.utils import timezone
+
+
+class CodeDiscountQuerySet(models.QuerySet):
+    """QuerySet for handling code discounts."""
+
+    def get_discount(self, code):
+        """Retrieve a discount by its code."""
+        return self.get(code=code)
+
+    def is_valid(self):
+        """Check if the discount code is currently valid."""
+        now = timezone.now()
+        return self.filter(
+            is_expired=False,
+            expiration_date__gte=now
+        )
+
+    def active_and_valid_discounts(self):
+        """Retrieve active and currently valid discounts."""
+        now = timezone.now().astimezone(pytz.timezone('Asia/Tehran'))
+        return self.filter(is_active=True, expiration_date__gte=now)
+
+    def valid_discounts(self):
+        """Retrieve currently valid discounts."""
+        now = timezone.now().astimezone(pytz.timezone('Asia/Tehran'))
+        return self.filter(is_active=True, expiration_date__gte=now, is_expired=False)
+
+    def expired_discounts(self):
+        """Retrieve expired discounts."""
+        now = timezone.now().astimezone(pytz.timezone('Asia/Tehran'))
+        return self.filter(expiration_date__lt=now)
+
+    def get_discount_by_code_and_user(self, code, user):
+        """Retrieve a discount by its code and associated user."""
+        now = timezone.now().astimezone(pytz.timezone('Asia/Tehran'))
+        return self.filter(code=code, user=user, expiration_date__gte=now).first()
+
+
+class CodeDiscountManager(models.Manager):
+    """Manager for handling code discounts."""
+
+    def get_queryset(self):
+        """Get the queryset object associated with this manager."""
+        if not hasattr(self.__class__, '__queryset'):
+            self.__class__.__queryset = CodeDiscountQuerySet(self.model)
+        return self.__queryset
+
+    def get_discount(self, code):
+        """Retrieve a discount by its code."""
+        return self.get_queryset().get_discount(code)
+
+    def is_valid(self):
+        """Check if a discount is valid."""
+        return self.get_queryset().is_valid()
+
+    def get_discounts(self, codes):
+        """Retrieve discounts by a list of codes."""
+        return self.get_queryset().filter(code__in=codes)
+
+    def active_discounts(self):
+        """Retrieve active discounts."""
+        return self.get_queryset().filter(is_active=True)
+
+    def inactive_discounts(self):
+        """Retrieve inactive discounts."""
+        return self.get_queryset().filter(is_active=False)
+
+    def expired_discounts(self):
+        """Retrieve expired discounts."""
+        return self.get_queryset().expired_discounts()
+
+    def active_and_valid_discounts(self):
+        """Retrieve active and valid discounts."""
+        return self.get_queryset().active_and_valid_discounts()
+
+    def valid_discounts(self):
+        """Retrieve valid discounts."""
+        return self.get_queryset().valid_discounts()
+
+    def get_discount_by_code_and_user(self, code, user):
+        """Retrieve a discount by its code and associated user."""
+        return self.get_queryset().get_discount_by_code_and_user(code, user)
+
+
+class WarehouseKeeperQuerySet(models.QuerySet):
+    def available_products(self):
+        """
+        Returns warehouse keepers with available products.
+        """
+        return self.filter(quantity__gt=0)
+
+    def by_brand(self, brand_id):
+        """
+        Returns warehouse keepers by a specific brand.
+        """
+        return self.filter(brand_id=brand_id)
+
+    def active_products(self):
+        """
+        Returns warehouse keepers with active products.
+        """
+        return self.filter(product__is_active=True)
+
+    def not_active_products(self):
+        """
+        Returns warehouse keepers with inactive products.
+        """
+        return self.filter(product__is_active=False)
+
+    def delete_products(self):
+        """
+        Deletes warehouse keepers with zero quantity products.
+        """
+        return self.filter(quantity=0).delete()
+
+    def total_quantity_lower_than(self, value):
+        """
+        Returns warehouse keepers with a total quantity lower than the specified value.
+        """
+        return self.annotate(total_quantity=Sum('quantity')).filter(total_quantity__lt=value)
+
+
+class WarehouseKeeperManager(models.Manager):
+    def get_queryset(self):
+        """
+        Get the queryset object associated with this manager.
+        """
+        if not hasattr(self.__class__, '__queryset'):
+            self.__class__.__queryset = WarehouseKeeperQuerySet(self.model)
+        return self.__queryset
+
+    def available_products(self):
+        """
+        Returns warehouse keepers with available products using the custom queryset.
+        """
+        return self.get_queryset().available_products()
+
+    def by_brand(self, brand_id):
+        """
+        Returns warehouse keepers by a specific brand using the custom queryset.
+        """
+        return self.get_queryset().by_brand(brand_id)
+
+    def active_products(self):
+        """
+        Returns warehouse keepers with active products using the custom queryset.
+        """
+        return self.get_queryset().active_products()
+
+    def not_active_products(self):
+        """
+        Returns warehouse keepers with inactive products using the custom queryset.
+        """
+        return self.get_queryset().not_active_products()
+
+    def delete_products(self):
+        """
+        Deletes warehouse keepers with zero quantity products using the custom queryset.
+        """
+        return self.get_queryset().delete_products()
+
+    def total_quantity_lower_than(self, value):
+        """
+        Returns warehouse keepers with a total quantity lower than the specified value using the custom queryset.
+        """
+        return self.get_queryset().total_quantity_lower_than(value)
 
 
 class BrandQuerySet(models.QuerySet):
