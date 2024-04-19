@@ -1,8 +1,10 @@
 from functools import partial
+from apps.order.models import Order
 from utility.upload_to_filename import maker
 from django.db import models
 from django.core import validators
 from apps.product import managers
+from apps.core import managers as delete_managers
 from apps.account.models import User
 from django.utils.translation import gettext_lazy as _
 from apps.core import mixin, managers as soft_delete_manager
@@ -259,4 +261,69 @@ class Comment(mixin.TimestampsStatusFlagMixin):
         ]
         indexes = [
             models.Index(fields=['user', 'product'], name='indexes_comment')
+        ]
+
+
+class CodeDiscount(mixin.TimestampsStatusFlagMixin):
+    """Model representing a discount code associated with a product or category."""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_code_discounts', null=True, blank=True)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='order_code_discounts', null=True,
+                              blank=True)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_code_discounts', null=True,
+                                blank=True)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='category_code_discounts', null=True,
+                                 blank=True)
+    code = models.CharField(max_length=100)
+    percentage_discount = models.IntegerField(null=True, blank=True,
+                                              validators=[validators.MinValueValidator(0)])
+    numerical_discount = models.IntegerField(null=True, blank=True,
+                                             validators=[validators.MinValueValidator(0)])
+    expiration_date = models.DateTimeField(null=True, blank=True)
+    is_use = models.SmallIntegerField(default=0)
+    is_expired = models.BooleanField(default=False)
+
+    objects = managers.CodeDiscountManager()
+    soft_delete = delete_managers.DeleteManager()
+
+    def __str__(self):
+        """Return a string representation of the CodeDiscount."""
+        return (f'{self.code} - %{self.percentage_discount} - ${self.numerical_discount} -'
+                f' {self.expiration_date} - {self.is_expired}')
+
+    class Meta:
+        """Additional metadata about the CodeDiscount model."""
+        ordering = ['-code']
+        verbose_name = 'Code Discount'
+        verbose_name_plural = 'Code Discounts'
+        constraints = [
+            models.UniqueConstraint(fields=['code'], name='unique_code')
+        ]
+        indexes = [
+            models.Index(fields=['code']),
+        ]
+
+
+class WarehouseKeeper(mixin.TimestampsStatusFlagMixin):
+    """Model representing a user responsible for managing inventory in a warehouse."""
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_warehouse_keepers')
+    brand = models.ForeignKey(Brand, on_delete=models.CASCADE, related_name='brand_warehouse_keepers')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_warehouse_keepers')
+    quantity = models.PositiveSmallIntegerField(default=0)
+    available = models.BooleanField(default=True)
+
+    objects = managers.WarehouseKeeperManager()
+    soft_delete = delete_managers.DeleteManager()
+
+    def __str__(self):
+        """Return a string representation of the WarehouseKeeper."""
+        return f'{self.user} - {self.product} - {self.quantity}'
+
+    class Meta:
+        """Additional metadata about the WarehouseKeeper model."""
+        ordering = ['-user', '-product']
+        verbose_name = 'Warehouse Keeper'
+        verbose_name_plural = 'Warehouse Keepers'
+        indexes = [
+            models.Index(fields=['user', 'product']),
         ]
