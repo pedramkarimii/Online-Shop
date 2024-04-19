@@ -1,5 +1,5 @@
 from django.contrib import admin
-from apps.product.models import Product, Comment, Brand, Category, Media
+from apps.product.models import Product, Comment, Brand, Category, Media, WarehouseKeeper, CodeDiscount
 
 
 @admin.register(Brand)
@@ -86,6 +86,80 @@ class MediaAdmin(admin.ModelAdmin):
         return obj.product.name if obj.product else ''
 
     product_name.short_description = 'Product'
+
+
+@admin.register(CodeDiscount)
+class CodeDiscountAdmin(admin.ModelAdmin):
+    """
+    Admin panel configuration for CodeDiscount model.
+    """
+
+    list_display = (
+        'user', 'order', 'product', 'category',
+        'code', 'percentage_discount', 'numerical_discount',
+        'expiration_date', 'is_use', 'is_expired', 'is_active', 'is_deleted',
+    )
+    search_fields = ('user', 'order', 'product', 'category', 'code', 'percentage_discount', 'numerical_discount',)
+    ordering = ('-create_time', '-update_time')
+    list_filter = (
+        'user', 'order', 'product', 'category', 'code', 'percentage_discount', 'numerical_discount', 'expiration_date',
+        'is_expired', 'is_active')
+    date_hierarchy = 'create_time'
+    list_per_page = 30
+    readonly_fields = ('is_use', 'is_deleted', 'is_active', 'expiration_date', 'create_time', 'update_time')
+    fieldsets = (
+        ('Creation Code discount', {
+            'fields': ('user', 'order', 'product', 'category', 'code', 'percentage_discount', 'numerical_discount',
+                       'expiration_date')
+        }),
+        ('Data', {
+            'fields': ('is_use', 'is_deleted', 'is_active', 'create_time', 'update_time')
+        }),
+    )
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': (
+                'user', 'order', 'product', 'category', 'code', 'percentage_discount', 'numerical_discount', 'is_use',
+                'is_deleted', 'is_active',
+                'expiration_date')
+        }),
+    )
+
+
+@admin.register(WarehouseKeeper)
+class WarehouseKeeperAdmin(admin.ModelAdmin):
+    """
+    Admin panel configuration for WarehouseKeeper model.
+    """
+
+    list_display = (
+        'user', 'brand', 'product', 'quantity', 'create_time', 'update_time', 'is_deleted', 'is_active'
+    )
+    search_fields = (
+        'user', 'brand__name', 'product__name', 'quantity', 'create_time', 'update_time'
+    )
+    ordering = ('-create_time', '-update_time')
+    list_filter = (
+        'user', 'brand__name', 'product__name', 'quantity', 'create_time', 'update_time'
+    )
+    date_hierarchy = 'create_time'
+    list_per_page = 30
+    readonly_fields = ('create_time', 'update_time', 'is_deleted', 'is_active')
+    fieldsets = (
+        ('Creation Warehouse Keeper', {
+            'fields': ('user', 'brand', 'product', 'quantity')
+        }),
+        ('Data', {
+            'fields': ('create_time', 'update_time', 'is_deleted', 'is_active')
+        }),
+    )
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('user', 'brand', 'product', 'quantity')
+        }),
+    )
 
 
 @admin.register(Comment)
