@@ -38,6 +38,15 @@ class BrandTestCase(TestCase):
         self.assertIsNotNone(brand)
         self.assertIsNotNone(product)
 
+    def test_soft_delete_brand(self):
+        brand = Brand.objects.create(user=self.user, name="Test Brand", description="Test Description",
+                                     location="Test Location")
+        Brand.soft_delete.filter(id=brand.id).delete()
+        soft_deleted_code_brand = Brand.soft_delete.archive().filter(id=brand.id).values(
+            'is_deleted').first()
+        self.assertIsNotNone(soft_deleted_code_brand)
+        self.assertTrue(soft_deleted_code_brand['is_deleted'])
+
 
 class MediaTestCase(TestCase):
     def setUp(self):
@@ -66,11 +75,14 @@ class MediaTestCase(TestCase):
         with self.assertRaises(Media.DoesNotExist):  # noqa
             Media.objects.get(id=media.id)
 
-    def test_delete_media_cascade(self):
-        media = Media.objects.create(product=self.product, product_picture="test.jpg")
-        Media.soft_delete.filter(id=media.id).delete()  # Accessing soft_delete manager via model class
+    def test_soft_delete_media(self):
+        media = Media.objects.create(product=self.product, product_picture="tests.jpg")
 
-        self.assertIsNotNone(media)
+        Media.soft_delete.filter(id=media.id).delete()
+        soft_deleted_code_media = Media.soft_delete.archive().filter(id=media.id).values(
+            'is_deleted').first()
+        self.assertIsNotNone(soft_deleted_code_media)
+        self.assertTrue(soft_deleted_code_media['is_deleted'])
 
 
 class CategoryTestCase(TestCase):
@@ -104,6 +116,14 @@ class CategoryTestCase(TestCase):
         self.assertIsNotNone(brand)
         self.assertIsNotNone(Product.objects.get(id=brand.id))
 
+    def test_soft_delete_category(self):
+        category = Category.objects.create(name="Test Category")
+        Category.soft_delete.filter(id=category.id).delete()
+        soft_deleted_code_category = Category.soft_delete.archive().filter(id=category.id).values(
+            'is_deleted').first()
+        self.assertIsNotNone(soft_deleted_code_category)
+        self.assertTrue(soft_deleted_code_category['is_deleted'])
+
 
 class ProductTestCase(TestCase):
     def setUp(self):
@@ -132,12 +152,15 @@ class ProductTestCase(TestCase):
         with self.assertRaises(Product.DoesNotExist):  # noqa
             Product.objects.get(id=product.id)
 
-    def test_delete_product_cascade(self):
+    def test_soft_delete_product(self):
         product = Product.objects.create(user=self.user, category=self.category, brand=self.brand, name="Test Product",
                                          description="Test Description", price=100, quantity=10)
-        Product.soft_delete.filter(id=product.id).delete()  # Accessing soft_delete manager via model class
 
-        self.assertIsNotNone(product)
+        Product.soft_delete.filter(id=product.id).delete()
+        soft_deleted_code_product = Product.soft_delete.archive().filter(id=product.id).values(
+            'is_deleted').first()
+        self.assertIsNotNone(soft_deleted_code_product)
+        self.assertTrue(soft_deleted_code_product['is_deleted'])
 
 
 class CommentTestCase(TestCase):
@@ -167,9 +190,11 @@ class CommentTestCase(TestCase):
         with self.assertRaises(Comment.DoesNotExist):  # noqa
             Comment.objects.get(id=comment.id)
 
-    def test_delete_comment_cascade(self):
+    def test_soft_delete_comment(self):
         comment = Comment.objects.create(user=self.user, product=self.product, comment="Test Comment")
-        Comment.soft_delete.filter(id=comment.id).delete()  # Accessing soft_delete manager via model class
 
-        self.assertIsNotNone(comment)
-        self.assertIsNotNone(self.product)
+        Comment.soft_delete.filter(id=comment.id).delete()
+        soft_deleted_code_comment = Comment.soft_delete.archive().filter(id=comment.id).values(
+            'is_deleted').first()
+        self.assertIsNotNone(soft_deleted_code_comment)
+        self.assertTrue(soft_deleted_code_comment['is_deleted'])
