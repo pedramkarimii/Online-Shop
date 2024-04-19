@@ -2,6 +2,7 @@ from django.db import models
 from django.core import validators
 from apps.core import mixin
 from apps.account.models import User, Address
+from apps.core.mixin import PaymentStatusMixin, generate_transaction_id
 from apps.order import managers
 from django.utils.translation import gettext_lazy as _
 
@@ -57,6 +58,51 @@ class Order(mixin.TimestampsStatusFlagMixin):
         indexes = [
             models.Index(
                 fields=['user', 'order_items'], name='user_order_items')]
+
+
+class OrderPayment(models.Model):
+    """Model representing a payment associated with an order."""
+
+    payment_method_choices = [
+        ('credit_card', _('Credit Card')),
+        ('debit_card', _('Debit Card')),
+        ('paypal', _('PayPal')),
+        ('bank_transfer', _('Bank Transfer')),
+        ('cash', _('Cash')),
+    ]
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="user_payments")
+    order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name="order_payments")
+    amount = models.DecimalField(max_digits=10, decimal_places=2, validators=[validators.MinValueValidator(0)])
+    cardholder_name = models.CharField(max_length=100, validators=[validators.MinLengthValidator(3)])
+    card_number = models.CharField(max_length=12, validators=[
+        validators.RegexValidator(r'^\d{12}$', _('Enter a valid 12-digit card number.'))])
+    expiration_date = models.DateField()
+    cvv = models.CharField(max_length=4, validators=[
+        validators.RegexValidator(r'^\d{3,4}$', _('Enter a valid 3 or 4-digit CVV.'))])
+    transaction_id = models.CharField(max_length=36, default=generate_transaction_id, unique=True)
+    payment_method = models.CharField(max_length=20, choices=payment_method_choices)
+    status = models.CharField(max_length=20,
+                              choices=[(status.value, status.name.capitalize()) for status in PaymentStatusMixin],
+                              default=PaymentStatusMixin.PENDING.value)
+    payment_time = models.DateTimeField(auto_now_add=True, editable=False)
+    is_paid = models.BooleanField(default=False)
+    is_failed = models.BooleanField(default=False)
+    is_canceled = models.BooleanField(default=False)
+
+    objects = managers.OrderPaymentManager()
+
+    def __str__(self):
+        """Return a string representation of the OrderPayment."""
+        return f'Transaction ID: {self.transaction_id}, Amount: {self.amount}, Status: {self.status}'
+
+    class Meta:
+        """Additional metadata about the OrderPayment model."""
+        ordering = ['-payment_time']
+        verbose_name = 'Order Payment'
+        verbose_name_plural = 'Order Payments'
+        indexes = [
+            models.Index(fields=['payment_time', 'user', 'order']),
+        ]
 
 
 class StatusOrder(models.Model):
