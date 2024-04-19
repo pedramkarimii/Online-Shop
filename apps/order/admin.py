@@ -1,5 +1,5 @@
 from django.contrib import admin
-from apps.order.models import Order, OrderItem, StatusOrder
+from apps.order.models import Order, OrderItem, StatusOrder, OrderPayment
 
 
 @admin.register(Order)
@@ -56,16 +56,45 @@ class OrderItemAdmin(admin.ModelAdmin):
         }),
     )
 
-    # def get_username(self, obj):
-    #     """Custom method to get username of the order's user."""
-    #     return obj.order.user.username
 
-    # def get_product_name(self, obj):
-    #     """Custom method to get name of the product."""
-    #     return obj.product.name
+@admin.register(OrderPayment)
+class OrderPaymentAdmin(admin.ModelAdmin):
+    """
+    Admin panel configuration for OrderPayment model.
+    """
 
-    # get_username.short_description = 'User'
-    # get_product_name.short_description = 'Product'
+    list_display = (
+        'user', 'order', 'amount', 'cardholder_name', 'card_number', 'expiration_date', 'cvv', 'transaction_id',
+        'payment_method', 'status', 'payment_time', 'is_paid', 'is_failed', 'is_canceled'
+    )
+    list_filter = (
+        'transaction_id', 'user', 'order', 'amount', 'payment_method', 'status', 'is_paid', 'is_failed', 'is_canceled'
+    )
+    search_fields = ('transaction_id', 'order', 'status')
+    readonly_fields = ('transaction_id', 'payment_time', 'is_failed', 'is_canceled', 'is_paid')
+    ordering = ('-payment_time',)
+    date_hierarchy = 'payment_time'
+    list_per_page = 30
+    raw_id_fields = ('order',)
+    fieldsets = (
+        ('Creation Order Payment', {
+            'fields': (
+                'user', 'order', 'amount', 'cardholder_name', 'card_number', 'expiration_date', 'cvv', 'transaction_id',
+                'payment_method', 'status'
+            )
+        }),
+        ('Data', {
+            'fields': ('payment_time', 'is_paid', 'is_failed', 'is_canceled')
+        }),
+    )
+    add_fieldsets = (
+        (None, {
+            'fields': (
+                'user', 'order', 'amount', 'cardholder_name', 'card_number', 'expiration_date', 'cvv', 'transaction_id',
+                'payment_method', 'status', 'payment_time'
+            )
+        }),
+    )
 
 
 @admin.register(StatusOrder)
