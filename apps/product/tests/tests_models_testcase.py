@@ -1,7 +1,7 @@
 from django.test import TestCase
 from apps.account.models import User, Address
 from apps.order.models import OrderItem, Order
-from apps.product.models import Brand, Media, Category, Product, Comment, WarehouseKeeper, CodeDiscount
+from apps.product.models import Brand, Media, Category, Product, Comment, WarehouseKeeper, CodeDiscount, FavoritesBasket
 from datetime import timedelta
 from decimal import Decimal
 from django.utils import timezone
@@ -396,3 +396,40 @@ class WarehouseKeeperTestCase(TestCase):
             'is_deleted').first()
         self.assertIsNotNone(soft_deleted_code_warehouse_keeper)
         self.assertTrue(soft_deleted_code_warehouse_keeper['is_deleted'])
+
+
+class FavoritesBasketTestCase(TestCase):
+    def setUp(self):
+        self.user = User.objects.create(username="testuser", email="test@example.com")  # noqa
+        self.category = Category.objects.create(name="Test Category")
+        self.brand = Brand.objects.create(user=self.user, name="Test Brand", description="Test Description",
+                                          location="Test Location")
+        self.product = Product.objects.create(user=self.user, category=self.category, brand=self.brand,
+                                              name="Test Product", description="Test Description",
+                                              price=100, quantity=10)
+
+    def test_create_favorites_basket(self):
+        favorites_basket = FavoritesBasket.objects.create(user=self.user, product=self.product)
+        self.assertIsNotNone(favorites_basket)
+        self.assertEqual(FavoritesBasket.objects.count(), 1)
+
+    def test_update_favorites_basket(self):
+        favorites_basket = FavoritesBasket.objects.create(user=self.user, product=self.product)
+        favorites_basket.quantity = 2
+        favorites_basket.save()
+        updated_favorites_basket = FavoritesBasket.objects.get(pk=favorites_basket.pk)
+        self.assertEqual(updated_favorites_basket.quantity, 2)
+
+    def test_delete_favorites_basket(self):
+        favorites_basket = FavoritesBasket.objects.create(user=self.user, product=self.product)
+        favorites_basket.delete()
+        self.assertEqual(FavoritesBasket.objects.count(), 0)
+
+    def test_soft_delete_favorites_basket(self):
+        favorites_basket = FavoritesBasket.objects.create(user=self.user, product=self.product)
+        FavoritesBasket.soft_delete.filter(id=favorites_basket.id).delete()
+        soft_deleted_favorites_basket = FavoritesBasket.soft_delete.archive().filter(
+            id=favorites_basket.id).values(
+            'is_deleted').first()
+        self.assertIsNotNone(soft_deleted_favorites_basket)
+        self.assertTrue(soft_deleted_favorites_basket['is_deleted'])
