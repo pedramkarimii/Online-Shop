@@ -261,3 +261,99 @@ class StatusOrderManager(models.Manager):
         Retrieve queryset of completed orders.
         """
         return self.get_queryset().completed_orders()
+
+
+class OrderPaymentQuerySet(models.QuerySet):
+    def total_payment_amount(self):
+        """
+        Calculate the total amount of all payments.
+        """
+        return self.aggregate(total_payment_amount=Sum('amount'))['total_payment_amount'] or 0
+
+    def successful_payments(self):
+        """
+        Get all successful payments.
+        """
+        return self.filter(is_paid=True, is_cancelled=False, is_failed=False)
+
+    def failed_payments(self):
+        """
+        Get all failed payments.
+        """
+        return self.filter(is_failed=True)
+
+    def pending_payments(self):
+        """
+        Get all pending payments.
+        """
+        return self.filter(is_paid=False, is_cancelled=False, is_failed=False)
+
+    def total_successful_payments(self):
+        """
+        Count the number of successful payments.
+        """
+        return self.successful_payments().count()
+
+    def total_failed_payments(self):
+        """
+        Count the number of failed payments.
+        """
+        return self.failed_payments().count()
+
+    def total_pending_payments(self):
+        """
+        Count the number of pending payments.
+        """
+        return self.pending_payments().count()
+
+
+class OrderPaymentManager(models.Manager):
+    def get_queryset(self):
+        """
+        Get the queryset object associated with this manager.
+        """
+        if not hasattr(self.__class__, '__queryset'):
+            self.__class__.__queryset = OrderPaymentQuerySet(self.model)
+        return self.__queryset
+
+    def total_payment_amount(self):
+        """
+        Calculate the total amount of all payments.
+        """
+        return self.get_queryset().total_payment_amount()
+
+    def successful_payments(self):
+        """
+        Get all successful payments.
+        """
+        return self.get_queryset().successful_payments()
+
+    def failed_payments(self):
+        """
+        Get all failed payments.
+        """
+        return self.get_queryset().failed_payments()
+
+    def pending_payments(self):
+        """
+        Get all pending payments.
+        """
+        return self.get_queryset().pending_payments()
+
+    def total_successful_payments(self):
+        """
+        Count the number of successful payments.
+        """
+        return self.get_queryset().total_successful_payments()
+
+    def total_failed_payments(self):
+        """
+        Count the number of failed payments.
+        """
+        return self.get_queryset().total_failed_payments()
+
+    def total_pending_payments(self):
+        """
+        Count the number of pending payments.
+        """
+        return self.get_queryset().total_pending_payments()
