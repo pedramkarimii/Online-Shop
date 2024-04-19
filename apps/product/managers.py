@@ -5,6 +5,49 @@ import pytz
 from django.utils import timezone
 
 
+class FavoritesBasketQuerySet(models.QuerySet):
+    def available(self):
+        return self.filter(available=True)
+
+    def unavailable(self):
+        return self.filter(available=False)
+
+    def with_quantity_greater_than(self, quantity):
+        return self.filter(quantity__gt=quantity)
+
+    def with_quantity_less_than(self, quantity):
+        return self.filter(quantity__lt=quantity)
+
+    def for_user(self, user):
+        return self.filter(user=user)
+
+    def for_product(self, product):
+        return self.filter(product=product)
+
+
+class FavoritesBasketManager(models.Manager):
+    def get_queryset(self):
+        return FavoritesBasketQuerySet(self.model, using=self._db)
+
+    def available(self):
+        return self.get_queryset().available()
+
+    def unavailable(self):
+        return self.get_queryset().unavailable()
+
+    def with_quantity_greater_than(self, quantity):
+        return self.get_queryset().with_quantity_greater_than(quantity)
+
+    def with_quantity_less_than(self, quantity):
+        return self.get_queryset().with_quantity_less_than(quantity)
+
+    def for_user(self, user):
+        return self.get_queryset().for_user(user)
+
+    def for_product(self, product):
+        return self.get_queryset().for_product(product)
+
+
 class CodeDiscountQuerySet(models.QuerySet):
     """QuerySet for handling code discounts."""
 
