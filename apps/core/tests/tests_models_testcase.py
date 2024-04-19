@@ -197,10 +197,11 @@ class WarehouseKeeperTestCase(TestCase):
             available=True
         )
         WarehouseKeeper.soft_delete.filter(id=warehouse_keeper.id).delete()
-        soft_deleted_code_discount = WarehouseKeeper.soft_delete.archive().filter(id=warehouse_keeper.id).values(
+        soft_deleted_code_warehouse_keeper = WarehouseKeeper.soft_delete.archive().filter(
+            id=warehouse_keeper.id).values(
             'is_deleted').first()
-        self.assertIsNotNone(soft_deleted_code_discount)
-        self.assertTrue(soft_deleted_code_discount['is_deleted'])
+        self.assertIsNotNone(soft_deleted_code_warehouse_keeper)
+        self.assertTrue(soft_deleted_code_warehouse_keeper['is_deleted'])
 
 
 class OrderPaymentTestCase(TestCase):
