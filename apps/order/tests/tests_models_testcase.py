@@ -17,11 +17,27 @@ class OrderItemTestCase(TestCase):
         # Create a product
         self.product = Product.objects.create(category=self.category, brand=self.brand,
                                               name="Test Product")
+        self.address = Address.objects.create(
+            user=self.user,
+            address_name="Home",
+            country="Iran",
+            city="Tehran",
+            street="123 Main St",
+            building_number="5A",
+            floor_number="3",
+            postal_code="12345",
+            notes="This is a test address"
+        )
+        self.order = Order.objects.create(
+            address=self.address,
+            status='Paid'
+        )
 
     def test_create_order_item(self):
         order_item = OrderItem.objects.create(
             user=self.user,
             product=self.product,
+            order=self.order,
             total_price=Decimal(10),
             quantity=1
         )
@@ -30,6 +46,7 @@ class OrderItemTestCase(TestCase):
     def test_update_order_item(self):
         order_item = OrderItem.objects.create(
             user=self.user,
+            order=self.order,
             product=self.product,
             total_price=Decimal(10),
             quantity=1
@@ -44,6 +61,7 @@ class OrderItemTestCase(TestCase):
     def test_delete_order_item(self):
         order_item = OrderItem.objects.create(
             user=self.user,
+            order=self.order,
             product=self.product,
             total_price=Decimal(10),
             quantity=1
@@ -82,32 +100,16 @@ class OrderTestCase(TestCase):
         self.warehouse_keeper = WarehouseKeeper.objects.create(user=self.user, brand=self.brand, product=self.product)
 
     def test_create_order(self):
-        order_item = OrderItem.objects.create(
-            user=self.user,
-            product=self.product,
-            total_price=Decimal(10),
-            quantity=1
-        )
         order = Order.objects.create(
-            code_discount=self.discount_code,
-            order_items=order_item,
             address=self.address,
             status='new'
         )
         self.assertIsNotNone(order)
 
     def test_update_order(self):
-        order_item = OrderItem.objects.create(
-            user=self.user,
-            product=self.product,
-            total_price=Decimal(10),
-            quantity=1
-        )
         order = Order.objects.create(
-            code_discount=self.discount_code,
             address=self.address,
             status='paid',
-            order_items=order_item  # Associate order_item with the Order
         )
 
         # Update fields and save
@@ -119,15 +121,7 @@ class OrderTestCase(TestCase):
         self.assertEqual(updated_order.status, 'Cancelled')
 
     def test_delete_order(self):
-        order_item = OrderItem.objects.create(
-            user=self.user,
-            product=self.product,
-            total_price=Decimal(10),
-            quantity=1
-        )
         order = Order.objects.create(
-            order_items=order_item,
-            code_discount=self.discount_code,
             address=self.address,
             status='new'
         )
@@ -143,16 +137,7 @@ class OrderPaymentTestCase(TestCase):
         self.category = Category.objects.create(name="Test Category")
         self.brand = Brand.objects.create(user=self.user, name="Test Brand", description="Test Description",
                                           location="Test Location")
-        self.discount_code = CodeDiscount.objects.create(
-            user=self.user,
-            code="TESTCODE",
-            percentage_discount=10,
-            numerical_discount=50,
-            expiration_date=date.today()
-        )
-        product = Product.objects.create(category=self.category, brand=self.brand, name="Test Product",
-                                         description="Test Description", price=100, quantity=10)
-        # Create a Address instance
+
         self.address = Address.objects.create(
             user=self.user,
             address_name="Home",
@@ -164,13 +149,17 @@ class OrderPaymentTestCase(TestCase):
             postal_code="12345",
             notes="This is a test address"
         )
-        # Now, create the OrderItem instance and associate it with the WarehouseKeeper
-        order_item = OrderItem.objects.create(user=self.user, product=product)
+        self.order = Order.objects.create(
+            address=self.address,
+            status='Paid'
+        )
 
         # Now, create the Order instance and associate it with the OrderItem
         with transaction.atomic():
-            self.order = Order.objects.create(code_discount=self.discount_code, order_items=order_item,
-                                              address=self.address)
+            self.order = Order.objects.create(
+                address=self.address,
+                status='Paid'
+            )
 
     def test_create_order_payment(self):
         expiration_date = timezone.now() + timedelta(days=30)
