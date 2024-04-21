@@ -1,11 +1,11 @@
-from datetime import timedelta
+from datetime import timedelta, date
 from decimal import Decimal
 from django.db import transaction
 from django.test import TestCase
 from django.utils import timezone
-from apps.order.models import StatusOrder, Order, OrderItem, OrderPayment
-from apps.account.models import User, Address
-from apps.product.models import Category, Brand, Product, WarehouseKeeper, CodeDiscount
+from apps.order.models import Order, OrderItem, OrderPayment
+from apps.account.models import User, Address, CodeDiscount
+from apps.product.models import Category, Brand, Product, WarehouseKeeper
 
 
 class OrderItemTestCase(TestCase):
@@ -15,7 +15,7 @@ class OrderItemTestCase(TestCase):
         self.brand = Brand.objects.create(user=self.user, name="Test Brand")
 
         # Create a product
-        self.product = Product.objects.create(user=self.user, category=self.category, brand=self.brand,
+        self.product = Product.objects.create(category=self.category, brand=self.brand,
                                               name="Test Product")
 
     def test_create_order_item(self):
@@ -59,8 +59,15 @@ class OrderTestCase(TestCase):
         self.user = User.objects.create(username="testuser")  # noqa
         self.category = Category.objects.create(name="Test Category")
         self.brand = Brand.objects.create(user=self.user, name="Test Brand")
-        self.product = Product.objects.create(user=self.user, category=self.category, brand=self.brand,
+        self.product = Product.objects.create(category=self.category, brand=self.brand,
                                               name="Test Product")
+        self.discount_code = CodeDiscount.objects.create(
+            user=self.user,
+            code="TESTCODE",
+            percentage_discount=10,
+            numerical_discount=50,
+            expiration_date=date.today()
+        )
         self.address = Address.objects.create(
             user=self.user,
             address_name="Home",
@@ -82,7 +89,7 @@ class OrderTestCase(TestCase):
             quantity=1
         )
         order = Order.objects.create(
-            user=self.user,
+            code_discount=self.discount_code,
             order_items=order_item,
             address=self.address,
             status='new'
@@ -97,7 +104,7 @@ class OrderTestCase(TestCase):
             quantity=1
         )
         order = Order.objects.create(
-            user=self.user,
+            code_discount=self.discount_code,
             address=self.address,
             status='paid',
             order_items=order_item  # Associate order_item with the Order
@@ -119,8 +126,8 @@ class OrderTestCase(TestCase):
             quantity=1
         )
         order = Order.objects.create(
-            user=self.user,
             order_items=order_item,
+            code_discount=self.discount_code,
             address=self.address,
             status='new'
         )
@@ -130,90 +137,20 @@ class OrderTestCase(TestCase):
             Order.objects.get(id=order.id)
 
 
-class StatusOrderTestCase(TestCase):
-    def setUp(self):
-        self.user = User.objects.create(username="testuser")  # noqa
-        self.category = Category.objects.create(name="Test Category")
-        self.brand = Brand.objects.create(user=self.user, name="Test Brand")
-
-        # Create a product
-        self.product = Product.objects.create(user=self.user, category=self.category, brand=self.brand,
-                                              name="Test Product")
-
-        # Create a warehouse keeper with the product
-        self.warehouse_keeper = WarehouseKeeper.objects.create(user=self.user, brand=self.brand, product=self.product)
-
-        # Assuming you have a valid OrderItem instance named 'order_item'
-        self.order_item = OrderItem.objects.create(user=self.user, product=self.product, quantity=1,
-                                                   total_price=Decimal(10))
-
-        self.address = Address.objects.create(
-            user=self.user,
-            address_name="Home",
-            country="Iran",
-            city="Tehran",
-            street="123 Main St",
-            building_number="5A",
-            floor_number="3",
-            postal_code="12345",
-            notes="This is a test address"
-        )
-        self.order = Order.objects.create(user=self.user, order_items=self.order_item, address=self.address)
-        # Create a code discount with the brand
-        self.code_discount = CodeDiscount.objects.create(user=self.user, category=self.category, order=self.order,
-                                                         product=self.product)
-
-    def test_create_status_order(self):
-        status_order = StatusOrder.objects.create(
-            user=self.user,
-            order=self.order,
-            time_accepted_order=timezone.now(),
-            accepted_order=True,
-            time_shipped_order=timezone.now(),
-            shipped_order=True,
-            time_deliver_order=timezone.now(),
-            deliver_order=True,
-            time_rejected_order=timezone.now(),
-            rejected_order=True,
-            time_cancelled_order=timezone.now(),
-            cancelled_order=True,
-        )
-        self.assertIsNotNone(status_order)
-
-    def test_update_status_order(self):
-        status_order = StatusOrder.objects.create(
-            user=self.user,
-            order=self.order,
-            time_accepted_order=timezone.now(),
-            accepted_order=True
-        )
-        # Update fields and save
-        status_order.accepted_order = False
-        status_order.save()
-        # Retrieve the updated instance and verify the changes
-        updated_status_order = StatusOrder.objects.get(id=status_order.id)
-        self.assertFalse(updated_status_order.accepted_order)
-
-    def test_delete_status_order(self):
-        status_order = StatusOrder.objects.create(
-            user=self.user,
-            order=self.order,
-            time_accepted_order=timezone.now(),
-            accepted_order=True
-        )
-        status_order.delete()
-        # Try to retrieve the deleted instance, it should raise a DoesNotExist exception
-        with self.assertRaises(StatusOrder.DoesNotExist):  # noqa
-            StatusOrder.objects.get(id=status_order.id)
-
-
 class OrderPaymentTestCase(TestCase):
     def setUp(self):
         self.user = User.objects.create(username="testuser", email="test@example.com")
         self.category = Category.objects.create(name="Test Category")
         self.brand = Brand.objects.create(user=self.user, name="Test Brand", description="Test Description",
                                           location="Test Location")
-        product = Product.objects.create(user=self.user, category=self.category, brand=self.brand, name="Test Product",
+        self.discount_code = CodeDiscount.objects.create(
+            user=self.user,
+            code="TESTCODE",
+            percentage_discount=10,
+            numerical_discount=50,
+            expiration_date=date.today()
+        )
+        product = Product.objects.create(category=self.category, brand=self.brand, name="Test Product",
                                          description="Test Description", price=100, quantity=10)
         # Create a Address instance
         self.address = Address.objects.create(
@@ -232,20 +169,18 @@ class OrderPaymentTestCase(TestCase):
 
         # Now, create the Order instance and associate it with the OrderItem
         with transaction.atomic():
-            self.order = Order.objects.create(user=self.user, order_items=order_item, address=self.address)
+            self.order = Order.objects.create(code_discount=self.discount_code, order_items=order_item,
+                                              address=self.address)
 
     def test_create_order_payment(self):
         expiration_date = timezone.now() + timedelta(days=30)
         order_payment = OrderPayment.objects.create(
-            user=self.user,
             order=self.order,
             amount=Decimal('100.00'),
             cardholder_name="John Doe",
             card_number="1234567890123456",
             expiration_date=expiration_date,
             cvv="123",
-            transaction_id="123456",
-            payment_method="credit_card",
             status="pending",
             payment_time=timezone.now(),
         )
@@ -253,15 +188,12 @@ class OrderPaymentTestCase(TestCase):
 
     def test_update_order_payment(self):
         order_payment = OrderPayment.objects.create(
-            user=self.user,
             order=self.order,
             amount=Decimal('100.00'),
             cardholder_name="John Doe",
             card_number="1234567890123456",
             expiration_date=timezone.now() + timedelta(days=30),
             cvv="123",
-            transaction_id="123456",
-            payment_method="credit_card",
             status="pending",
             payment_time=timezone.now(),
         )
@@ -272,15 +204,12 @@ class OrderPaymentTestCase(TestCase):
 
     def test_delete_order_payment(self):
         order_payment = OrderPayment.objects.create(
-            user=self.user,
             order=self.order,
             amount=Decimal('100.00'),
             cardholder_name="John Doe",
             card_number="1234567890123456",
             expiration_date=timezone.now() + timedelta(days=30),
             cvv="123",
-            transaction_id="123456",
-            payment_method="credit_card",
             status="pending",
             payment_time=timezone.now(),
         )

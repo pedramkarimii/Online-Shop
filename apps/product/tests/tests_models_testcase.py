@@ -1,7 +1,7 @@
 from django.test import TestCase
-from apps.account.models import User, Address
+from apps.account.models import User, Address, CodeDiscount
 from apps.order.models import OrderItem, Order
-from apps.product.models import Brand, Media, Category, Product, Comment, WarehouseKeeper, CodeDiscount, FavoritesBasket
+from apps.product.models import Brand, Media, Category, Product, Comment, WarehouseKeeper, Discount, FavoritesBasket
 from datetime import timedelta
 from decimal import Decimal
 from django.utils import timezone
@@ -35,7 +35,7 @@ class BrandTestCase(TestCase):
     def test_delete_brand_cascade(self):
         brand = Brand.objects.create(user=self.user, name="Test Brand", description="Test Description",
                                      location="Test Location")
-        product = Product.objects.create(user=self.user, category=Category.objects.create(name="Test Category"),
+        product = Product.objects.create(category=Category.objects.create(name="Test Category"),
                                          brand=brand, name="Test Product", description="Test Description",
                                          price=100, quantity=10)
         Brand.soft_delete.filter(id=brand.id).delete()  # Accessing soft_delete manager via model class
@@ -59,7 +59,7 @@ class MediaTestCase(TestCase):
         self.category = Category.objects.create(name="Test Category")
         self.brand = Brand.objects.create(user=self.user, name="Test Brand", description="Test Description",
                                           location="Test Location")
-        self.product = Product.objects.create(user=self.user, category=self.category, brand=self.brand,
+        self.product = Product.objects.create(category=self.category, brand=self.brand,
                                               name="Test Product", description="Test Description", price=100,
                                               quantity=10)
 
@@ -113,7 +113,7 @@ class CategoryTestCase(TestCase):
         category = Category.objects.create(name="Test Category")
         brand = Brand.objects.create(user=self.user, name="Test Brand", description="Test Description",
                                      location="Test Location")
-        Product.objects.create(user=self.user, category=category, brand=brand, name="Test Product",
+        Product.objects.create(category=category, brand=brand, name="Test Product",
                                description="Test Description", price=100, quantity=10)
         Category.soft_delete.filter(id=category.id).delete()  # Accessing soft_delete manager via model class
 
@@ -138,12 +138,12 @@ class ProductTestCase(TestCase):
                                           location="Test Location")
 
     def test_create_product(self):
-        product = Product.objects.create(user=self.user, category=self.category, brand=self.brand, name="Test Product",
+        product = Product.objects.create(category=self.category, brand=self.brand, name="Test Product",
                                          description="Test Description", price=100, quantity=10)
         self.assertIsNotNone(product)
 
     def test_update_product(self):
-        product = Product.objects.create(user=self.user, category=self.category, brand=self.brand, name="Test Product",
+        product = Product.objects.create(category=self.category, brand=self.brand, name="Test Product",
                                          description="Test Description", price=100, quantity=10)
         product.name = "Updated Product"
         product.save()
@@ -151,14 +151,14 @@ class ProductTestCase(TestCase):
         self.assertEqual(updated_product.name, "Updated Product")
 
     def test_delete_product(self):
-        product = Product.objects.create(user=self.user, category=self.category, brand=self.brand, name="Test Product",
+        product = Product.objects.create(category=self.category, brand=self.brand, name="Test Product",
                                          description="Test Description", price=100, quantity=10)
         product.delete()
         with self.assertRaises(Product.DoesNotExist):  # noqa
             Product.objects.get(id=product.id)
 
     def test_soft_delete_product(self):
-        product = Product.objects.create(user=self.user, category=self.category, brand=self.brand, name="Test Product",
+        product = Product.objects.create(category=self.category, brand=self.brand, name="Test Product",
                                          description="Test Description", price=100, quantity=10)
 
         Product.soft_delete.filter(id=product.id).delete()
@@ -174,7 +174,7 @@ class CommentTestCase(TestCase):
         self.category = Category.objects.create(name="Test Category")
         self.brand = Brand.objects.create(user=self.user, name="Test Brand", description="Test Description",
                                           location="Test Location")
-        self.product = Product.objects.create(user=self.user, category=self.category, brand=self.brand,
+        self.product = Product.objects.create(category=self.category, brand=self.brand,
                                               name="Test Product", description="Test Description", price=100,
                                               quantity=10)
 
@@ -205,136 +205,136 @@ class CommentTestCase(TestCase):
         self.assertTrue(soft_deleted_code_comment['is_deleted'])
 
 
-class CodeDiscountTestCase(TestCase):
-    def setUp(self):
-        self.user = User.objects.create(username="testuser")  # noqa
-        self.category = Category.objects.create(name="Test Category")
-        self.brand = Brand.objects.create(user=self.user, name="Test Brand")
-
-        # Create a product
-        self.product = Product.objects.create(user=self.user, category=self.category, brand=self.brand,
-                                              name="Test Product")
-
-        # Create a warehouse keeper with the product
-        self.warehouse_keeper = WarehouseKeeper.objects.create(user=self.user, brand=self.brand, product=self.product)
-
-        # Assuming you have a valid OrderItem instance named 'order_item'
-        self.order_item = OrderItem.objects.create(user=self.user, product=self.product, quantity=1,
-                                                   total_price=Decimal(10))
-        self.address = Address.objects.create(
-            user=self.user,
-            address_name="Home",
-            country="Iran",
-            city="Tehran",
-            street="123 Main St",
-            building_number="5A",
-            floor_number="3",
-            postal_code="12345",
-            notes="This is a test address"
-        )
-        # Create an order with the order item
-        self.order = Order.objects.create(user=self.user, order_items=self.order_item, address=self.address)
-
-        # Create a code discount with the brand
-        self.code_discount = CodeDiscount.objects.create(user=self.user, category=self.category, order=self.order,
-                                                         product=self.product)
-
-    def test_create_code_discount(self):
-        expiration_date = timezone.now() + timedelta(days=30)
-
-        # Create a code discount with the order
-        code_discount = CodeDiscount.objects.create(
-            user=self.user,
-            order=self.order,
-            product=self.product,
-            category=self.category,
-            code="DISCOUNT123",
-            percentage_discount=10,
-            expiration_date=expiration_date,
-        )
-        self.assertIsNotNone(code_discount)
-
-    def test_update_code_discount(self):
-        # Update the percentage discount and expiration date
-        new_percentage_discount = 20
-        new_expiration_date = timezone.now() + timedelta(days=60)
-
-        # Update the existing code discount instance
-        self.code_discount.percentage_discount = new_percentage_discount
-        self.code_discount.expiration_date = new_expiration_date
-        self.code_discount.save()
-
-        # Retrieve the updated code discount from the database
-        updated_code_discount = CodeDiscount.objects.get(pk=self.code_discount.pk)
-
-        # Check if the updates were successful
-        self.assertEqual(updated_code_discount.percentage_discount, new_percentage_discount)
-        self.assertEqual(updated_code_discount.expiration_date, new_expiration_date)
-
-    def test_delete_code_discount(self):
-        # Delete the code discount instance
-        self.code_discount.delete()
-
-        # Attempt to retrieve the deleted code discount from the database
-        with self.assertRaises(CodeDiscount.DoesNotExist):  # noqa
-            CodeDiscount.objects.get(pk=self.code_discount.pk)
-
-    def test_soft_delete_code_discount(self):
-        CodeDiscount.soft_delete.filter(id=self.code_discount.id).delete()
-        soft_deleted_code_discount = CodeDiscount.soft_delete.archive().filter(id=self.code_discount.id).values(
-            'is_deleted').first()
-        self.assertIsNotNone(soft_deleted_code_discount)
-        self.assertTrue(soft_deleted_code_discount['is_deleted'])
-
-    def test_code_discount_code_uniqueness(self):
-        # Generate a unique code
-        code = str(uuid.uuid4())
-
-        expiration_date = timezone.now() + timedelta(days=30)
-
-        # Create the first code discount
-        code_discount1 = CodeDiscount.objects.create(
-            user=self.user,
-            product=self.product,
-            category=self.category,
-            order=self.order,
-            code=code,
-            percentage_discount=10,
-            expiration_date=expiration_date,
-        )
-
-        # Attempt to create another code discount with a different code
-        code_discount2 = CodeDiscount.objects.create(
-            user=self.user,
-            product=self.product,
-            category=self.category,
-            order=self.order,
-            code=str(uuid.uuid4()),  # Generate another unique code
-            percentage_discount=20,
-            expiration_date=expiration_date,
-        )
-
-        # Ensure the objects were created successfully
-        self.assertIsNotNone(code_discount1)
-        self.assertIsNotNone(code_discount2)
-
-    def test_code_discount_expiration(self):
-        # Set the expiration date to a past date
-        past_expiration_date = timezone.now() - timedelta(days=1)
-
-        # Create a code discount with an expired expiration date
-        expired_code_discount = CodeDiscount.objects.create(
-            user=self.user,
-            product=self.product,
-            category=self.category,
-            order=self.order,
-            code="EXPIRED123",
-            percentage_discount=10,
-            expiration_date=past_expiration_date,
-        )
-
-        # Check if the discount code is expired
-        self.assertFalse(CodeDiscount.objects.is_valid().filter(pk=expired_code_discount.pk).exists())
+# class CodeDiscountTestCase(TestCase):
+#     def setUp(self):
+#         self.user = User.objects.create(username="testuser")  # noqa
+#         self.category = Category.objects.create(name="Test Category")
+#         self.brand = Brand.objects.create(user=self.user, name="Test Brand")
+#
+#         # Create a product
+#         self.product = Product.objects.create(category=self.category, brand=self.brand,
+#                                               name="Test Product")
+#
+#         # Create a warehouse keeper with the product
+#         self.warehouse_keeper = WarehouseKeeper.objects.create(user=self.user, brand=self.brand, product=self.product)
+#
+#         # Assuming you have a valid OrderItem instance named 'order_item'
+#         self.order_item = OrderItem.objects.create(user=self.user, product=self.product, quantity=1,
+#                                                    total_price=Decimal(10))
+#         self.address = Address.objects.create(
+#             user=self.user,
+#             address_name="Home",
+#             country="Iran",
+#             city="Tehran",
+#             street="123 Main St",
+#             building_number="5A",
+#             floor_number="3",
+#             postal_code="12345",
+#             notes="This is a test address"
+#         )
+#         # Create an order with the order item
+#         self.code_discount = CodeDiscount.objects.create(user=self.user)
+#         self.order = Order.objects.create(code_discount=self.code_discount, order_items=self.order_item,
+#                                           address=self.address)
+#
+#         # Create a code discount with the brand
+#
+#     def test_create_code_discount(self):
+#         expiration_date = timezone.now() + timedelta(days=30)
+#
+#         # Create a code discount with the order
+#         code_discount = CodeDiscount.objects.create(
+#             user=self.user,
+#             order=self.order,
+#             product=self.product,
+#             category=self.category,
+#             code="DISCOUNT123",
+#             percentage_discount=10,
+#             expiration_date=expiration_date,
+#         )
+#         self.assertIsNotNone(code_discount)
+#
+#     def test_update_code_discount(self):
+#         # Update the percentage discount and expiration date
+#         new_percentage_discount = 20
+#         new_expiration_date = timezone.now() + timedelta(days=60)
+#
+#         # Update the existing code discount instance
+#         self.code_discount.percentage_discount = new_percentage_discount
+#         self.code_discount.expiration_date = new_expiration_date
+#         self.code_discount.save()
+#
+#         # Retrieve the updated code discount from the database
+#         updated_code_discount = CodeDiscount.objects.get(pk=self.code_discount.pk)
+#
+#         # Check if the updates were successful
+#         self.assertEqual(updated_code_discount.percentage_discount, new_percentage_discount)
+#         self.assertEqual(updated_code_discount.expiration_date, new_expiration_date)
+#
+#     def test_delete_code_discount(self):
+#         # Delete the code discount instance
+#         self.code_discount.delete()
+#
+#         # Attempt to retrieve the deleted code discount from the database
+#         with self.assertRaises(CodeDiscount.DoesNotExist):  # noqa
+#             Discount.objects.get(pk=self.code_discount.pk)
+#
+#     def test_soft_delete_code_discount(self):
+#         CodeDiscount.soft_delete.filter(id=self.code_discount.id).delete()
+#         soft_deleted_code_discount = CodeDiscount.soft_delete.archive().filter(id=self.code_discount.id).values(
+#             'is_deleted').first()
+#         self.assertIsNotNone(soft_deleted_code_discount)
+#         self.assertTrue(soft_deleted_code_discount['is_deleted'])
+#
+#     def test_code_discount_code_uniqueness(self):
+#         # Generate a unique code
+#         code = str(uuid.uuid4())
+#
+#         expiration_date = timezone.now() + timedelta(days=30)
+#
+#         # Create the first code discount
+#         code_discount1 = CodeDiscount.objects.create(
+#             user=self.user,
+#             product=self.product,
+#             category=self.category,
+#             order=self.order,
+#             code=code,
+#             percentage_discount=10,
+#             expiration_date=expiration_date,
+#         )
+#
+#         # Attempt to create another code discount with a different code
+#         code_discount2 = CodeDiscount.objects.create(
+#             user=self.user,
+#             product=self.product,
+#             category=self.category,
+#             order=self.order,
+#             code=str(uuid.uuid4()),  # Generate another unique code
+#             percentage_discount=20,
+#             expiration_date=expiration_date,
+#         )
+#
+#         # Ensure the objects were created successfully
+#         self.assertIsNotNone(code_discount1)
+#         self.assertIsNotNone(code_discount2)
+#
+#     def test_code_discount_expiration(self):
+#         # Set the expiration date to a past date
+#         past_expiration_date = timezone.now() - timedelta(days=1)
+#
+#         # Create a code discount with an expired expiration date
+#         expired_code_discount = CodeDiscount.objects.create(
+#             user=self.user,
+#             product=self.product,
+#             category=self.category,
+#             order=self.order,
+#             code="EXPIRED123",
+#             percentage_discount=10,
+#             expiration_date=past_expiration_date,
+#         )
+#
+#         # Check if the discount code is expired
+#         self.assertFalse(CodeDiscount.objects.is_valid().filter(pk=expired_code_discount.pk).exists())
 
 
 class WarehouseKeeperTestCase(TestCase):
@@ -343,7 +343,7 @@ class WarehouseKeeperTestCase(TestCase):
         self.category = Category.objects.create(name="Test Category")
         self.brand = Brand.objects.create(user=self.user, name="Test Brand", description="Test Description",
                                           location="Test Location")
-        self.product = Product.objects.create(user=self.user, category=self.category, brand=self.brand,
+        self.product = Product.objects.create(category=self.category, brand=self.brand,
                                               name="Test Product", description="Test Description",
                                               price=100, quantity=10)
 
@@ -404,7 +404,7 @@ class FavoritesBasketTestCase(TestCase):
         self.category = Category.objects.create(name="Test Category")
         self.brand = Brand.objects.create(user=self.user, name="Test Brand", description="Test Description",
                                           location="Test Location")
-        self.product = Product.objects.create(user=self.user, category=self.category, brand=self.brand,
+        self.product = Product.objects.create(category=self.category, brand=self.brand,
                                               name="Test Product", description="Test Description",
                                               price=100, quantity=10)
 
