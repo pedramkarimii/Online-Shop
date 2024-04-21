@@ -6,10 +6,11 @@ from apps.product import managers
 from apps.core import managers as delete_managers
 from apps.account.models import User
 from django.utils.translation import gettext_lazy as _
-from apps.core import mixin, managers as soft_delete_manager
+from apps.core.mixin import mixin_model
+from apps.core import managers as soft_delete_manager
 
 
-class Brand(mixin.TimestampsStatusFlagMixin):
+class Brand(mixin_model.TimestampsStatusFlagMixin):
     """
     Model to represent brands.
     """
@@ -48,7 +49,7 @@ class Brand(mixin.TimestampsStatusFlagMixin):
         ]
 
 
-class Media(mixin.TimestampsStatusFlagMixin):
+class Media(mixin_model.TimestampsStatusFlagMixin):
     """
     Model to represent media associated with products.
     """
@@ -72,7 +73,7 @@ class Media(mixin.TimestampsStatusFlagMixin):
         verbose_name = 'Media'
 
 
-class Category(mixin.TimestampsStatusFlagMixin):
+class Category(mixin_model.TimestampsStatusFlagMixin):
     """
     Model to represent product categories.
     """
@@ -112,7 +113,7 @@ class Category(mixin.TimestampsStatusFlagMixin):
         ]
 
 
-class Product(mixin.TimestampsStatusFlagMixin):
+class Product(mixin_model.TimestampsStatusFlagMixin):
     """
     Model to represent products.
     """
@@ -232,7 +233,7 @@ class Product(mixin.TimestampsStatusFlagMixin):
         ]
 
 
-class Comment(mixin.TimestampsStatusFlagMixin):
+class Comment(mixin_model.TimestampsStatusFlagMixin):
     """
     Model to represent comments.
     """
@@ -268,7 +269,7 @@ class Comment(mixin.TimestampsStatusFlagMixin):
         ]
 
 
-class FavoritesBasket(mixin.TimestampsStatusFlagMixin):
+class FavoritesBasket(mixin_model.TimestampsStatusFlagMixin):
     """Model representing a user's favorite or basket products."""
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='user_favorites_baskets')
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_favorites_baskets')
@@ -295,7 +296,7 @@ class FavoritesBasket(mixin.TimestampsStatusFlagMixin):
         ]
 
 
-class Discount(mixin.TimestampsStatusFlagMixin):
+class Discount(mixin_model.TimestampsStatusFlagMixin):
     """Model representing a discount code associated with a product or category."""
     PERCENT_DISCOUNT_CHOICES = (  # noqa
         (5, _('5%')),
@@ -341,7 +342,7 @@ class Discount(mixin.TimestampsStatusFlagMixin):
         ]
 
 
-class WarehouseKeeper(mixin.TimestampsStatusFlagMixin):
+class WarehouseKeeper(mixin_model.TimestampsStatusFlagMixin):
     """Model representing a user responsible for managing inventory in a warehouse."""
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='user_warehouse_keepers')
