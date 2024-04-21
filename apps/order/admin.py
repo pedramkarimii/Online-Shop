@@ -1,32 +1,5 @@
 from django.contrib import admin
-from apps.order.models import Order, OrderItem, StatusOrder, OrderPayment
-
-
-@admin.register(Order)
-class OrderAdmin(admin.ModelAdmin):
-    """Admin configuration for the Order model."""
-
-    list_display = ('user', 'order_items', 'address', 'status', 'create_time', 'update_time', 'is_active', 'is_deleted')
-    list_filter = ('user__username', 'status')
-    search_fields = ('status', 'user__username')
-    readonly_fields = ('create_time', 'update_time', 'is_active', 'is_deleted')
-    ordering = ['-create_time']
-    date_hierarchy = 'create_time'
-    list_per_page = 30
-    raw_id_fields = ('user',)
-    fieldsets = (
-        ('Creation Order', {
-            'fields': ('user', 'order_items', 'address', 'status')
-        }),
-        ('Data', {'fields': ('create_time', 'update_time', 'is_active', 'is_deleted')
-                  }),
-    )
-    add_fieldsets = (
-        ('Creation Order', {
-            'classes': ('wide',),
-            'fields': ('user', 'order_items', 'address', 'status')
-        }),
-    )
+from apps.order.models import Order, OrderItem, OrderPayment
 
 
 @admin.register(OrderItem)
@@ -36,10 +9,10 @@ class OrderItemAdmin(admin.ModelAdmin):
     list_display = (
         'user', 'product', 'total_price', 'quantity', 'is_active', 'is_deleted'
     )
-    list_filter = ('product__name',)
-    search_fields = ('order__user__username', 'product__name', 'total_price')
+    list_filter = ('user__username', 'product__name', 'total_price')
+    search_fields = ('ser__username', 'product__name', 'total_price')
     readonly_fields = ('create_time', 'update_time', 'is_active', 'is_deleted')
-    ordering = ['-create_time']
+    ordering = ('-create_time',)
     date_hierarchy = 'create_time'
     list_per_page = 30
     raw_id_fields = ('user', 'product')
@@ -57,6 +30,50 @@ class OrderItemAdmin(admin.ModelAdmin):
     )
 
 
+@admin.register(Order)
+class OrderAdmin(admin.ModelAdmin):
+    """Admin configuration for the Order model."""
+
+    list_display = (
+        'order_items', 'address', 'code_discount', 'status', 'transaction_id', 'payment_method', 'finally_price',
+        'time_accepted_order', 'accepted_order', 'time_shipped_order', 'shipped_order', 'time_deliver_order',
+        'deliver_order', 'time_rejected_order', 'rejected_order', 'time_cancelled_order', 'cancelled_order',
+        'create_time', 'update_time', 'is_active', 'is_deleted')
+    list_filter = ('order_items__user__username', 'status', 'payment_method', 'time_accepted_order')
+    search_fields = ('status', 'order_items__user__username', 'payment_method', 'time_accepted_order')
+    readonly_fields = ('create_time', 'update_time', 'is_active', 'is_deleted')
+    ordering = ('-create_time',)
+    date_hierarchy = 'create_time'
+    list_per_page = 30
+    raw_id_fields = ('address',)
+    fieldsets = (
+        ('Creation Order', {
+            'fields': (
+                'order_items', 'address', 'code_discount', 'status', 'transaction_id', 'payment_method',
+                'finally_price',
+                'time_accepted_order', 'time_shipped_order', 'time_deliver_order',
+                'time_rejected_order', 'time_cancelled_order')
+        }),
+        ('Data', {'fields': ('accepted_order',
+                             'shipped_order',
+                             'deliver_order',
+                             'rejected_order',
+                             'cancelled_order',
+                             'create_time', 'update_time', 'is_active', 'is_deleted')
+                  }),
+    )
+    add_fieldsets = (
+        ('Creation Order', {
+            'classes': ('wide',),
+            'fields': (
+                'order_items', 'address', 'code_discount', 'status', 'transaction_id', 'payment_method',
+                'finally_price',
+                'time_accepted_order', 'time_shipped_order', 'time_deliver_order',
+                'time_rejected_order', 'time_cancelled_order')
+        }),
+    )
+
+
 @admin.register(OrderPayment)
 class OrderPaymentAdmin(admin.ModelAdmin):
     """
@@ -64,14 +81,14 @@ class OrderPaymentAdmin(admin.ModelAdmin):
     """
 
     list_display = (
-        'user', 'order', 'amount', 'cardholder_name', 'card_number', 'expiration_date', 'cvv', 'transaction_id',
-        'payment_method', 'status', 'payment_time', 'is_paid', 'is_failed', 'is_canceled'
+        'order', 'amount', 'cardholder_name', 'card_number', 'expiration_date', 'cvv', 'status', 'payment_time',
+        'is_paid', 'is_failed', 'is_canceled'
     )
     list_filter = (
-        'transaction_id', 'user', 'order', 'amount', 'payment_method', 'status', 'is_paid', 'is_failed', 'is_canceled'
+        'order__address__user__username', 'amount', 'status', 'is_paid', 'is_failed', 'is_canceled'
     )
-    search_fields = ('transaction_id', 'order', 'status')
-    readonly_fields = ('transaction_id', 'payment_time', 'is_failed', 'is_canceled', 'is_paid')
+    search_fields = ('order__address__user__username', 'status')
+    readonly_fields = ('payment_time', 'is_failed', 'is_canceled', 'is_paid')
     ordering = ('-payment_time',)
     date_hierarchy = 'payment_time'
     list_per_page = 30
@@ -79,8 +96,8 @@ class OrderPaymentAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Creation Order Payment', {
             'fields': (
-                'user', 'order', 'amount', 'cardholder_name', 'card_number', 'expiration_date', 'cvv', 'transaction_id',
-                'payment_method', 'status'
+                'order', 'amount', 'cardholder_name', 'card_number', 'expiration_date', 'cvv',
+                'status'
             )
         }),
         ('Data', {
@@ -90,44 +107,7 @@ class OrderPaymentAdmin(admin.ModelAdmin):
     add_fieldsets = (
         (None, {
             'fields': (
-                'user', 'order', 'amount', 'cardholder_name', 'card_number', 'expiration_date', 'cvv', 'transaction_id',
-                'payment_method', 'status', 'payment_time'
+                'order', 'amount', 'cardholder_name', 'card_number', 'expiration_date', 'cvv', 'status', 'payment_time'
             )
-        }),
-    )
-
-
-@admin.register(StatusOrder)
-class StatusOrderAdmin(admin.ModelAdmin):
-    """Admin configuration for the StatusOrder model."""
-
-    list_display = ('user', 'order',
-                    'time_accepted_order', 'accepted_order', 'time_shipped_order', 'shipped_order',
-                    'time_deliver_order', 'deliver_order', 'time_rejected_order', 'rejected_order',
-                    'time_cancelled_order', 'cancelled_order',)
-    list_filter = (
-        'user', 'order', 'accepted_order', 'shipped_order', 'deliver_order', 'rejected_order', 'cancelled_order',)
-    search_fields = ('user', 'order',)
-    readonly_fields = (
-        'time_accepted_order', 'time_shipped_order', 'time_deliver_order', 'time_rejected_order',
-        'time_cancelled_order')
-    ordering = ['-time_accepted_order']
-    raw_id_fields = ('user',)
-    date_hierarchy = 'time_accepted_order'
-    list_per_page = 30
-    fieldsets = (
-        ('Creation StatusOrder', {
-            'fields': ('user', 'order', 'accepted_order', 'shipped_order', 'deliver_order', 'rejected_order',
-                       'cancelled_order',)
-        }),
-        ('Data', {'fields': ('time_accepted_order', 'time_shipped_order', 'time_deliver_order',
-                             'time_rejected_order', 'time_cancelled_order')
-                  }),
-    )
-    add_fieldsets = (
-        ('Creation StatusOrder', {
-            'classes': ('wide',),
-            'fields': ('order', 'accepted_order', 'shipped_order', 'deliver_order', 'rejected_order',
-                       'cancelled_order',)
         }),
     )
