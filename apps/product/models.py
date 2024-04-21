@@ -1,5 +1,4 @@
 from functools import partial
-from apps.order.models import Order
 from utility.upload_to_filename import maker
 from django.db import models
 from django.core import validators
@@ -15,10 +14,13 @@ class Brand(mixin.TimestampsStatusFlagMixin):
     Model to represent brands.
     """
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_brand')
-    name = models.CharField(max_length=100)
-    description = models.TextField()
-    location = models.CharField(max_length=200)
-    logo = models.ImageField(upload_to=partial(maker, "brand_logo/%Y/%m/", keys=["name"]))
+    name = models.CharField(max_length=100, verbose_name=_('Name'))
+    phone_number = models.CharField(max_length=11, unique=True, validators=[
+        validators.RegexValidator(r"09(1[0-9]|3[0-9]|2[0-9]|0[1-9]|9[0-9])[0-9]{7}$",
+                                  'Please enter a valid phone number.')], verbose_name=_('Phone Number'))
+    description = models.TextField(verbose_name=_('Description'))
+    location = models.CharField(max_length=200, verbose_name=_('Location'))
+    logo = models.ImageField(upload_to=partial(maker, "brand_logo/%Y/%m/", keys=["name"]), verbose_name=_('Logo'))
 
     objects = managers.BrandManager()
     soft_delete = soft_delete_manager.DeleteManager()
@@ -38,11 +40,11 @@ class Brand(mixin.TimestampsStatusFlagMixin):
         - indexes: Database indexes.
         - constraints: Database constraints.
         """
-        ordering = ['name']
+        ordering = ('name',)
         verbose_name_plural = 'Brands'
         verbose_name = 'Brand'
         constraints = [
-            models.UniqueConstraint(fields=['name', 'user'], name='unique_name_user'),
+            models.UniqueConstraint(fields=['name'], name='unique_name_user'),
         ]
 
 
@@ -54,7 +56,7 @@ class Media(mixin.TimestampsStatusFlagMixin):
     product_picture = models.ImageField(
         upload_to=partial(maker, "media_picture/%Y/%m/", keys=["product"]), max_length=255, blank=True,
         null=True, validators=[validators.FileExtensionValidator(
-            allowed_extensions=['jpg', 'jpeg', 'png', 'gif'])])
+            allowed_extensions=['jpg', 'jpeg', 'png', 'gif'])], verbose_name=_('Product Picture'))
 
     objects = managers.MediaManager()
     soft_delete = soft_delete_manager.DeleteManager()
@@ -65,6 +67,7 @@ class Media(mixin.TimestampsStatusFlagMixin):
         - verbose_name_plural: Plural name for the model.
         - verbose_name: Singular name for the model.
         """
+        ordering = ('-product',)
         verbose_name_plural = 'Media'
         verbose_name = 'Media'
 
@@ -74,13 +77,13 @@ class Category(mixin.TimestampsStatusFlagMixin):
     Model to represent product categories.
     """
 
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, verbose_name=_('Name'))
     parent_category = models.ForeignKey("self", on_delete=models.CASCADE, related_name='pcategory', null=True,
                                         blank=True)
     category_picture = models.ImageField(
         upload_to=partial(maker, "media_picture/%Y/%m/", keys=["name"]), max_length=255, blank=True,
         null=True, validators=[validators.FileExtensionValidator(
-            allowed_extensions=['jpg', 'jpeg', 'png', 'gif'])])
+            allowed_extensions=['jpg', 'jpeg', 'png', 'gif'])], verbose_name=_('Category Picture'))
     is_sub_category = models.BooleanField(default=False)
 
     objects = managers.CategoryManager()
@@ -174,26 +177,30 @@ class Product(mixin.TimestampsStatusFlagMixin):
     - brand: Relationship with the Brand model.
     - warranty: Warranty period for the product.
     """
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_products')
     category = models.ForeignKey('Category', on_delete=models.CASCADE, related_name='category_products')
     brand = models.ForeignKey('Brand', on_delete=models.CASCADE, related_name='brand_products')
-    name = models.CharField(max_length=100)
-    description = models.TextField(max_length=500)
+    name = models.CharField(max_length=100, verbose_name=_('Name'))
+    description = models.TextField(max_length=500, verbose_name=_('Description'))
     price = models.PositiveIntegerField(validators=[validators.MinValueValidator(0)], null=True, blank=True)
-    size = models.CharField(max_length=30, choices=SIZE_CHOICES, validators=[
+    size = models.CharField(max_length=30, choices=SIZE_CHOICES, verbose_name=_('Size'), validators=[
         validators.RegexValidator(regex=r'^(S|M|L|XL|XXL|XXXL|XXXXL)$',
                                   message='Invalid size. Please select a valid size.')], null=True, blank=True)
-    color = models.CharField(max_length=20, choices=COLOR_CHOICES, validators=[validators.RegexValidator(
-        regex=r'^(RED|GREEN|BLUE|YELLOW|PURPLE|ORANGE|BLACK|WHITE|GRAY|BROWN|PINK|GOLD|SILVER|BLACK)$',
-        message='Invalid color. Please select a valid color.')], null=True, blank=True)
-    material = models.CharField(max_length=100, choices=MATERIAL_CHOICES, validators=[
+    color = models.CharField(max_length=20, choices=COLOR_CHOICES, verbose_name=_('Color'),
+                             validators=[validators.RegexValidator(
+                                 regex=r'^(RED|GREEN|BLUE|YELLOW|PURPLE|ORANGE|BLACK'
+                                       r'|WHITE|GRAY|BROWN|PINK|GOLD|SILVER|BLACK)$',
+                                 message='Invalid color. Please select a valid color.')], null=True, blank=True)
+    material = models.CharField(max_length=100, choices=MATERIAL_CHOICES, verbose_name=_('Material'), validators=[
         validators.RegexValidator(regex=r'^(WOOD|METAL|PLASTIC|GLASS|FIBER|LEATHER|TEXTILE|RUBBER|OTHER)$',
                                   message='Invalid material. Please select a valid material.')], null=True, blank=True)
     weight = models.PositiveSmallIntegerField(default=0, null=True, blank=True)
     height = models.PositiveSmallIntegerField(default=0, null=True, blank=True)
     width = models.PositiveSmallIntegerField(default=0, null=True, blank=True)
-    warranty = models.CharField(max_length=20, choices=WARRANTY_CHOICES, validators=[validators.RegexValidator(
-        regex=r'^(1|2|3|4|5)$', message='Invalid warranty. Please select a valid warranty.')], null=True, blank=True)
+    warranty = models.CharField(max_length=20, choices=WARRANTY_CHOICES, verbose_name=_('Warranty'),
+                                validators=[validators.RegexValidator(
+                                    regex=r'^(1|2|3|4|5)$',
+                                    message='Invalid warranty. Please select a valid warranty.')], null=True,
+                                blank=True)
     quantity = models.PositiveSmallIntegerField(default=0)
 
     objects = managers.ProductManager()
@@ -214,7 +221,7 @@ class Product(mixin.TimestampsStatusFlagMixin):
         - constraints: Database constraints.
         - indexes: Database indexes.
         """
-        ordering = ['name']
+        ordering = ('name',)
         verbose_name = 'Product'
         verbose_name_plural = 'Products'
         constraints = [
@@ -234,7 +241,7 @@ class Comment(mixin.TimestampsStatusFlagMixin):
     reply = models.ForeignKey('self', on_delete=models.CASCADE, related_name='reply_comments', blank=True,
                               null=True)
     is_reply = models.BooleanField(default=False)
-    comment = models.TextField(max_length=500)
+    comment = models.TextField(max_length=500, verbose_name=_('Comment'))
     objects = managers.CommentManager()
     soft_delete = soft_delete_manager.DeleteManager()
 
@@ -242,7 +249,7 @@ class Comment(mixin.TimestampsStatusFlagMixin):
         """
         Method to return a string representation of the Comment object.
         """
-        return f'{self.user.name} - {self.comment} - {self.product.name} '
+        return f'{self.comment} - {self.product.name} '
 
     class Meta:
         """
@@ -253,12 +260,9 @@ class Comment(mixin.TimestampsStatusFlagMixin):
         - constraints: Database constraints.
         - indexes: Database indexes.
         """
-        ordering = ['user']
+        ordering = ('-create_time',)
         verbose_name = 'Comment'
         verbose_name_plural = 'Comments'
-        constraints = [
-            models.UniqueConstraint(fields=['user', 'comment'], name='unique_comment')
-        ]
         indexes = [
             models.Index(fields=['user', 'product'], name='indexes_comment')
         ]
@@ -266,10 +270,10 @@ class Comment(mixin.TimestampsStatusFlagMixin):
 
 class FavoritesBasket(mixin.TimestampsStatusFlagMixin):
     """Model representing a user's favorite or basket products."""
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_favorites_baskets')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='user_favorites_baskets')
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_favorites_baskets')
     available = models.BooleanField(default=True)
-    quantity = models.PositiveSmallIntegerField(default=1)
+    quantity = models.PositiveSmallIntegerField(default=0)
 
     objects = managers.FavoritesBasketManager()
     soft_delete = soft_delete_manager.DeleteManager()
@@ -291,21 +295,31 @@ class FavoritesBasket(mixin.TimestampsStatusFlagMixin):
         ]
 
 
-class CodeDiscount(mixin.TimestampsStatusFlagMixin):
+class Discount(mixin.TimestampsStatusFlagMixin):
     """Model representing a discount code associated with a product or category."""
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_code_discounts', null=True, blank=True)
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='order_code_discounts', null=True,
-                              blank=True)
+    PERCENT_DISCOUNT_CHOICES = (  # noqa
+        (5, _('5%')),
+        (10, _('10%')),
+        (15, _('15%')),
+        (20, _('20%')),
+        (25, _('25%')),
+        (30, _('30%')),
+        (35, _('35%')),
+        (40, _('40%')),
+        (45, _('45%')),
+        (50, _('50%')),
+        (55, _('55%')),
+        (60, _('60%'))
+    )
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_code_discounts', null=True,
                                 blank=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='category_code_discounts', null=True,
                                  blank=True)
-    code = models.CharField(max_length=100)
-    percentage_discount = models.IntegerField(null=True, blank=True,
+    percentage_discount = models.IntegerField(null=True, blank=True, choices=PERCENT_DISCOUNT_CHOICES,
                                               validators=[validators.MinValueValidator(0)])
     numerical_discount = models.IntegerField(null=True, blank=True,
                                              validators=[validators.MinValueValidator(0)])
-    expiration_date = models.DateTimeField(null=True, blank=True)
+    expiration_date = models.DateTimeField(null=True, blank=True, verbose_name=_('Expiration Date'))
     is_use = models.SmallIntegerField(default=0)
     is_expired = models.BooleanField(default=False)
 
@@ -313,27 +327,24 @@ class CodeDiscount(mixin.TimestampsStatusFlagMixin):
     soft_delete = delete_managers.DeleteManager()
 
     def __str__(self):
-        """Return a string representation of the CodeDiscount."""
-        return (f'{self.code} - %{self.percentage_discount} - ${self.numerical_discount} -'
+        """Return a string representation of the Discount."""
+        return (f'%{self.percentage_discount} - ${self.numerical_discount} -'
                 f' {self.expiration_date} - {self.is_expired}')
 
     class Meta:
-        """Additional metadata about the CodeDiscount model."""
-        ordering = ['-code']
+        """Additional metadata about the Discount model."""
+        ordering = ('update_time', '-create_time')
         verbose_name = 'Code Discount'
         verbose_name_plural = 'Code Discounts'
-        constraints = [
-            models.UniqueConstraint(fields=['code'], name='unique_code')
-        ]
         indexes = [
-            models.Index(fields=['code']),
+            models.Index(fields=['product', 'category']),
         ]
 
 
 class WarehouseKeeper(mixin.TimestampsStatusFlagMixin):
     """Model representing a user responsible for managing inventory in a warehouse."""
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_warehouse_keepers')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='user_warehouse_keepers')
     brand = models.ForeignKey(Brand, on_delete=models.CASCADE, related_name='brand_warehouse_keepers')
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_warehouse_keepers')
     quantity = models.PositiveSmallIntegerField(default=0)
@@ -348,7 +359,7 @@ class WarehouseKeeper(mixin.TimestampsStatusFlagMixin):
 
     class Meta:
         """Additional metadata about the WarehouseKeeper model."""
-        ordering = ['-user', '-product']
+        ordering = ('product',)
         verbose_name = 'Warehouse Keeper'
         verbose_name_plural = 'Warehouse Keepers'
         indexes = [
