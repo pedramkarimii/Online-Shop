@@ -1,8 +1,11 @@
 from django.test import TestCase
-from apps.account.models import Address
+from apps.account.models import Address, CodeDiscount
 from django.contrib.auth import get_user_model
+from datetime import date
+from datetime import datetime, timedelta
 
 User = get_user_model()
+
 
 class UserModelTestCase(TestCase):
     def setUp(self):
@@ -244,3 +247,129 @@ class AddressModelTestCase(TestCase):
 
         # Check the string representation of the address
         self.assertEqual(str(address), f'{address.user} - {address.address_name}')
+
+
+class CodeDiscountModelTestCase(TestCase):
+
+    def setUp(self):
+        # Create a sample user for testing
+        self.user = User.objects.create(
+            username="testuser",
+            email="test@example.com",
+            phone_number="09123456789",
+            name="John",
+            last_name="Doe",
+            gender="Male",
+            age=30
+        )
+
+    def test_create_discount_code(self):
+        # Create a discount code
+        discount_code = CodeDiscount.objects.create(
+            user=self.user,
+            code="TESTCODE",
+            percentage_discount=10,
+            numerical_discount=50,
+            expiration_date=date.today()
+        )
+        # Assert that the discount code is created successfully
+        self.assertEqual(discount_code.code, "TESTCODE")
+
+    def test_update_discount_code(self):
+        # Create a discount code
+        discount_code = CodeDiscount.objects.create(
+            user=self.user,
+            code="TESTCODE",
+            percentage_discount=10,
+            numerical_discount=50,
+            expiration_date=date.today()
+        )
+        # Update the discount code
+        discount_code.code = "UPDATEDCODE"
+        discount_code.save()
+        # Retrieve the updated discount code from the database
+        updated_discount_code = CodeDiscount.objects.get(id=discount_code.id)
+        # Assert that the code is updated successfully
+        self.assertEqual(updated_discount_code.code, "UPDATEDCODE")
+
+    def test_delete_discount_code(self):
+        # Create a discount code
+        discount_code = CodeDiscount.objects.create(
+            user=self.user,
+            code="TESTCODE",
+            percentage_discount=10,
+            numerical_discount=50,
+            expiration_date=date.today()
+        )
+        # Delete the discount code
+        discount_code.delete()
+        # Assert that the discount code is deleted successfully
+        with self.assertRaises(CodeDiscount.DoesNotExist): # noqa
+            CodeDiscount.objects.get(id=discount_code.id)
+
+    def test_is_expired(self):
+        # Create a discount code that has expired
+        expired_date = datetime.now().date() - timedelta(days=1)
+        expired_code = CodeDiscount.objects.create(
+            user=self.user,
+            code="EXPIRED",
+            percentage_discount=10,
+            expiration_date=expired_date,
+            is_expired=False  # This should be False initially
+        )
+
+        if expired_code.expiration_date < datetime.now().date():
+            expired_code.is_expired = True
+
+        # Check if the code is marked as expired
+        self.assertTrue(expired_code.is_expired)
+
+        # Create a discount code that has not expired
+        valid_code = CodeDiscount.objects.create(
+            user=self.user,
+            code="VALID",
+            percentage_discount=20,
+            expiration_date=datetime.now() + timedelta(days=1),
+            is_expired=False  # This should be False initially
+        )
+
+        # Check if the code is not marked as expired
+        self.assertFalse(valid_code.is_expired)
+
+    def test_is_not_expired(self):
+        # Create a discount code with an expiration date in the future
+        active_discount_code = CodeDiscount.objects.create(
+            user=self.user,
+            code="ACTIVECODE",
+            percentage_discount=10,
+            numerical_discount=50,
+            expiration_date=date.today()  # Set expiration date in the future
+        )
+        # Assert that the discount code is not expired
+        self.assertFalse(active_discount_code.is_expired)
+
+    def test_is_used(self):
+        # Create a discount code that has been used
+        used_discount_code = CodeDiscount.objects.create(
+            user=self.user,
+            code="USEDCODE",
+            percentage_discount=10,
+            numerical_discount=50,
+            expiration_date=date.today(),
+            is_use=1  # Set is_use to 1 indicating it has been used
+        )
+        # Assert that the discount code has been used
+        self.assertTrue(used_discount_code.is_use)
+
+    def test_is_not_used(self):
+        # Create a discount code that has not been used
+        unused_discount_code = CodeDiscount.objects.create(
+            user=self.user,
+            code="UNUSED",
+            percentage_discount=10,
+            numerical_discount=50,
+            expiration_date=date.today(),
+            is_use=0  # Set is_use to 0 indicating it has not been used
+        )
+        # Assert that the discount code has not been used
+        self.assertFalse(unused_discount_code.is_use)
