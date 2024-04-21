@@ -4,11 +4,12 @@ from django.db import models
 from utility.upload_to_filename import maker
 from functools import partial
 from apps.account import managers
-from apps.core import mixin, managers as soft_delete_manager
+from apps.core.mixin import mixin_model
+from apps.core import managers as soft_delete_manager
 from django.utils.translation import gettext_lazy as _
 
 
-class User(mixin.TimestampsStatusFlagMixin, AbstractBaseUser, PermissionsMixin):
+class User(mixin_model.TimestampsStatusFlagMixin, AbstractBaseUser, PermissionsMixin):
     """
     Custom user model representing users in the system.
     Inherits from mixin.TimestampsStatusFlagMixin for timestamps and status flags,
@@ -123,7 +124,7 @@ class User(mixin.TimestampsStatusFlagMixin, AbstractBaseUser, PermissionsMixin):
         ]
 
 
-class Address(mixin.TimestampsStatusFlagMixin):
+class Address(mixin_model.TimestampsStatusFlagMixin):
     """
     Model representing user addresses.
     Inherits from mixin.TimestampsStatusFlagMixin for timestamps and status flags.
@@ -250,7 +251,7 @@ class Address(mixin.TimestampsStatusFlagMixin):
         ]
 
 
-class CodeDiscount(mixin.TimestampsStatusFlagMixin):
+class CodeDiscount(mixin_model.TimestampsStatusFlagMixin):
     """
     Model representing discount codes.
     Inherits from mixin.TimestampsStatusFlagMixin for timestamps and status flags.
