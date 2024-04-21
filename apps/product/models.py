@@ -1,13 +1,13 @@
 from functools import partial
 from utility.upload_to_filename import maker
 from django.db import models
-from django.core import validators
 from apps.product import managers
 from apps.core import managers as delete_managers
 from apps.account.models import User
 from django.utils.translation import gettext_lazy as _
 from apps.core.mixin import mixin_model
 from apps.core import managers as soft_delete_manager
+from apps.core import validators
 
 
 class Brand(mixin_model.TimestampsStatusFlagMixin):
@@ -16,9 +16,8 @@ class Brand(mixin_model.TimestampsStatusFlagMixin):
     """
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_brand')
     name = models.CharField(max_length=100, verbose_name=_('Name'))
-    phone_number = models.CharField(max_length=11, unique=True, validators=[
-        validators.RegexValidator(r"09(1[0-9]|3[0-9]|2[0-9]|0[1-9]|9[0-9])[0-9]{7}$",
-                                  'Please enter a valid phone number.')], verbose_name=_('Phone Number'))
+    phone_number = models.CharField(max_length=11, unique=True, validators=[validators.PhoneNumberValidator()],
+                                    verbose_name=_('Phone Number'))
     description = models.TextField(verbose_name=_('Description'))
     location = models.CharField(max_length=200, verbose_name=_('Location'))
     logo = models.ImageField(upload_to=partial(maker, "brand_logo/%Y/%m/", keys=["name"]), verbose_name=_('Logo'))
@@ -56,8 +55,7 @@ class Media(mixin_model.TimestampsStatusFlagMixin):
     product = models.ForeignKey('Product', on_delete=models.CASCADE, related_name='media_products')
     product_picture = models.ImageField(
         upload_to=partial(maker, "media_picture/%Y/%m/", keys=["product"]), max_length=255, blank=True,
-        null=True, validators=[validators.FileExtensionValidator(
-            allowed_extensions=['jpg', 'jpeg', 'png', 'gif'])], verbose_name=_('Product Picture'))
+        null=True, validators=[validators.PictureValidator()], verbose_name=_('Product Picture'))
 
     objects = managers.MediaManager()
     soft_delete = soft_delete_manager.DeleteManager()
@@ -83,8 +81,7 @@ class Category(mixin_model.TimestampsStatusFlagMixin):
                                         blank=True)
     category_picture = models.ImageField(
         upload_to=partial(maker, "media_picture/%Y/%m/", keys=["name"]), max_length=255, blank=True,
-        null=True, validators=[validators.FileExtensionValidator(
-            allowed_extensions=['jpg', 'jpeg', 'png', 'gif'])], verbose_name=_('Category Picture'))
+        null=True, validators=[validators.PictureValidator()], verbose_name=_('Category Picture'))
     is_sub_category = models.BooleanField(default=False)
 
     objects = managers.CategoryManager()
@@ -182,25 +179,19 @@ class Product(mixin_model.TimestampsStatusFlagMixin):
     brand = models.ForeignKey('Brand', on_delete=models.CASCADE, related_name='brand_products')
     name = models.CharField(max_length=100, verbose_name=_('Name'))
     description = models.TextField(max_length=500, verbose_name=_('Description'))
-    price = models.PositiveIntegerField(validators=[validators.MinValueValidator(0)], null=True, blank=True)
-    size = models.CharField(max_length=30, choices=SIZE_CHOICES, verbose_name=_('Size'), validators=[
-        validators.RegexValidator(regex=r'^(S|M|L|XL|XXL|XXXL|XXXXL)$',
-                                  message='Invalid size. Please select a valid size.')], null=True, blank=True)
-    color = models.CharField(max_length=20, choices=COLOR_CHOICES, verbose_name=_('Color'),
-                             validators=[validators.RegexValidator(
-                                 regex=r'^(RED|GREEN|BLUE|YELLOW|PURPLE|ORANGE|BLACK'
-                                       r'|WHITE|GRAY|BROWN|PINK|GOLD|SILVER|BLACK)$',
-                                 message='Invalid color. Please select a valid color.')], null=True, blank=True)
-    material = models.CharField(max_length=100, choices=MATERIAL_CHOICES, verbose_name=_('Material'), validators=[
-        validators.RegexValidator(regex=r'^(WOOD|METAL|PLASTIC|GLASS|FIBER|LEATHER|TEXTILE|RUBBER|OTHER)$',
-                                  message='Invalid material. Please select a valid material.')], null=True, blank=True)
+    price = models.PositiveIntegerField(validators=[validators.PriceValidator()], null=True, blank=True)
+    size = models.CharField(max_length=30, choices=validators.SizeChoice.CHOICES, verbose_name=_('Size'),
+                            validators=[validators.SizeValidator()], null=True, blank=True)
+    color = models.CharField(max_length=20, choices=validators.ColorChoice.CHOICES, verbose_name=_('Color'),
+                             validators=[validators.ColorValidator()], null=True, blank=True)
+    material = models.CharField(max_length=100, choices=validators.MaterialChoice.CHOICES, verbose_name=_('Material'),
+                                validators=[validators.MaterialValidator()], null=True,
+                                blank=True)
     weight = models.PositiveSmallIntegerField(default=0, null=True, blank=True)
     height = models.PositiveSmallIntegerField(default=0, null=True, blank=True)
     width = models.PositiveSmallIntegerField(default=0, null=True, blank=True)
-    warranty = models.CharField(max_length=20, choices=WARRANTY_CHOICES, verbose_name=_('Warranty'),
-                                validators=[validators.RegexValidator(
-                                    regex=r'^(1|2|3|4|5)$',
-                                    message='Invalid warranty. Please select a valid warranty.')], null=True,
+    warranty = models.CharField(max_length=20, choices=validators.WarrantyChoice.CHOICES, verbose_name=_('Warranty'),
+                                validators=[validators.WarrantyValidator()], null=True,
                                 blank=True)
     quantity = models.PositiveSmallIntegerField(default=0)
 
@@ -298,28 +289,15 @@ class FavoritesBasket(mixin_model.TimestampsStatusFlagMixin):
 
 class Discount(mixin_model.TimestampsStatusFlagMixin):
     """Model representing a discount code associated with a product or category."""
-    PERCENT_DISCOUNT_CHOICES = (  # noqa
-        (5, _('5%')),
-        (10, _('10%')),
-        (15, _('15%')),
-        (20, _('20%')),
-        (25, _('25%')),
-        (30, _('30%')),
-        (35, _('35%')),
-        (40, _('40%')),
-        (45, _('45%')),
-        (50, _('50%')),
-        (55, _('55%')),
-        (60, _('60%'))
-    )
+
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_code_discounts', null=True,
                                 blank=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='category_code_discounts', null=True,
                                  blank=True)
-    percentage_discount = models.IntegerField(null=True, blank=True, choices=PERCENT_DISCOUNT_CHOICES,
-                                              validators=[validators.MinValueValidator(0)])
+    percentage_discount = models.IntegerField(null=True, blank=True, choices=validators.PercentDiscountChoices.CHOICES,
+                                              validators=[validators.PercentageDiscountValidator()])
     numerical_discount = models.IntegerField(null=True, blank=True,
-                                             validators=[validators.MinValueValidator(0)])
+                                             validators=[validators.NumericalDiscountValidator()])
     expiration_date = models.DateTimeField(null=True, blank=True, verbose_name=_('Expiration Date'))
     is_use = models.SmallIntegerField(default=0)
     is_expired = models.BooleanField(default=False)
