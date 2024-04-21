@@ -1,12 +1,12 @@
 from django.db import models
 from django.core import validators
-from apps.core import mixin
+from apps.core.mixin import mixin_model
 from apps.account.models import User, Address, CodeDiscount
 from apps.order import managers
 from django.utils.translation import gettext_lazy as _
 
 
-class OrderItem(mixin.TimestampsStatusFlagMixin):
+class OrderItem(mixin_model.TimestampsStatusFlagMixin):
     """Model representing an item within an order."""
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="user_order_items")
@@ -30,7 +30,7 @@ class OrderItem(mixin.TimestampsStatusFlagMixin):
                 fields=('user', 'product'), name='order_item')]
 
 
-class Order(mixin.TimestampsStatusFlagMixin):
+class Order(mixin_model.TimestampsStatusFlagMixin):
     """Model representing an order placed by a user."""
     payment_method_choices = [
         ('credit_card', _('Credit Card')),
@@ -53,7 +53,7 @@ class Order(mixin.TimestampsStatusFlagMixin):
                               validators=[validators.RegexValidator(
                                   regex=r'^(paid|delivered|cancelled)$', message=_('Invalid status'), )],
                               verbose_name=_('Status'))
-    transaction_id = models.CharField(max_length=36, default=mixin.generate_transaction_id, unique=True,
+    transaction_id = models.CharField(max_length=36, default=mixin_model.generate_transaction_id, unique=True,
                                       verbose_name=_('Transaction'))
     payment_method = models.CharField(max_length=20, choices=payment_method_choices)
     finally_price = models.IntegerField(default=0, validators=[validators.MinValueValidator(0)])
@@ -105,8 +105,9 @@ class OrderPayment(models.Model):
                            verbose_name=_('CVV'))
 
     status = models.CharField(max_length=20,
-                              choices=[(status.value, status.name.capitalize()) for status in mixin.PaymentStatusMixin],
-                              default=mixin.PaymentStatusMixin.PENDING.value, verbose_name=_('Status'))
+                              choices=[(status.value, status.name.capitalize()) for status in
+                                       mixin_model.PaymentStatusMixin],
+                              default=mixin_model.PaymentStatusMixin.PENDING.value, verbose_name=_('Status'))
     payment_time = models.DateTimeField(auto_now_add=True, editable=False, verbose_name=_('Payment Time'))
     is_paid = models.BooleanField(default=False)
     is_failed = models.BooleanField(default=False)
