@@ -1,7 +1,7 @@
 from django.db import models
-from django.core import validators
+from apps.core import validators
 from apps.core.mixin import mixin_model
-from apps.account.models import User, Address, CodeDiscount
+from apps.account.models import User, Address
 from apps.order import managers
 from django.utils.translation import gettext_lazy as _
 
@@ -11,8 +11,9 @@ class OrderItem(mixin_model.TimestampsStatusFlagMixin):
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="user_order_items")
     product = models.ForeignKey('product.Product', on_delete=models.CASCADE, related_name="product_order_items")
+    order = models.ForeignKey('order.Order', on_delete=models.CASCADE, related_name="order_order_items")
     total_price = models.IntegerField(default=0)
-    quantity = models.PositiveIntegerField(default=1, validators=[validators.MinValueValidator(1)],
+    quantity = models.PositiveIntegerField(default=1, validators=[validators.QuantityValidators()],
                                            verbose_name=_('Quantity'))
     objects = managers.OrderItemManager()
 
@@ -27,36 +28,20 @@ class OrderItem(mixin_model.TimestampsStatusFlagMixin):
         verbose_name_plural = 'Order Items'
         indexes = [
             models.Index(
-                fields=('user', 'product'), name='order_item')]
+                fields=('user', 'product', 'order'), name='order_item')]
 
 
 class Order(mixin_model.TimestampsStatusFlagMixin):
     """Model representing an order placed by a user."""
-    payment_method_choices = [
-        ('credit_card', _('Credit Card')),
-        ('debit_card', _('Debit Card')),
-        ('paypal', _('PayPal')),
-        ('bank_transfer', _('Bank Transfer')),
-        ('cash', _('Cash')),
-    ]
 
-    STATUS_CHOICES = (
-        ('paid', _('Paid')),
-        ('delivered', _('Delivered')),
-        ('cancelled', _('Cancelled')),
-    )
-    order_items = models.ForeignKey(OrderItem, on_delete=models.CASCADE, related_name="order_items_order")
     address = models.ForeignKey(Address, on_delete=models.CASCADE, related_name="address_order")
-    code_discount = models.ForeignKey(CodeDiscount, on_delete=models.CASCADE, related_name="code_discount_order",
-                                      null=True, blank=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES,
-                              validators=[validators.RegexValidator(
-                                  regex=r'^(paid|delivered|cancelled)$', message=_('Invalid status'), )],
+    status = models.CharField(max_length=20, choices=validators.StatusChoice.CHOICES,
+                              validators=[validators.StatusValidator()],
                               verbose_name=_('Status'))
     transaction_id = models.CharField(max_length=36, default=mixin_model.generate_transaction_id, unique=True,
                                       verbose_name=_('Transaction'))
-    payment_method = models.CharField(max_length=20, choices=payment_method_choices)
-    finally_price = models.IntegerField(default=0, validators=[validators.MinValueValidator(0)])
+    payment_method = models.CharField(max_length=20, choices=validators.PaymentMethodChoice.CHOICES)
+    finally_price = models.IntegerField(default=0, validators=[validators.FinallyPriceValidator()])
 
     time_accepted_order = models.DateTimeField(null=True, blank=True, verbose_name=_('Time Accepted Order'))
     accepted_order = models.BooleanField(default=False)
@@ -76,7 +61,7 @@ class Order(mixin_model.TimestampsStatusFlagMixin):
 
     def __str__(self):
         """Return a string representation of the Order."""
-        return f'{self.order_items} - {self.address} - {self.status}'
+        return f' {self.address} - {self.status}'
 
     class Meta:
         """Additional metadata about the Order model."""
@@ -85,23 +70,21 @@ class Order(mixin_model.TimestampsStatusFlagMixin):
         verbose_name_plural = 'Orders'
         indexes = [
             models.Index(
-                fields=['order_items'], name='user_order_items')]
+                fields=['address'], name='user_order_items')]
 
 
 class OrderPayment(models.Model):
     """Model representing a payment associated with an order."""
 
     order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name="order_payments")
-    amount = models.SmallIntegerField(default=0, validators=[validators.MinValueValidator(0)],
+    amount = models.SmallIntegerField(default=0, validators=[validators.AmountValidator()],
                                       verbose_name=_('Amount'))
-    cardholder_name = models.CharField(max_length=100, validators=[validators.MinLengthValidator(3)],
+    cardholder_name = models.CharField(max_length=100, validators=[validators.CardholderNameValidator()],
                                        verbose_name=_('Cardholder Name'))
-    card_number = models.CharField(max_length=12, validators=[
-        validators.RegexValidator(r'^\d{12}$', _('Enter a valid 12-digit card number.'))],
+    card_number = models.CharField(max_length=12, validators=[validators.CardNumberValidator()],
                                    verbose_name=_('Card Number'))
     expiration_date = models.DateField()
-    cvv = models.CharField(max_length=4, validators=[
-        validators.RegexValidator(r'^\d{3,4}$', _('Enter a valid 3 or 4-digit CVV.'))],
+    cvv = models.CharField(max_length=4, validators=[validators.CVVValidator()],
                            verbose_name=_('CVV'))
 
     status = models.CharField(max_length=20,
