@@ -16,6 +16,9 @@ django-jazzmin = "^2.6.1"
 psycopg2-binary = "^2.9.9"
 pytz = "^2024.1"
 selenium = "^4.19.0"
+redis = "^5.0.3"
+kavenegar = "^1.1.2"
+aioredis = "^2.0.1"
 
 
 [tool.poetry.group.dev.dependencies]
