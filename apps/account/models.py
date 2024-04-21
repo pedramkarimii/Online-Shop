@@ -1,6 +1,6 @@
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
-from apps.account import validators
+from apps.core import validators
 from utility.upload_to_filename import maker
 from functools import partial
 from apps.account import managers
@@ -47,7 +47,7 @@ class User(mixin_model.TimestampsStatusFlagMixin, AbstractBaseUser, PermissionsM
     profile_picture = models.ImageField(
         upload_to=partial(maker, "profile_picture/%Y/%m/", keys=["name"]),
         max_length=255, blank=True, null=True,
-        validators=[validators.ProfilePictureValidator()], verbose_name=_('Profile Picture')
+        validators=[validators.PictureValidator()], verbose_name=_('Profile Picture')
     )
 
     """
