@@ -104,7 +104,7 @@ class ProfilePictureValidator(validators.FileExtensionValidator):
         )
 
 
-class CountryValidator(validators.RegexValidator):
+class CountryValidator(CustomRegexValidator):
     """
     Validator for country field
     """
@@ -116,7 +116,7 @@ class CountryValidator(validators.RegexValidator):
         )
 
 
-class CityValidator(validators.RegexValidator):
+class CityValidator(CustomRegexValidator):
     """
     Validator for city field
     """
@@ -128,7 +128,7 @@ class CityValidator(validators.RegexValidator):
         )
 
 
-class StreetValidator(validators.RegexValidator):
+class StreetValidator(CustomRegexValidator):
     """
     Validator for street field
     """
@@ -140,7 +140,7 @@ class StreetValidator(validators.RegexValidator):
         )
 
 
-class BuildingNumberValidator(validators.RegexValidator):
+class BuildingNumberValidator(CustomRegexValidator):
     """
     Validator for building number field
     """
@@ -152,7 +152,7 @@ class BuildingNumberValidator(validators.RegexValidator):
         )
 
 
-class FloorNumberValidator(validators.RegexValidator):
+class FloorNumberValidator(CustomRegexValidator):
     """
     Validator for floor number field
     """
@@ -164,7 +164,7 @@ class FloorNumberValidator(validators.RegexValidator):
         )
 
 
-class PostalCodeValidator(validators.RegexValidator):
+class PostalCodeValidator(CustomRegexValidator):
     """
     Validator for postal code field
     """
@@ -176,7 +176,7 @@ class PostalCodeValidator(validators.RegexValidator):
         )
 
 
-class NotesValidator(validators.RegexValidator):
+class NotesValidator(CustomRegexValidator):
     """
     Validator for notes field
     """
@@ -188,7 +188,7 @@ class NotesValidator(validators.RegexValidator):
         )
 
 
-class CodeValidator(validators.RegexValidator):
+class CodeValidator(CustomRegexValidator):
     """
     Validator for code field
     """
@@ -224,7 +224,7 @@ class NumericalDiscountValidator(validators.MinValueValidator):
         )
 
 
-class PasswordValidator(validators.RegexValidator):
+class PasswordValidator(CustomRegexValidator):
     """
     Validator for password field
     """
