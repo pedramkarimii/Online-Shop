@@ -32,51 +32,51 @@ class User(mixin.TimestampsStatusFlagMixin, AbstractBaseUser, PermissionsMixin):
         validators=[validators.RegexValidator(
             r'^[a-zA-Z0-9_.+-]+$', 'Username can contain letters, numbers, underscores, dots, '
                                    'hyphens, and be at least 4 characters long.'
-        )]
+        )], verbose_name=_('Username')
     )
     email = models.EmailField(
         max_length=100, unique=True,
         validators=[validators.RegexValidator(
             r'^[a-zA-Z0-9._%+-]+@(?:gmail|yahoo)\.com$',
             'Please enter a valid Gmail or Yahoo email address.'
-        )]
+        )], verbose_name=_('Email')
     )
     phone_number = models.CharField(
         max_length=11, unique=True,
         validators=[validators.RegexValidator(
             r"09(1[0-9]|3[0-9]|2[0-9]|0[1-9]|9[0-9])[0-9]{7}$",
             'Please enter a valid phone number.'
-        )]
+        )], verbose_name=_('Phone Number')
     )
     name = models.CharField(
         max_length=50,
         validators=[validators.RegexValidator(
             r'^[a-zA-Z]+(?:\s[a-zA-Z]+)*$',
             message='Enter a valid name.'
-        )]
+        )], verbose_name=_('Name')
     )
     last_name = models.CharField(
         max_length=50,
         validators=[validators.RegexValidator(
             r'^[a-zA-Z]+(?:\s[a-zA-Z]+)*$',
             message='Enter a valid last name.'
-        )]
+        )], verbose_name=_('Last Name')
     )
     gender = models.CharField(
         max_length=10, choices=STATUS_GENDER, default='Other', blank=True, null=True,
         validators=[validators.RegexValidator(
             r'^(Male|Female|Other)$',
             message='Enter a valid gender (Male, Female, Other).'
-        )]
+        )], verbose_name=_('Gender')
     )
-    age = models.PositiveSmallIntegerField(default=0)
+    age = models.PositiveSmallIntegerField(default=0, verbose_name=_('Age'))
     profile_picture = models.ImageField(
         upload_to=partial(maker, "profile_picture/%Y/%m/", keys=["name"]),
         max_length=255, blank=True, null=True,
         validators=[validators.FileExtensionValidator(
             allowed_extensions=['jpg', 'jpeg', 'png'],
             message='Only JPG, JPEG, and PNG files are allowed.'
-        )]
+        )], verbose_name=_('Profile Picture')
     )
 
     """
@@ -173,7 +173,7 @@ class Address(mixin.TimestampsStatusFlagMixin):
         validators=[validators.RegexValidator(
             r'^[a-zA-Z]+(?:\s[a-zA-Z]+)*$',
             message='Enter a valid address name.'
-        )]
+        )], verbose_name=_('Address Name')
     )
     country = models.CharField(
         max_length=100,
@@ -181,7 +181,7 @@ class Address(mixin.TimestampsStatusFlagMixin):
         validators=[validators.RegexValidator(
             r'^[a-zA-Z]+(?:\s[a-zA-Z]+)*$',
             message='Enter a valid country name.'
-        )]
+        )], verbose_name=_('Country')
     )
     city = models.CharField(
         max_length=100,
@@ -189,42 +189,42 @@ class Address(mixin.TimestampsStatusFlagMixin):
         validators=[validators.RegexValidator(
             r'^[a-zA-Z]+(?:\s[a-zA-Z]+)*$',
             message='Enter a valid city name.'
-        )]
+        )], verbose_name=_('City')
     )
     street = models.CharField(
         max_length=200,
         validators=[validators.RegexValidator(
             r'^[a-zA-Z0-9\s.,#-]+$',
             message='Enter a valid street address.'
-        )]
+        )], verbose_name=_('Street')
     )
     building_number = models.CharField(
         max_length=20,
         validators=[validators.RegexValidator(
             r'^[a-zA-Z0-9\s-]+$',
             message='Enter a valid building number.'
-        )]
+        )], verbose_name=_('Building Number')
     )
     floor_number = models.CharField(
         max_length=20,
         validators=[validators.RegexValidator(
             r'^[a-zA-Z0-9\s-]+$',
             message='Enter a valid floor number.'
-        )]
+        )], verbose_name=_('Floor Number')
     )
     postal_code = models.CharField(
         max_length=20,
         validators=[validators.RegexValidator(
             r'^[a-zA-Z0-9\s-]+$',
             message='Enter a valid postal code.'
-        )]
+        )], verbose_name=_('Postal Code')
     )
     notes = models.TextField(
         blank=True, null=True,
         validators=[validators.RegexValidator(
             r'^[a-zA-Z0-9\s.,#-]+$',
             message='Enter a valid notes.'
-        )]
+        )], verbose_name=_('Notes')
     )
     objects = managers.AddressManager()
     soft_delete = soft_delete_manager.DeleteManager()
@@ -247,4 +247,68 @@ class Address(mixin.TimestampsStatusFlagMixin):
         ]
         indexes = [
             models.Index(fields=['user', 'address_name'], name='index_user_postal_code')
+        ]
+
+
+class CodeDiscount(mixin.TimestampsStatusFlagMixin):
+    """
+    Model representing discount codes.
+    Inherits from mixin.TimestampsStatusFlagMixin for timestamps and status flags.
+    """
+    PERCENT_DISCOUNT_CHOICES = (  # noqa
+        (5, _('5%')),
+        (10, _('10%')),
+        (15, _('15%')),
+        (20, _('20%')),
+        (25, _('25%')),
+        (30, _('30%')),
+        (35, _('35%')),
+        (40, _('40%')),
+        (45, _('45%')),
+        (50, _('50%')),
+        (55, _('55%')),
+        (60, _('60%'))
+    )
+
+    """
+    Fields for discount code information
+    """
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_query_name='user_discount_code')
+    code = models.CharField(
+        max_length=100,
+        validators=[validators.RegexValidator(
+            r'^[a-zA-Z0-9]+$',
+            message='Enter a valid code.'
+        )], verbose_name=_('Code')
+    )
+    percentage_discount = models.SmallIntegerField(null=True, blank=True, choices=PERCENT_DISCOUNT_CHOICES,
+                                                   validators=[validators.MinValueValidator(0)],
+                                                   verbose_name=_('Percentage Discount'))
+    numerical_discount = models.SmallIntegerField(null=True, blank=True,
+                                                  validators=[validators.MinValueValidator(0)],
+                                                  verbose_name=_('Numerical Discount'))
+    expiration_date = models.DateField(null=True, blank=True, verbose_name=_('Expiration Date'))
+    is_use = models.SmallIntegerField(default=0)
+    is_expired = models.BooleanField(default=False)
+    objects = managers.CodeDiscountManager()
+    soft_delete = soft_delete_manager.DeleteManager()
+
+    def __str__(self):
+        """
+        String representation of the discount code object
+        """
+        return f'{self.code} - {self.percentage_discount} - {self.numerical_discount} - {self.expiration_date}  %'
+
+    class Meta:
+        """
+        Meta information about the model
+        """
+        ordering = ('-update_time', '-create_time')
+        verbose_name = 'discount code'
+        verbose_name_plural = 'discount codes'
+        constraints = [
+            models.UniqueConstraint(fields=['code'], name='unique_code_discount')
+        ]
+        indexes = [
+            models.Index(fields=['code'], name='index_code')
         ]
