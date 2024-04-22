@@ -19,12 +19,15 @@ selenium = "^4.19.0"
 redis = "^5.0.3"
 kavenegar = "^1.1.2"
 aioredis = "^2.0.1"
+djangorestframework-simplejwt = "^5.3.1"
+pycryptodome = "^3.20.0"
 
 
 [tool.poetry.group.dev.dependencies]
 isort = "^5.13.2"
 ruff = "^0.3.7"
 pre-commit = "^3.7.0"
+model-bakery = "^1.18.0"
 
 [build-system]
 requires = ["poetry-core"]
