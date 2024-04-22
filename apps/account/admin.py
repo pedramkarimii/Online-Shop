@@ -1,5 +1,5 @@
 from django.contrib import admin
-from apps.account.models import User, Address, CodeDiscount
+from apps.account.models import User, Address, CodeDiscount, UserAuth, Profile
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
 
@@ -54,9 +54,87 @@ class CodeDiscountInline(admin.StackedInline):
     )
 
 
+class ProfileInline(admin.StackedInline):
+    """Inline for managing profiles within the user admin."""
+
+    model = Profile
+    can_delete = False
+    verbose_name_plural = 'Profile'
+    fk_name = 'user'
+    readonly_fields = ('create_time', 'update_time', 'is_deleted', 'is_active')
+    ordering = ('create_time',)
+    date_hierarchy = 'create_time'
+    list_per_page = 30
+    fieldsets = (
+        ('Creation Profile', {'fields': ('user', 'name', 'last_name', 'gender', 'age', 'profile_picture')}),
+        ('Data', {'fields': ('create_time', 'update_time', 'is_deleted', 'is_active')
+                  }),
+    )
+    add_fieldsets = (
+        ('Creation Profile', {
+            'classes': ('wide',),
+            'fields': ('user', 'name', 'last_name', 'gender', 'age', 'profile_picture')
+        }),
+    )
+
+
+@admin.register(UserAuth)
+class UserAuthModelAdmin(admin.ModelAdmin):
+    list_display = ['user_id', 'token_type', 'uuid', 'create_time', 'update_time', 'is_active', 'is_deleted']
+    list_filter = ['user_id', 'token_type', 'is_active']
+    search_fields = ['user_id', 'token_type', 'is_active']
+    readonly_fields = ('create_time', 'update_time', 'is_active', 'is_deleted')
+    ordering = ['-create_time']
+    date_hierarchy = 'create_time'
+    list_per_page = 30
+    fieldsets = (
+        ('Creation User Auth',
+         {'fields': ('user_id', 'token_type', 'uuid')}),
+        ('Data', {'fields': ('create_time', 'update_time', 'is_active', 'is_deleted')
+                  }),
+    )
+    add_fieldsets = (
+        ('Creation User Auth', {
+            'classes': ('wide',),
+            'fields': ('user_id', 'token_type', 'uuid')
+        }),
+        ('Data', {'fields': ('create_time', 'update_time', 'is_active', 'is_deleted')
+                  })
+    )
+
+
+@admin.register(Profile)
+class ProfileAdmin(admin.ModelAdmin):
+    list_display = ['user', 'name', 'last_name', 'gender', 'age', 'profile_picture', 'create_time', 'update_time',
+                    'is_active',
+                    'is_deleted']
+    list_filter = ['user__username', 'name', 'age']
+    search_fields = ['user__username', 'name', 'age', 'create_time', 'is_active']
+    readonly_fields = ('is_deleted', 'create_time', 'update_time', 'is_active')
+    ordering = ['-create_time']
+    date_hierarchy = 'create_time'
+    list_per_page = 30
+    fieldsets = (
+        ('Creation Profile',
+         {'fields': (
+             'user', 'name', 'last_name', 'gender', 'age',
+         )}),
+        ('Data', {'fields': ('create_time', 'update_time', 'is_deleted', 'is_active')
+                  }),
+    )
+    add_fieldsets = (
+        ('Creation Profile', {
+            'classes': ('wide',),
+            'fields': ('user', 'name', 'last_name', 'gender', 'age', 'profile_picture')
+        }),
+        ('Data', {'fields': ('create_time', 'update_time', 'is_deleted', 'is_active')
+                  })
+    )
+
+
 @admin.register(CodeDiscount)
 class CodeDiscountAdmin(admin.ModelAdmin):
-    """Admin interface for managing addresses."""
+    """Admin interface for managing CodeDiscount."""
 
     list_display = ['user', 'code', 'percentage_discount', 'numerical_discount', 'expiration_date', 'is_use',
                     'is_expired',
@@ -118,9 +196,7 @@ class UserAdmin(BaseUserAdmin):
 
     fieldsets = (
         ('Change personal info',
-         {'fields': (
-             'email', 'phone_number', 'username', 'name', 'last_name', 'gender', 'age', 'profile_picture',
-             'password')}),
+         {'fields': ('email', 'phone_number', 'username', 'password')}),
         ('Permissions',
          {'fields': ('is_admin', 'is_superuser', 'is_staff', 'groups')}),
         ('Important dates', {'fields': ('last_login', 'create_time', 'update_time', 'is_active', 'is_deleted',)}),
@@ -128,9 +204,7 @@ class UserAdmin(BaseUserAdmin):
 
     add_fieldsets = (
         ('Creation User', {
-            'fields': (
-                'name', 'last_name', 'gender', 'age', 'email', 'phone_number', 'username', 'profile_picture',
-                'password1', 'password2')}
+            'fields': ('email', 'phone_number', 'username', 'password1', 'password2')}
          ),
     )
     row_id_fields = ('phone_number',)
@@ -143,7 +217,7 @@ class UserAdmin(BaseUserAdmin):
     readonly_fields = ('create_time', 'update_time', 'last_login', 'is_active', 'is_deleted',)
     filter_horizontal = ('groups', 'user_permissions')
 
-    inlines = (AddressInline, CodeDiscountInline)
+    inlines = (AddressInline, CodeDiscountInline, ProfileInline)
 
     def get_inline_instances(self, request, obj=None):
         """Get inline instances based on whether an object is provided."""
