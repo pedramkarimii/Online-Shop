@@ -31,24 +31,6 @@ class User(mixin_model.TimestampsStatusFlagMixin, AbstractBaseUser, PermissionsM
         max_length=11, unique=True,
         validators=[validators.PhoneNumberValidator()], verbose_name=_('Phone Number')
     )
-    name = models.CharField(
-        max_length=50,
-        validators=[validators.NameValidator()], verbose_name=_('Name')
-    )
-    last_name = models.CharField(
-        max_length=50,
-        validators=[validators.LastNameValidator()], verbose_name=_('Last Name')
-    )
-    gender = models.CharField(
-        max_length=10, choices=validators.GenderChoices.CHOICES, default='Other',
-        validators=[validators.GenderValidator()], verbose_name=_('Gender')
-    )
-    age = models.PositiveSmallIntegerField(default=0, verbose_name=_('Age'))
-    profile_picture = models.ImageField(
-        upload_to=partial(maker, "profile_picture/%Y/%m/", keys=["name"]),
-        max_length=255, blank=True, null=True,
-        validators=[validators.PictureValidator()], verbose_name=_('Profile Picture')
-    )
 
     """
     Boolean fields for user permissions and status
@@ -94,6 +76,82 @@ class User(mixin_model.TimestampsStatusFlagMixin, AbstractBaseUser, PermissionsM
         ]
 
 
+class UserAuth(mixin_model.TimestampsStatusFlagMixin):
+    """
+    Model representing user authentication tokens.
+    Inherits from mixin.TimestampsStatusFlagMixin for timestamps and status flags.
+    """
+    ACCESS_TOKEN = 1
+    REFRESH_TOKEN = 2
+
+    TOKEN_TYPE_CHOICES = (
+        (ACCESS_TOKEN, "access token"),
+        (REFRESH_TOKEN, "refresh token")
+    )
+    user_id = models.IntegerField(verbose_name=_("user id"), )
+    token_type = models.PositiveSmallIntegerField(choices=TOKEN_TYPE_CHOICES,
+                                                  verbose_name=_("token type"))
+    uuid = models.UUIDField(verbose_name=_("uuid"), unique=True)
+
+    objects = managers.UserAuthManager()
+
+    class Meta:
+        verbose_name = _("UserAuth")
+        verbose_name_plural = _("UserAuths")
+        ordering = ("-id",)
+        indexes = [
+            models.Index(fields=["user_id", "token_type"], name="user_id_token_type_index"),
+        ]
+
+    def __str__(self):
+        return f"user id: {self.user_id} - token type(a = 1, r = 2): {self.token_type} - {self.uuid}"
+
+
+class Profile(mixin_model.TimestampsStatusFlagMixin):
+    """
+    Model representing user profiles.
+    Inherits from mixin.TimestampsStatusFlagMixin for timestamps and status flags.
+    """
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    name = models.CharField(
+        max_length=50,
+        validators=[validators.NameValidator()], verbose_name=_('Name')
+    )
+    last_name = models.CharField(
+        max_length=50,
+        validators=[validators.LastNameValidator()], verbose_name=_('Last Name')
+    )
+    gender = models.CharField(
+        max_length=10, choices=validators.GenderChoices.CHOICES, default='Other',
+        validators=[validators.GenderValidator()], verbose_name=_('Gender')
+    )
+    age = models.PositiveSmallIntegerField(default=0, verbose_name=_('Age'))
+    profile_picture = models.ImageField(
+        upload_to=partial(maker, "profile_picture/%Y/%m/", keys=["name"]),
+        max_length=255, blank=True, null=True,
+        validators=[validators.PictureValidator()], verbose_name=_('Profile Picture')
+    )
+    objects = managers.ProfileManager()
+    soft_delete = soft_delete_manager.DeleteManager()
+
+    def __str__(self):
+        """
+        String representation of the profile object
+        """
+        return f'{self.user} - {self.name} {self.last_name}'
+
+    class Meta:
+        """
+        Meta information about the model
+        """
+        ordering = ('-update_time', '-create_time')
+        verbose_name = 'profile'
+        verbose_name_plural = 'profiles'
+        indexes = [
+            models.Index(fields=['user'], name='index_user_profile')
+        ]
+
+
 class Address(mixin_model.TimestampsStatusFlagMixin):
     """
     Model representing user addresses.
@@ -126,13 +184,11 @@ class Address(mixin_model.TimestampsStatusFlagMixin):
         max_length=20,
         validators=[validators.BuildingNumberValidator()], verbose_name=_('Building Number')
     )
-    floor_number = models.CharField(
-        max_length=20,
-        validators=[validators.FloorNumberValidator()], verbose_name=_('Floor Number')
+    floor_number = models.IntegerField(
+        default=0, verbose_name=_('Floor Number')
     )
-    postal_code = models.CharField(
-        max_length=20,
-        validators=[validators.PostalCodeValidator()], verbose_name=_('Postal Code')
+    postal_code = models.PositiveSmallIntegerField(
+        default=0, verbose_name=_('Postal Code')
     )
     notes = models.TextField(
         blank=True, null=True,
