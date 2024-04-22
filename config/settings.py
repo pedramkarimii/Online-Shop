@@ -1,5 +1,5 @@
 from pathlib import Path
-from decouple import config
+from decouple import config  # noqa
 
 USE_TZ = True
 USE_I18N = True
@@ -62,7 +62,7 @@ TEMPLATES = [
 APPLICATIONS = ["core", "account", "order", "product"]
 
 # Serving
-STATIC_URL = "static/"
+STATIC_URL = "storage/static/"
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "storage/media"
 
@@ -78,6 +78,7 @@ if DEBUG:
         "django.contrib.staticfiles",
         # Third-party
         "rest_framework",
+
         # Application
         *list(map(lambda app: f"apps.{app}", APPLICATIONS)),
     ]
@@ -149,3 +150,12 @@ else:
     EMAIL_HOST_USER = config("EMAIL_HOST_USER")
     EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
     DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL")
+
+    DEFAULT_FILE_STORAGE = config("DEFAULT_FILE_STORAGE")
+    AWS_ACCESS_KEY_ID = config("AWS_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY = config("AWS_SECRET_ACCESS_KEY")
+    AWS_S3_ENDPOINT_URL = config("AWS_S3_ENDPOINT_URL")
+    AWS_STORAGE_BUCKET_NAME = config("AWS_STORAGE_BUCKET_NAME")
+    AWS_SERVICE_NAME = config("AWS_SERVICE_NAME")
+    AWS_S3_FILE_OVERWRITE = config("AWS_S3_FILE_OVERWRITE", cast=bool, default=False)
+    AWS_LOCAL_STORAGE = f"{BASE_DIR}/aws/"
