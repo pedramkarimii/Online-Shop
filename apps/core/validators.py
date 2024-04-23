@@ -342,30 +342,6 @@ class PriceValidator(CustomMinValueValidator):
         )
 
 
-class PercentageDiscountValidator(CustomMinValueValidator):
-    """
-    Validator for percentage discount field
-    """
-
-    def __init__(self):
-        super().__init__(
-            limit_value=0,
-            message='Percentage discount cannot be negative.'
-        )
-
-
-class NumericalDiscountValidator(CustomMinValueValidator):
-    """
-    Validator for numerical discount field
-    """
-
-    def __init__(self):
-        super().__init__(
-            limit_value=0,
-            message='Numerical discount cannot be negative.'
-        )
-
-
 class NumericalDiscountValidator(CustomMinValueValidator):
     """
     Validator for numerical discount field
