@@ -1,3 +1,138 @@
+<!-- TOP HEADER -->
+    <div id="top-header"        class="bg-gray-900  relative px-4 py-4 flex justify-between items-center bg-opacity-30 shadow-lg backdrop-filter backdrop-blur-lg backdrop-contrast-100 border-black border-opacity-40  sticky top-0 z-50"
+>
+        <div class="container">
+            <ul class="header-links pull-right ">
+                <li><a href="#"><i class="fa fa-phone"></i> +021-4444-8844</a></li>
+                <li><a href="#"><i class="fa fa-envelope-o"></i> email@email.com</a></li>
+                <li><a href="#"><i class="fa fa-map-marker"></i> 1734 Stonecoal Road</a></li>
+            </ul>
+
+            <div class="text-3xl font-bold leading-none header-links pull-left">
+                {% if not request.user.profile.profile_picture.url %}
+                    <img
+                            src="data:image/png;base64,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"
+                            alt="Login"
+                            class="w-14 text-xl h-14 rounded-full cursor-pointer"
+                            onclick="redirectToLogin()"
+                    />
+                {% else %}
+                    <img
+                            src="{{ user.profile.profile_picture.url }}"
+                            alt="Login"
+                            class="w-14 text-xl h-14 rounded-full cursor-pointer"
+                            onclick="redirectToLogin()"
+                    />
+                {% endif %}
+            </div>
+
+            {% if request.user.is_authenticated %}
+                <div class="relative">
+                <button class="flex items-center focus:outline-none">
+                    <span class=" fa fa-user-o mt-4 ms-2 text-xl text-gray-300 hover:bg-gray-600 hover:rounded-lg">{{ user.username }}</span>
+                    <svg
+                            class="w-4 h-4 fill-current"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                    ></svg>
+                </button>
+
+            {% endif %}
+
+            <div
+                    class="absolute left-5 mt-2 w-48 bg-gradient-to-r  from-gray-300 via-gray-100 px-4 py-4 bg-opacity-80 shadow-lg backdrop-filter backdrop-blur-lg backdrop-contrast-100 border-black border-opacity-20 rounded-lg  z-10 hidden"
+                >
+
+
+                {% if not request.user.profile.name %}
+                    <a
+                            href="#"
+                            class="block px-4 py-2  text-sm text-black-800 hover:bg-gray-500 hover:rounded-md"
+                            onclick="redirectToCreateProfile()"
+                    >Create Profile</a
+                    >
+                {% endif %}
+                {% if  request.user.profile.name %}
+
+
+
+                    <a
+                            href="http://127.0.0.1:8000/profiles/{{ user.pk }}/"
+                            class="block px-4 py-2 text-sm text-black-800 hover:bg-gray-500 hover:rounded-md"
+                            onclick="redirectToInfo({{ request.user.pk }})">Info Account</a
+                    >
+                <a
+                            href="http://127.0.0.1:8000/create-address/"
+                            class="block px-4 py-2 text-sm text-black-800 hover:bg-gray-500 hover:rounded-md"
+                            >Create Address</a
+                    >
+
+                {% comment %}
+                {% if  request.user.profile.name %}
+
+                    <a
+                            href="http://127.0.0.1:8000/show_post/{{ user.pk }}/"
+                            class="block px-4 py-2 text-sm text-black-800 hover:bg-gray-500 hover:rounded-md"
+                            onclick="redirectToPost({{ user.pk }})">Post</a
+                    >
+                    <a
+                            href="#"
+                            class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 hover:rounded-md"
+                            onclick="redirectToCreatePost()">Create Post</a
+                    >
+                    <a
+                            href="#"
+                            class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 hover:rounded-md"
+                            onclick="redirectToUpdatePost()">Update Post</a
+                    >
+                    <a
+                            href="#"
+                            class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 hover:rounded-md"
+                            onclick="redirectToDeletePost()">Delete Post</a
+                    >
+                {% endif %}
+
+                {% endcomment %}
+
+
+                    <a
+                            href="#"
+                            class="block px-4 py-2  text-sm text-black-800 hover:bg-gray-500 hover:rounded-md"
+                            onclick="redirectToChangeUser()"
+                    >Update Info Account</a
+                    >
+                    <a
+                            href="#"
+                            class="block px-4 py-2  text-sm text-black-800 hover:bg-gray-500 hover:rounded-md"
+                            onclick="redirectToChangeProfile()"
+                    >Edite Profile</a
+                    >
+                <a
+                        class="block px-4 py-2 text-sm text-black-800 hover:bg-gray-500 hover:rounded-md"
+                        onclick="redirectToChangePassword()"
+                >Change Password</a
+                >
+                {% endif %}
+                {% if request.user.is_authenticated %}
+                    <a
+                            class="block px-4 py-2 text-sm text-black-800 hover:bg-gray-500 hover:rounded-md"
+                            onclick="redirectToDeleteAccount({{ user.pk }})"
+                    >DELETE ACCOUNT</a
+                    >
+
+                <a
+                        class="block px-4 py-2 text-sm text-black-800 hover:bg-gray-500 hover:rounded-md"
+                        onclick="redirectToSingOut()"
+                >Sing out</a
+                >{% endif %}
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+    <!-- /TOP HEADER -->
+
 <!-- NAVIGATION -->
 <nav id="navigation">
     <!-- container -->
@@ -21,3 +156,107 @@
     <!-- /container -->
 </nav>
 <!-- /NAVIGATION -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const dropdownButton = document.querySelector(".relative button");
+        const dropdownMenu = document.querySelector(".relative .absolute");
+
+        dropdownButton.addEventListener("click", function () {
+            dropdownMenu.classList.toggle("hidden");
+        });
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const burger = document.querySelectorAll(".navbar-burger");
+        const menu = document.querySelectorAll(".navbar-menu");
+
+        if (burger.length && menu.length) {
+            for (var i = 0; i < burger.length; i++) {
+                burger[i].addEventListener("click", function () {
+                    for (var j = 0; j < menu.length; j++) {
+                        menu[j].classList.toggle("hidden");
+                    }
+                });
+            }
+        }
+
+        const close = document.querySelectorAll(".navbar-close");
+        const backdrop = document.querySelectorAll(".navbar-backdrop");
+
+        if (close.length) {
+            for (var i = 0; i < close.length; i++) {
+                close[i].addEventListener("click", function () {
+                    for (var j = 0; j < menu.length; j++) {
+                        menu[j].classList.toggle("hidden");
+                    }
+                });
+            }
+        }
+
+        if (backdrop.length) {
+            for (var i = 0; i < backdrop.length; i++) {
+                backdrop[i].addEventListener("click", function () {
+                    for (var j = 0; j < menu.length; j++) {
+                        menu[j].classList.toggle("hidden");
+                    }
+                });
+            }
+        }
+    });
+
+    function redirectToLogin() {
+        window.location.href = "{% url 'login' %}";
+    }
+
+    function redirectToChangePassword() {
+        window.location.href = "{% url 'change_pass' %}";
+    }
+
+    function redirectToChangeUser() {
+        window.location.href = "{% url 'change_user' %}";
+    }
+
+    function redirectToChangeProfile() {
+        window.location.href = "{% url 'create_profile' %}";
+    }
+
+     function redirectToCreateAddress() {
+        window.location.href = `create_address/`;
+    }
+    function redirectToExplore(id) {
+        window.location.href = `explorer/${id}/`;
+    }
+
+    function redirectToPost(id) {
+        window.location.href = `show_post/${id}/`;
+    }
+
+    function redirectToInfo(id) {
+        window.location.href = `/profiles/${id}/`;
+    }
+
+    function redirectToDeleteAccount(id) {
+        window.location.href = `users/${id}/delete/`;
+    }
+
+    function redirectToCreateProfile() {
+        window.location.href = "{% url 'create_profile' %}";
+    }
+
+    function redirectToSingOut() {
+        window.location.href = "{% url 'logout' %}";
+    }
+
+    function redirectToDeletePofile(id) {
+        window.location.href = `/profile/${id}/delete/`;
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const dropdownButton = document.querySelector(".relative button");
+        const dropdownMenu = document.querySelector(".relative .absolute");
+    });
+
+    dropdownButton.addEventListener("click", function () {
+        dropdownMenu.classList.toggle("hidden");
+    });
+</script>
