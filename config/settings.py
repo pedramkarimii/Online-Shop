@@ -1,3 +1,4 @@
+from datetime import timedelta
 from pathlib import Path
 from decouple import config  # noqa
 
@@ -29,7 +30,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
-    'apps.account.authenticate.EmailAuthBackend',
+    'apps.account.users_auth.authenticate.EmailAuthBackend',
 ]
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -59,7 +60,7 @@ TEMPLATES = [
 ]
 
 # Applications
-APPLICATIONS = ["core", "account", "order", "product"]
+APPLICATIONS = ["account", "order", "product"]
 
 # Serving
 STATIC_URL = "storage/static/"
@@ -117,7 +118,6 @@ else:
         "django.contrib.contenttypes",
         # Third-party
         "rest_framework",
-        "taggit",
         # Application
         *list(map(lambda app: f"apps.{app}", APPLICATIONS)),
     ]
@@ -159,3 +159,8 @@ else:
     AWS_SERVICE_NAME = config("AWS_SERVICE_NAME")
     AWS_S3_FILE_OVERWRITE = config("AWS_S3_FILE_OVERWRITE", cast=bool, default=False)
     AWS_LOCAL_STORAGE = f"{BASE_DIR}/aws/"
+
+    JWT_AUTH_ACCESS_TOKEN_LIFETIME = timedelta(days=1)
+    JWT_AUTH_ENCRYPT_KEY = b'32 bytes'
+    JWT_AUTH_GET_USER_BY_ACCESS_TOKEN = True
+    JWT_AUTH_CACHE_USING = True
