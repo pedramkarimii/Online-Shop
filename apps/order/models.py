@@ -11,7 +11,7 @@ class OrderItem(mixin_model.TimestampsStatusFlagMixin):
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="user_order_items")
     product = models.ForeignKey('product.Product', on_delete=models.CASCADE, related_name="product_order_items")
-    order = models.ForeignKey('order.Order', on_delete=models.CASCADE, related_name="order_order_items")
+    order = models.ForeignKey('Order', on_delete=models.CASCADE, related_name="order_order_items")
     total_price = models.IntegerField(default=0)
     quantity = models.PositiveIntegerField(default=1, validators=[validators.QuantityValidators()],
                                            verbose_name=_('Quantity'))
@@ -41,6 +41,8 @@ class Order(mixin_model.TimestampsStatusFlagMixin):
     transaction_id = models.CharField(max_length=36, default=mixin_model.generate_transaction_id, unique=True,
                                       verbose_name=_('Transaction'))
     payment_method = models.CharField(max_length=20, choices=validators.PaymentMethodChoice.CHOICES)
+    code_discount = models.CharField(max_length=100, validators=[validators.CodeValidator()],
+                                     verbose_name=_('Code Discount'), null=True, blank=True)
     finally_price = models.IntegerField(default=0, validators=[validators.FinallyPriceValidator()])
 
     time_accepted_order = models.DateTimeField(null=True, blank=True, verbose_name=_('Time Accepted Order'))
