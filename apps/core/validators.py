@@ -605,3 +605,28 @@ class WarrantyChoice:
         (FOUR_YEARS, _('4 Years')),
         (FIVE_YEARS, _('5 Years')),
     )
+
+
+class IsUseChoice:
+    one = 1
+    two = 2
+    three = 3
+    four = 4
+    five = 5
+    six = 6
+    seven = 7
+    eight = 8
+    nine = 9
+    ten = 10
+    CHOICES = (
+        (one, _('1')),
+        (two, _('2')),
+        (three, _('3')),
+        (four, _('4')),
+        (five, _('5')),
+        (six, _('6')),
+        (seven, _('7')),
+        (eight, _('8')),
+        (nine, _('9')),
+        (ten, _('10')),
+    )
