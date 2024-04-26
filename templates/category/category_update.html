@@ -1,0 +1,35 @@
+{% extends 'base/base.html' %}
+{% block title %}
+<title>Update Category</title>
+{% endblock %}
+{% block content %}
+
+<div class="flex items-center justify-center p-4  bg-gradient-to-r from-green-800 via-gray-100 ">
+    <div
+            class="bg-gradient-to-r from-gray-300 via-gray-100 to-gary-600 max-w-md w-full p-8 rounded shadow-lg bg-opacity-20 shadow-lg backdrop-filter backdrop-blur-lg backdrop-contrast-100 border-black border-opacity-20 rounded-lg"
+    >
+        <h2 class="text-2xl font-bold  text-center mb-4">
+            Update Category
+        </h2>
+        <form class="space-y-4" action="#" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+
+                </div>
+            </div>
+            <div>
+                <button
+                        href="{% url 'category_update' category.pk %}"
+                        type="submit"
+                        class="w-full mt-2 pt-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                    Update
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
