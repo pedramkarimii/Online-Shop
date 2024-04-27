@@ -1,0 +1,49 @@
+{% extends "base/base.html" %}
+{% block title %}
+    <title>
+        Update Account
+    </title>
+{% endblock %}
+
+{% block content %}
+
+    <div class="flex items-center justify-center p-4 bg-gradient-to-r  bg-gradient-to-r from-blue-800 via-gray-100 ">
+        <div
+                class=" bg-gradient-to-r from-gray-300 via-gray-100 max-w-md w-full p-8 rounded shadow-lg bg-opacity-20 shadow-lg backdrop-filter backdrop-blur-lg backdrop-contrast-100 border-black border-opacity-20 rounded-lg"
+        >
+            <h2 class="text-2xl font-bold  text-center mb-4">
+                Update Account
+            </h2>
+            <form class="space-y-4" action="#" method="post">
+                {% csrf_token %}
+                <div>
+                    {{ form.as_p }}
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input
+                                id="remember_me"
+                                name="remember_me"
+                                type="checkbox"
+                                class="h-4 w-4 mr-4 p-r4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                        />
+                        <label
+                                for="remember_me"
+                                class="ml-2 block text-sm text-gray-900"
+                        >Remember me
+                        </label>
+                    </div>
+                </div>
+                <div>
+                    <button
+                            href="{% url 'user_update' user.pk %}"
+                            class="w-full mt-2 pt-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    >
+                        Update
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
