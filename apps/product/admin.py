@@ -28,12 +28,12 @@ class MediaInline(admin.StackedInline):
 class DiscountInline(admin.StackedInline):
     model = Discount
     can_delete = False
-    verbose_name_plural = 'Code Discounts'
+    verbose_name_plural = 'Discounts %'
     fk_name = 'product'
     ordering = ('-create_time', '-update_time')
     readonly_fields = ('is_use', 'is_deleted', 'is_active', 'expiration_date', 'create_time', 'update_time')
     fieldsets = (
-        ('Creation Code discount', {
+        ('Creation discount', {
             'fields': ('product', 'category', 'percentage_discount', 'numerical_discount',
                        'expiration_date')
         }),
@@ -54,7 +54,7 @@ class DiscountInline(admin.StackedInline):
 class BrandAdmin(admin.ModelAdmin):
     """Admin configuration for the Brand model."""
 
-    list_display = ('user', 'name', 'description', 'location', 'is_active', 'is_deleted')
+    list_display = ('user', 'phone_number', 'name', 'description', 'location', 'is_active', 'is_deleted')
     search_fields = ('user__username', 'name', 'description', 'location')
     list_filter = ('user__username', 'name', 'description', 'location', 'is_active')
     ordering = ('-create_time', '-update_time')
@@ -63,7 +63,7 @@ class BrandAdmin(admin.ModelAdmin):
     readonly_fields = ('create_time', 'update_time', 'is_active', 'is_deleted')
     fieldsets = (
         ('Creation Brand', {
-            'fields': ('user', 'name', 'description', 'location')
+            'fields': ('user', 'phone_number', 'name', 'description', 'location')
         }),
         ('Data', {
             'fields': ('create_time', 'update_time', 'is_active', 'is_deleted')
@@ -72,7 +72,7 @@ class BrandAdmin(admin.ModelAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('user', 'name', 'description', 'location', 'is_active')
+            'fields': ('user', 'phone_number', 'name', 'description', 'location', 'is_active')
         }),
     )
 
@@ -150,7 +150,7 @@ class DiscountAdmin(admin.ModelAdmin):
     list_per_page = 30
     readonly_fields = ('is_use', 'is_deleted', 'is_active', 'create_time', 'update_time')
     fieldsets = (
-        ('Creation Code discount', {
+        ('Creation discount', {
             'fields': ('product', 'category', 'percentage_discount', 'numerical_discount',
                        'expiration_date')
         }),
