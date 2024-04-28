@@ -117,7 +117,7 @@ class ProfileAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Creation Profile',
          {'fields': (
-             'user', 'name', 'last_name', 'gender', 'age',
+             'user', 'name', 'last_name', 'gender', 'age', 'profile_picture'
          )}),
         ('Data', {'fields': ('create_time', 'update_time', 'is_deleted', 'is_active')
                   }),
