@@ -48,6 +48,34 @@ class UserManager(BaseUserManager):
         return user
 
 
+class UserAuthQuerySet(models.QuerySet):
+    pass
+
+
+class UserAuthManager(models.Manager):
+    """Manager for handling address operations."""
+
+    def get_queryset(self):
+        """Get the queryset object associated with this manager."""
+        if not hasattr(self.__class__, '__queryset'):
+            self.__class__.__queryset = UserAuthQuerySet(self.model)
+        return self.__queryset
+
+
+class ProfileQuerySet(models.QuerySet):
+    pass
+
+
+class ProfileManager(models.Manager):
+    """Manager for handling address operations."""
+
+    def get_queryset(self):
+        """Get the queryset object associated with this manager."""
+        if not hasattr(self.__class__, '__queryset'):
+            self.__class__.__queryset = UserAuthQuerySet(self.model)
+        return self.__queryset
+
+
 class AddressQuerySet(models.QuerySet):
     """QuerySet for handling address operations."""
 
@@ -113,6 +141,18 @@ class AddressManager(models.Manager):
     def address_summary(self):
         """Generate a summary of addresses."""
         return self.get_queryset().address_summary()
+
+
+class RoleQuerySet(models.QuerySet):
+    pass
+
+
+class RoleManager(models.Manager):
+    def get_queryset(self):
+        """Get the queryset object associated with this manager."""
+        if not hasattr(self.__class__, '__queryset'):
+            self.__class__.__queryset = RoleQuerySet(self.model)
+        return self.__queryset
 
 
 class CodeDiscountQuerySet(models.QuerySet):
