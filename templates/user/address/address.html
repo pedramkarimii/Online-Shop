@@ -1,33 +1,10 @@
 {% extends "base/base.html" %}
 {% block title %}
-    <title>Profile {{ profile.user.username }}</title>
+    <title>Address {{ request.user.username }}</title>
 {% endblock %}
 {% block content %}
     <div class="container mx-auto mb-8 mt-8">
         <div class="overflow-x-auto">
-            <h1 class="text-2xl font-bold mb-4">Profile Information</h1>
-            <table class="table-auto w-full mt-8 rounded-lg border border-gray-300">
-                <tbody>
-                    <tr class="bg-gray-200 text-gray-700">
-                        <td class="px-4 py-2 text-center">Username</td>
-                        <td class="px-4 py-2 text-center">Email</td>
-                        <td class="px-4 py-2 text-center">Phone Number</td>
-                        <td class="px-4 py-2 text-center">Name</td>
-                        <td class="px-4 py-2 text-center">Last Name</td>
-                        <td class="px-4 py-2 text-center">Gender</td>
-                        <td class="px-4 py-2 text-center">Age</td>
-                    </tr>
-                    <tr class="bg-white text-gray-800">
-                        <td class="px-4 py-2 text-center">{{ profile.user.username }}</td>
-                        <td class="px-4 py-2 text-center">{{ profile.user.email }}</td>
-                        <td class="px-4 py-2 text-center">{{ profile.user.phone_number }}</td>
-                        <td class="px-4 py-2 text-center">{{ profile.name }}</td>
-                        <td class="px-4 py-2 text-center">{{ profile.last_name }}</td>
-                        <td class="px-4 py-2 text-center">{{ profile.gender }}</td>
-                        <td class="px-4 py-2 text-center">{{ profile.age }}</td>
-                    </tr>
-                </tbody>
-            </table>
             <h1 class="text-2xl font-bold mt-8 mb-4">Addresses</h1>
             <table class="table-auto w-full mt-2 rounded-lg border border-gray-300">
                 <tbody>
