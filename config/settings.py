@@ -58,14 +58,25 @@ TEMPLATES = [
         },
     },
 ]
-
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'apps.account.users_auth.authenticate.JWTAuthentication',
+    ),
+}
 # Applications
-APPLICATIONS = ["account", "order", "product"]
+APPLICATIONS = ["account", "order", "product", "core"]
 
 # Serving
 STATIC_URL = "storage/static/"
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "storage/media"
+
+# TOKEN Handling
+JWT_AUTH_ACCESS_TOKEN_LIFETIME = timedelta(minutes=20)
+JWT_AUTH_REFRESH_TOKEN_LIFETIME = timedelta(days=30)
+JWT_AUTH_ENCRYPT_KEY = b'32 bytes'
+JWT_AUTH_GET_USER_BY_ACCESS_TOKEN = True
+JWT_AUTH_CACHE_USING = True
 
 # Mode Handling:
 if DEBUG:
@@ -84,11 +95,14 @@ if DEBUG:
         *list(map(lambda app: f"apps.{app}", APPLICATIONS)),
     ]
     STATICFILES_DIRS = [BASE_DIR / "storage/static"]
-
     DATABASES = {
         "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": config("DB_NAME"),
+            "USER": config("DB_USER"),
+            "PASSWORD": config("DB_PASSWORD"),
+            "HOST": config("DB_HOST"),
+            "PORT": config("DB_PORT"),
         }
     }
 
@@ -123,17 +137,6 @@ else:
     ]
     REDIS_URL = f"redis://{config('REDIS_HOST')}:{config('REDIS_PORT')}"
 
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": config("DB_NAME"),
-            "USER": config("DB_USER"),
-            "PASSWORD": config("DB_PASSWORD"),
-            "HOST": config("DB_HOST"),
-            "PORT": config("DB_PORT"),
-        }
-    }
-
     CACHES = {
         "default": {
             "BACKEND": "django.core.cache.backends.redis.RedisCache",
@@ -158,9 +161,4 @@ else:
     AWS_STORAGE_BUCKET_NAME = config("AWS_STORAGE_BUCKET_NAME")
     AWS_SERVICE_NAME = config("AWS_SERVICE_NAME")
     AWS_S3_FILE_OVERWRITE = config("AWS_S3_FILE_OVERWRITE", cast=bool, default=False)
-    AWS_LOCAL_STORAGE = f"{BASE_DIR}/aws/"
-
-    JWT_AUTH_ACCESS_TOKEN_LIFETIME = timedelta(days=1)
-    JWT_AUTH_ENCRYPT_KEY = b'32 bytes'
-    JWT_AUTH_GET_USER_BY_ACCESS_TOKEN = True
-    JWT_AUTH_CACHE_USING = True
+    AWS_LOCAL_STORAGE = f"{BASE_DIR}storage/aws/"
