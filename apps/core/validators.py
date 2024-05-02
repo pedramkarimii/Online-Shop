@@ -48,7 +48,7 @@ class EmailValidator(CustomRegexValidator):
         )
 
 
-class PhoneNumberValidator(CustomRegexValidator):
+class PhoneNumberMobileValidator(CustomRegexValidator):
     """
     Validator for phone number field
     """
@@ -57,6 +57,18 @@ class PhoneNumberValidator(CustomRegexValidator):
         super().__init__(
             r"09(1[0-9]|3[0-9]|2[0-9]|0[1-9]|9[0-9])[0-9]{7}$",
             _('Please enter a valid phone number in the format 09121234567.')
+        )
+
+
+class PhoneNumberValidator(CustomRegexValidator):
+    """
+    Validator for phone number field
+    """
+
+    def __init__(self):
+        super().__init__(
+            r"0[1-9][1-9][0-9]{8}$",
+            _('Please enter a valid phone number in the format 02123456789.')
         )
 
 
@@ -630,3 +642,15 @@ class IsUseChoice:
         (nine, _('9')),
         (ten, _('10')),
     )
+
+
+class RoleChoices:
+    GOLDEN = 'golden'
+    SILVER = 'silver'
+    BRONZE = 'bronze'
+
+    CHOICES = [
+        ('golden', _('Golden')),
+        ('silver', _('Silver')),
+        ('bronze', _('Bronze')),
+    ]
