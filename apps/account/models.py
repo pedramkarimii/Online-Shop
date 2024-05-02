@@ -1,12 +1,57 @@
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 from apps.core import validators
-from utility.upload_to_filename import maker
+from apps.core.upload_to_filename import maker
 from functools import partial
 from apps.account import managers
 from apps.core.mixin import mixin_model
 from apps.core import managers as soft_delete_manager
 from django.utils.translation import gettext_lazy as _
+
+
+class Role(mixin_model.TimestampsStatusFlagMixin):
+    """
+    Model representing a role.
+    """
+    code_discount = models.ForeignKey(
+        'CodeDiscount', on_delete=models.CASCADE, verbose_name=_('Discount Code'))
+    golden = models.ForeignKey(
+        'User', on_delete=models.CASCADE, blank=True, null=True, related_name='golden_roles',
+        verbose_name=_('Golden')
+    )
+    silver = models.ForeignKey(
+        'User', on_delete=models.CASCADE, blank=True, null=True, related_name='silver_roles',
+        verbose_name=_('Silver')
+    )
+    bronze = models.ForeignKey(
+        'User', on_delete=models.CASCADE, blank=True, null=True, related_name='bronze_roles',
+        verbose_name=_('Bronze')
+    )
+    seller = models.ForeignKey(
+        'User', on_delete=models.CASCADE, blank=True, null=True, verbose_name=_('Seller')
+    )
+    objects = managers.RoleManager()
+    soft_delete = soft_delete_manager.DeleteManager()
+
+    def __str__(self):
+        return f"{self.golden} - {self.silver} - {self.bronze} - {self.seller}"
+
+    class Meta:
+        """
+        Meta information about the model
+        """
+        ordering = ('-update_time', '-create_time')
+        verbose_name = 'Role'
+        verbose_name_plural = 'Roles'
+        constraints = [
+            models.UniqueConstraint(fields=['golden'], name='unique_golden'),
+            models.UniqueConstraint(fields=['silver'], name='unique_silver'),
+            models.UniqueConstraint(fields=['bronze'], name='unique_bronze'),
+            models.UniqueConstraint(fields=['seller'], name='unique_seller'),
+        ]
+        indexes = [
+            models.Index(fields=['golden', 'silver', 'bronze'], name='golden_silver_bronze_index')
+        ]
 
 
 class User(mixin_model.TimestampsStatusFlagMixin, AbstractBaseUser, PermissionsMixin):
@@ -29,7 +74,7 @@ class User(mixin_model.TimestampsStatusFlagMixin, AbstractBaseUser, PermissionsM
     )
     phone_number = models.CharField(
         max_length=11, unique=True,
-        validators=[validators.PhoneNumberValidator()], verbose_name=_('Phone Number')
+        validators=[validators.PhoneNumberMobileValidator()], verbose_name=_('Phone Number')
     )
 
     """
@@ -52,8 +97,8 @@ class User(mixin_model.TimestampsStatusFlagMixin, AbstractBaseUser, PermissionsM
     """
     Custom managers
     """
-    objects = managers.UserManager()  # Default manager
-    soft_delete = soft_delete_manager.DeleteManager()  # Manager for soft deletes
+    objects = managers.UserManager()
+    soft_delete = soft_delete_manager.DeleteManager()
 
     def __str__(self):
         """
@@ -100,7 +145,7 @@ class UserAuth(mixin_model.TimestampsStatusFlagMixin):
         verbose_name_plural = _("UserAuths")
         ordering = ("-id",)
         indexes = [
-            models.Index(fields=["user_id", "token_type"], name="user_id_token_type_index"),
+            models.Index(fields=["user_id"], name="user_id_index"),
         ]
 
     def __str__(self):
@@ -227,7 +272,8 @@ class CodeDiscount(mixin_model.TimestampsStatusFlagMixin):
     """
     Fields for discount code information
     """
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_query_name='user_discount_code')
+
+    role_name = models.CharField(max_length=100, choices=validators.RoleChoices.CHOICES, verbose_name=_('Role Name'))
     code = models.CharField(
         max_length=100,
         validators=[validators.CodeValidator()], verbose_name=_('Code')
@@ -240,7 +286,7 @@ class CodeDiscount(mixin_model.TimestampsStatusFlagMixin):
                                                   validators=[validators.NumericalDiscountValidator()],
                                                   verbose_name=_('Numerical Discount'))
     expiration_date = models.DateField(null=True, blank=True, verbose_name=_('Expiration Date'))
-    is_use = models.SmallIntegerField(default=0)
+    is_use = models.SmallIntegerField(default=1, choices=validators.IsUseChoice.CHOICES)
     is_expired = models.BooleanField(default=False)
     objects = managers.CodeDiscountManager()
     soft_delete = soft_delete_manager.DeleteManager()
@@ -249,7 +295,8 @@ class CodeDiscount(mixin_model.TimestampsStatusFlagMixin):
         """
         String representation of the discount code object
         """
-        return f'{self.code} - {self.percentage_discount} - {self.numerical_discount} - {self.expiration_date}  %'
+        return (f' {self.role_name} - {self.code} - % {self.percentage_discount}'
+                f'- $ {self.numerical_discount} - {self.expiration_date}')
 
     class Meta:
         """
@@ -259,7 +306,7 @@ class CodeDiscount(mixin_model.TimestampsStatusFlagMixin):
         verbose_name = 'discount code'
         verbose_name_plural = 'discount codes'
         constraints = [
-            models.UniqueConstraint(fields=['code'], name='unique_code_discount')
+            models.UniqueConstraint(fields=('code', 'role_name'), name='unique_code_discount_role_name')
         ]
         indexes = [
             models.Index(fields=['code'], name='index_code')
