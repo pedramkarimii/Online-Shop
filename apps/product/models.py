@@ -1,5 +1,5 @@
 from functools import partial
-from utility.upload_to_filename import maker
+from apps.core.upload_to_filename import maker
 from django.db import models
 from apps.product import managers
 from apps.core import managers as delete_managers
@@ -114,49 +114,6 @@ class Product(mixin_model.TimestampsStatusFlagMixin):
     """
     Model to represent products.
     """
-    SIZE_CHOICES = [
-        ('S', _('Small')),
-        ('M', _('Medium')),
-        ('L', _('Large')),
-        ('XL', _('Extra Large')),
-        ('XXL', _('Extra Extra Large')),
-        ('XXXL', _('Extra Extra Extra Large')),
-        ('XXXXL', _('Extra Extra Extra Extra Large')),
-    ]
-    COLOR_CHOICES = [
-        ('RED', _('Red')),
-        ('GREEN', _('Green')),
-        ('BLUE', _('Blue')),
-        ('YELLOW', _('Yellow')),
-        ('PURPLE', _('Purple')),
-        ('ORANGE', _('Orange')),
-        ('BLACK', _('Black')),
-        ('WHITE', _('White')),
-        ('GRAY', _('Gray')),
-        ('BROWN', _('Brown')),
-        ('PINK', _('Pink')),
-        ('GOLD', _('Gold')),
-        ('SILVER', _('Silver')),
-        ('BLACK', _('Black')),
-    ]
-    MATERIAL_CHOICES = [
-        ('WOOD', _('Wood')),
-        ('METAL', _('Metal')),
-        ('PLASTIC', _('Plastic')),
-        ('GLASS', _('Glass')),
-        ('FIBER', _('Fiber')),
-        ('LEATHER', _('Leather')),
-        ('TEXTILE', _('Textile')),
-        ('RUBBER', _('Rubber')),
-        ('OTHER', _('Other')),
-    ]
-    WARRANTY_CHOICES = [
-        ('1', _('1 Year')),
-        ('2', _('2 Years')),
-        ('3', _('3 Years')),
-        ('4', _('4 Years')),
-        ('5', _('5 Years')),
-    ]
 
     """
     Fields for product:
@@ -272,7 +229,7 @@ class FavoritesBasket(mixin_model.TimestampsStatusFlagMixin):
 
     def __str__(self):
         """Return a string representation of the FavoritesBasket."""
-        return f'{self.user.name} - {self.product.name} - {self.available} - {self.quantity}'
+        return f'{self.user} - {self.product.name} - {self.available} - {self.quantity}'
 
     class Meta:
         """Additional metadata about the FavoritesBasket model."""
@@ -299,7 +256,7 @@ class Discount(mixin_model.TimestampsStatusFlagMixin):
     numerical_discount = models.IntegerField(null=True, blank=True,
                                              validators=[validators.NumericalDiscountValidator()])
     expiration_date = models.DateTimeField(null=True, blank=True, verbose_name=_('Expiration Date'))
-    is_use = models.SmallIntegerField(default=0)
+    is_use = models.SmallIntegerField(default=1, choices=validators.IsUseChoice.CHOICES)
     is_expired = models.BooleanField(default=False)
 
     objects = managers.CodeDiscountManager()
@@ -313,8 +270,8 @@ class Discount(mixin_model.TimestampsStatusFlagMixin):
     class Meta:
         """Additional metadata about the Discount model."""
         ordering = ('update_time', '-create_time')
-        verbose_name = 'Code Discount'
-        verbose_name_plural = 'Code Discounts'
+        verbose_name = 'Discount %'
+        verbose_name_plural = 'Discounts %'
         indexes = [
             models.Index(fields=['product', 'category']),
         ]
