@@ -6,7 +6,133 @@
 {% endblock %}
 {% block content %}
 
+    {% if  request.user.is_authenticated and seller or supervisor or request.user.is_admin or request.user.is_staff or request.user.is_superuser %}
 
+        <nav id="navigation">
+            <!-- container -->
+
+            <div class="container">
+                <!-- responsive-nav -->
+
+                <div id="responsive-nav">
+                    <!-- NAV -->
+
+                    <ul class="main-nav nav navbar-nav">
+                        <li class="active"><a href="{% url "home" %}">Home</a></li>
+                        <li><a
+                                href="http://127.0.0.1:8000/admin-seller-brand-list/"
+                                class="block p-1 text-sm text-gray-800 hover:bg-gray-200 hover:rounded-md"
+                                onclick="redirectToUpdateBrand()">Detail Brand</a
+                        ></li>
+                        <li><a
+                                href="http://127.0.0.1:8000/admin-seller-product-list/"
+                                class="block p-1 text-sm text-gray-800 hover:bg-gray-200 hover:rounded-md"
+                                onclick="redirectToDetailBrand()">Detail Product</a
+                        ></li>
+                        {% if  request.user.is_authenticated and request.user.is_admin or supervisor or request.user.is_staff or request.user.is_superuser %}
+                            <li><a
+                                    href="http://127.0.0.1:8000/admin-category-list/"
+                                    class="block p-1 text-sm text-gray-800 hover:bg-gray-200 hover:rounded-md"
+                                    onclick="redirectToDeleteBrand()">Detail Category</a
+                            ></li>
+                            <li><a
+                                    href="http://127.0.0.1:8000/admin-discount-list/"
+                                    class="block p-1 text-sm text-gray-800 hover:bg-gray-200 hover:rounded-md"
+                                    onclick="redirectToCreateProduct()">Detail Discount</a
+                            ></li>
+                            <li><a
+                                    href="http://127.0.0.1:8000/admin-discount-cod-list/"
+                                    class="block p-1 text-sm text-gray-800 hover:bg-gray-200 hover:rounded-md"
+                                    onclick="redirectToUpdateProduct()">Detail Discount Cod </a
+                            ></li>
+                            <li><a
+                                    href="http://127.0.0.1:8000/admin-warehouse-keeper-list/"
+                                    class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 hover:rounded-md"
+                                    onclick="redirectToDeleteBrand()">Detail Warehouse Keeper</a
+                            ></li>
+                            </ul>
+                        {% endif %}
+                </div>
+                <!-- /responsive-nav -->
+            </div>
+            <!-- /container -->
+        </nav>
+    {% endif %}
+    {% if  request.user.is_authenticated and not  seller and not supervisor and not admin_permissions %}
+        <nav id="navigation">
+            <!-- container -->
+
+            <div class="container">
+                <!-- responsive-nav -->
+
+                <div id="responsive-nav">
+                    <!-- NAV -->
+
+                    <ul class="main-nav nav navbar-nav">
+                        <!-- Create -->
+                        <li class="active"><a href="{% url "home" %}">Home</a></li>
+                    </ul>
+                </div>
+                <!-- /responsive-nav -->
+            </div>
+            <!-- /container -->
+        </nav>
+    {% endif %}
+    {% if  request.user.is_authenticated and seller or admin_permissions %}
+
+        <nav id="navigation">
+            <!-- container -->
+
+            <div class="container">
+                <!-- responsive-nav -->
+
+                <div id="responsive-nav">
+                    <!-- NAV -->
+
+                    <ul class="main-nav nav navbar-nav">
+                        <!-- Create -->
+
+                        <li><a
+                                href="http://127.0.0.1:8000/brand-create/"
+                                class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 hover:rounded-md"
+                                onclick="redirectToUpdateBrand()">Create Brand</a
+                        ></li>
+                        <li><a
+                                href="http://127.0.0.1:8000/product-create/"
+                                class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 hover:rounded-md"
+                                onclick="redirectToDetailBrand()">Create Product</a
+                        ></li>
+                        {% if  request.user.is_authenticated and admin_permissions %}
+                            <li>
+
+                                <a
+                                        href="http://127.0.0.1:8000/category-create/"
+                                        class="block p text-sm text-gray-800 hover:bg-gray-200 hover:rounded-md"
+                                        onclick="redirectToDeleteBrand()">Create Category</a
+                                ></li>
+                            <li><a
+                                    href="http://127.0.0.1:8000/discount-create/"
+                                    class="block p text-sm text-gray-800 hover:bg-gray-200 hover:rounded-md"
+                                    onclick="redirectToCreateProduct()">Create Discount</a
+                            ></li>
+                            <li><a
+                                    href="http://127.0.0.1:8000/discount-cod-create/"
+                                    class="block p text-sm text-gray-800 hover:bg-gray-200 hover:rounded-md"
+                                    onclick="redirectToUpdateProduct()">Create Discount Cod </a
+                            ></li>
+                            <li><a
+                                    href="http://127.0.0.1:8000/warehouse-keeper-create/"
+                                    class="block p text-sm text-gray-800 hover:bg-gray-200 hover:rounded-md"
+                                    onclick="redirectToDeleteBrand()">Create Warehouse Keeper</a
+                            ></li>
+
+                            </ul>{% endif %}
+                    <!-- /NAV -->
+                </div>
+                <!-- /responsive-nav -->
+            </div>
+            <!-- /container -->
+        </nav>{% endif %}
 
     <!-- /HEADER -->
     {% if form_search.is_valid %}
@@ -38,7 +164,7 @@
                                                     {% if media.product_picture.url %}
                                                         <img src="{{ media.product_picture.url }}" alt="">
                                                     {% else %}
-                                                        <img src="/storage/static/img/product02.png" alt="">
+                                                        <img src="/img/product02.png" alt="">
                                                     {% endif %}
                                                     <div class="product-label">
                                                         <span class="new">NEW</span>
@@ -52,7 +178,7 @@
                                                     </h3>
                                                     {% for discount in product.product_code_discounts.all %}
                                                         {% if discount.percentage_discount %}
-                                                         <h3 class="product-price"> Off
+                                                            <h3 class="product-price"> Off
                                                                 {{ discount.percentage_discount }}%
                                                                 <del class="product-old-price  mt-3">{{ product.price }}</del>
                                                             </h3>
@@ -65,7 +191,7 @@
                                                     {% endfor %}
                                                     {% if not product.product_code_discounts.all %}
                                                         <h3 class="product-price mt-3">
-                                                           ${{ product.price }}
+                                                            ${{ product.price }}
                                                         </h3>
 
                                                     {% endif %}
@@ -133,7 +259,7 @@
                                 {% if category.category_picture %}
                                     <img src="{{ category.category_picture.url }}" alt="{{ category.name }}">
                                 {% else %}
-                                    <img src="/storage/static/img/shop01.png" alt="">
+                                    <img src="/img/shop01.png" alt="">
                                 {% endif %}
                             </div>
                             <div class="shop-body">
@@ -202,7 +328,7 @@
                                                 {% if media.product_picture.url %}
                                                     <img src="{{ media.product_picture.url }}" alt="">
                                                 {% else %}
-                                                    <img src="/storage/static/img/product02.png" alt="">
+                                                    <img src="/img/product02.png" alt="">
                                                 {% endif %}
                                                 <div class="product-label">
                                                     <span class="new">NEW</span>
@@ -217,35 +343,35 @@
 
                                                 {% for discount in product.product_code_discounts.all %}
 
-                                                        {% if discount.percentage_discount %}
-                                                         <h3 class="product-price"> Off
-                                                                {{ discount.percentage_discount }}%
-                                                                <del class="product-old-price  mt-3">{{ product.price }}</del>
-                                                            </h3>
-                                                        {% else %}
-                                                            <h3 class="product-price"> Off
-                                                                ${{ discount.numerical_discount }}
-                                                                <del class="product-old-price  mt-3">{{ product.price }}</del>
-                                                            </h3>
-                                                        {% endif %}
-{#                                                        {% elif discount.numerical_discount and not  discount.percentage_discount %}#}
-{#                                                            <h3 class="product-price">#}
-{#                                                                Off {{ discount.percentage_discount }}%#}
-{#                                                                <del class="product-old-price  mt-3">{{ product.price }}</del>#}
-{#                                                            </h3>#}
-{#                                                        {% elif  discount.numerical_discount and  not discount.percentage_discount %}#}
-{#                                                            <h3 class="product-price"> Off#}
-{#                                                                ${{ discount.numerical_discount }}#}
-{#                                                                <del class="product-old-price  mt-3">{{ product.price }}</del>#}
-{#                                                            </h3>#}
-{#                                                        {% endif %}#}
-                                                    {% endfor %}
-                                                    {% if not product.product_code_discounts.all %}
-                                                        <h3 class="product-price mt-3">
-                                                            ${{ product.price }}
+                                                    {% if discount.percentage_discount %}
+                                                        <h3 class="product-price"> Off
+                                                            {{ discount.percentage_discount }}%
+                                                            <del class="product-old-price  mt-3">{{ product.price }}</del>
                                                         </h3>
-
+                                                    {% else %}
+                                                        <h3 class="product-price"> Off
+                                                            ${{ discount.numerical_discount }}
+                                                            <del class="product-old-price  mt-3">{{ product.price }}</del>
+                                                        </h3>
                                                     {% endif %}
+                                                    {#                                                        {% elif discount.numerical_discount and not  discount.percentage_discount %}#}
+                                                    {#                                                            <h3 class="product-price">#}
+                                                    {#                                                                Off {{ discount.percentage_discount }}%#}
+                                                    {#                                                                <del class="product-old-price  mt-3">{{ product.price }}</del>#}
+                                                    {#                                                            </h3>#}
+                                                    {#                                                        {% elif  discount.numerical_discount and  not discount.percentage_discount %}#}
+                                                    {#                                                            <h3 class="product-price"> Off#}
+                                                    {#                                                                ${{ discount.numerical_discount }}#}
+                                                    {#                                                                <del class="product-old-price  mt-3">{{ product.price }}</del>#}
+                                                    {#                                                            </h3>#}
+                                                    {#                                                        {% endif %}#}
+                                                {% endfor %}
+                                                {% if not product.product_code_discounts.all %}
+                                                    <h3 class="product-price mt-3">
+                                                        ${{ product.price }}
+                                                    </h3>
+
+                                                {% endif %}
                                                 <div class="product-rating">
                                                     <!-- Display actual product rating if available -->
                                                 </div>
@@ -381,7 +507,7 @@
                                                 {% if media.product_picture.url %}
                                                     <img src="{{ media.product_picture.url }}" alt="">
                                                 {% else %}
-                                                    <img src="/storage/static/img/product02.png" alt="">
+                                                    <img src="/img/product02.png" alt="">
                                                 {% endif %}
                                                 <div class="product-label">
                                                     <span class="new">NEW</span>
@@ -393,25 +519,25 @@
                                                     <a href="#"
                                                        tabindex="-1">{{ product.name | default:"Product Name Goes Here" }}</a>
                                                 </h3>
-                                               {% for discount in product.product_code_discounts.all %}
-                                                       {% if discount.percentage_discount %}
-                                                         <h3 class="product-price"> Off
-                                                                {{ discount.percentage_discount }}%
-                                                                <del class="product-old-price  mt-3">{{ product.price }}</del>
-                                                            </h3>
-                                                        {% else %}
-                                                            <h3 class="product-price"> Off
-                                                                ${{ discount.numerical_discount }}
-                                                                <del class="product-old-price  mt-3">{{ product.price }}</del>
-                                                            </h3>
-                                                        {% endif %}
-                                                    {% endfor %}
-                                                    {% if not product.product_code_discounts.all %}
-                                                        <h3 class="product-price mt-3">
-                                                            ${{ product.price }}
+                                                {% for discount in product.product_code_discounts.all %}
+                                                    {% if discount.percentage_discount %}
+                                                        <h3 class="product-price"> Off
+                                                            {{ discount.percentage_discount }}%
+                                                            <del class="product-old-price  mt-3">{{ product.price }}</del>
                                                         </h3>
-
+                                                    {% else %}
+                                                        <h3 class="product-price"> Off
+                                                            ${{ discount.numerical_discount }}
+                                                            <del class="product-old-price  mt-3">{{ product.price }}</del>
+                                                        </h3>
                                                     {% endif %}
+                                                {% endfor %}
+                                                {% if not product.product_code_discounts.all %}
+                                                    <h3 class="product-price mt-3">
+                                                        ${{ product.price }}
+                                                    </h3>
+
+                                                {% endif %}
                                                 <div class="product-rating">
                                                     <!-- Display actual product rating if available -->
                                                 </div>
