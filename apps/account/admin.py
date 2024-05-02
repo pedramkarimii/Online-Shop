@@ -1,5 +1,5 @@
 from django.contrib import admin
-from apps.account.models import User, Address, CodeDiscount, UserAuth, Profile
+from apps.account.models import User, Address, CodeDiscount, UserAuth, Profile, Role
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
 
@@ -29,27 +29,51 @@ class AddressInline(admin.StackedInline):
     )
 
 
-class CodeDiscountInline(admin.StackedInline):
+class RoleInline(admin.StackedInline):
     """Inline for managing addresses within the user admin."""
 
-    model = CodeDiscount
+    model = Role
     can_delete = False
-    verbose_name_plural = 'CodeDiscount'
-    fk_name = 'user'
-    readonly_fields = ('create_time', 'update_time', 'is_deleted', 'is_active')
-    ordering = ('create_time',)
+    verbose_name_plural = 'Role'
+    fk_name = 'golden'
+    readonly_fields = ('code_discount', 'create_time', 'update_time', 'is_deleted', 'is_active')
+    ordering = ('update_time', 'create_time')
     date_hierarchy = 'create_time'
     list_per_page = 30
     fieldsets = (
-        ('Creation Address',
-         {'fields': ('user', 'code', 'percentage_discount', 'numerical_discount', 'expiration_date', 'is_use')}),
+        ('Creation Address', {'fields': ('code_discount', 'golden', 'silver', 'bronze')}),
         ('Data', {'fields': ('create_time', 'update_time', 'is_deleted', 'is_active')
                   }),
     )
     add_fieldsets = (
         ('Creation Address', {
             'classes': ('wide',),
-            'fields': ('user', 'code', 'percentage_discount', 'is_active', 'is_deleted')
+            'fields': ('code_discount', 'golden', 'silver', 'bronze')
+        }),
+    )
+
+
+class CodeDiscountInline(admin.StackedInline):
+    """Inline for managing addresses within the user admin."""
+
+    model = CodeDiscount
+    can_delete = False
+    verbose_name_plural = 'CodeDiscount'
+    fk_name = 'role'
+    readonly_fields = ('create_time', 'update_time', 'is_deleted', 'is_active')
+    ordering = ('create_time',)
+    date_hierarchy = 'create_time'
+    list_per_page = 30
+    fieldsets = (
+        ('Creation Address',
+         {'fields': ('role', 'code', 'percentage_discount', 'numerical_discount', 'expiration_date', 'is_use')}),
+        ('Data', {'fields': ('create_time', 'update_time', 'is_deleted', 'is_active')
+                  }),
+    )
+    add_fieldsets = (
+        ('Creation Address', {
+            'classes': ('wide',),
+            'fields': ('role', 'code', 'percentage_discount', 'is_active', 'is_deleted')
         }),
     )
 
@@ -103,6 +127,30 @@ class UserAuthModelAdmin(admin.ModelAdmin):
     )
 
 
+@admin.register(Role)
+class RoleAdmin(admin.ModelAdmin):
+    list_display = ['code_discount', 'golden', 'silver', 'bronze',
+                    'create_time', 'update_time', 'is_active', 'is_deleted']
+    list_filter = ['code_discount', 'golden', 'silver', 'bronze', 'create_time', 'is_active']
+    readonly_fields = ('create_time', 'update_time', 'is_active', 'is_deleted')
+    ordering = ['-create_time']
+    date_hierarchy = 'create_time'
+    list_per_page = 30
+    fieldsets = (
+        ('Creation Role', {'fields': ('code_discount', 'golden', 'silver', 'bronze')}),
+        ('Data', {'fields': ('create_time', 'update_time', 'is_active', 'is_deleted')
+                  }),
+    )
+    add_fieldsets = (
+        ('Creation Role', {
+            'classes': ('wide',),
+            'fields': ('code_discount', 'golden', 'silver', 'bronze')
+        }),
+        ('Data', {'fields': ('create_time', 'update_time', 'is_active', 'is_deleted')
+                  })
+    )
+
+
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
     list_display = ['user', 'name', 'last_name', 'gender', 'age', 'profile_picture', 'create_time', 'update_time',
@@ -136,11 +184,12 @@ class ProfileAdmin(admin.ModelAdmin):
 class CodeDiscountAdmin(admin.ModelAdmin):
     """Admin interface for managing CodeDiscount."""
 
-    list_display = ['user', 'code', 'percentage_discount', 'numerical_discount', 'expiration_date', 'is_use',
+    list_display = ['role_name', 'code', 'percentage_discount', 'numerical_discount', 'expiration_date', 'is_use',
                     'is_expired',
                     'is_active', 'is_deleted']
-    list_filter = ['user__username', 'code', 'percentage_discount', 'numerical_discount', 'create_time', 'is_active']
-    search_fields = ['user__username', 'code', 'percentage_discount', 'numerical_discount', 'create_time', 'is_active']
+    list_filter = ['role_name', 'code', 'percentage_discount', 'numerical_discount', 'create_time', 'is_active']
+    search_fields = ['role_name', 'code', 'percentage_discount',
+                     'numerical_discount', 'create_time', 'is_active']
     readonly_fields = ('is_expired', 'create_time', 'update_time', 'is_active')
     ordering = ['-create_time']
     date_hierarchy = 'create_time'
@@ -148,7 +197,7 @@ class CodeDiscountAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Creation Address',
          {'fields': (
-             'user', 'code', 'percentage_discount', 'numerical_discount', 'expiration_date', 'is_use',
+             'role_name', 'code', 'percentage_discount', 'numerical_discount', 'expiration_date', 'is_use',
          )}),
         ('Data', {'fields': ('is_expired', 'create_time', 'update_time', 'is_deleted', 'is_active')
                   }),
@@ -156,7 +205,7 @@ class CodeDiscountAdmin(admin.ModelAdmin):
     add_fieldsets = (
         ('Creation Address', {
             'classes': ('wide',),
-            'fields': ('user', 'code', 'percentage_discount', 'is_active', 'is_deleted')
+            'fields': ('role', 'code', 'percentage_discount', 'is_active', 'is_deleted')
         }),
         ('Data', {'fields': ('create_time', 'update_time', 'is_deleted', 'is_active')
                   })
@@ -217,7 +266,7 @@ class UserAdmin(BaseUserAdmin):
     readonly_fields = ('create_time', 'update_time', 'last_login', 'is_active', 'is_deleted',)
     filter_horizontal = ('groups', 'user_permissions')
 
-    inlines = (AddressInline, CodeDiscountInline, ProfileInline)
+    inlines = (AddressInline, RoleInline, ProfileInline)
 
     def get_inline_instances(self, request, obj=None):
         """Get inline instances based on whether an object is provided."""
