@@ -23,9 +23,9 @@ class OrderItemTestCase(TestCase):
             country="Iran",
             city="Tehran",
             street="123 Main St",
-            building_number="5A",
-            floor_number="3",
-            postal_code="12345",
+            building_number=5,
+            floor_number=3,
+            postal_code=12345,
             notes="This is a test address"
         )
         self.order = Order.objects.create(
@@ -92,9 +92,9 @@ class OrderTestCase(TestCase):
             country="Iran",
             city="Tehran",
             street="123 Main St",
-            building_number="5A",
-            floor_number="3",
-            postal_code="12345",
+            building_number=5,
+            floor_number=3,
+            postal_code=12345,
             notes="This is a test address"
         )
         self.warehouse_keeper = WarehouseKeeper.objects.create(user=self.user, brand=self.brand, product=self.product)
@@ -144,9 +144,9 @@ class OrderPaymentTestCase(TestCase):
             country="Iran",
             city="Tehran",
             street="123 Main St",
-            building_number="5A",
-            floor_number="3",
-            postal_code="12345",
+            building_number=5,
+            floor_number=3,
+            postal_code=12345,
             notes="This is a test address"
         )
         self.order = Order.objects.create(
