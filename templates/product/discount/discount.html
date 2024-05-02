@@ -1,0 +1,42 @@
+{% extends "base/base.html" %}
+{% block title %}
+    <title>Discount</title>
+{% endblock %}
+{% block content %}
+    <div class="container mx-auto mb-8 mt-8">
+        <div class="overflow-x-auto">
+            <h1 class="text-2xl font-bold mt-8 mb-4">Discount</h1>
+            <table class="table-auto w-full mt-2 rounded-lg border border-gray-300">
+                <tbody>
+                    <tr class="bg-gray-200 text-gray-700">
+                        <td class="px-4 py-2 text-center">Product</td>
+                        <td class="px-4 py-2 text-center">Category</td>
+                        <td class="px-4 py-2 text-center">Percentage Discount</td>
+                        <td class="px-4 py-2 text-center">Numerical Discount</td>
+                        <td class="px-4 py-2 text-center">Expiration Date</td>
+                        <td class="px-4 py-2 text-center">Is Use</td>
+                        <td class="px-4 py-2 text-center">Is Expired</td>
+                    </tr>
+                    {% for discount in discounts %}
+                        <tr class="bg-white text-gray-800">
+                            <td class="px-4 py-2 text-center">{{ discount.product }}</td>
+                            <td class="px-4 py-2 text-center">{{ discount.category }}</td>
+                            <td class="px-4 py-2 text-center">{{ discount.percentage_discount }}</td>
+                            <td class="px-4 py-2 text-center">{{ discount.numerical_discount }}</td>
+                            <td class="px-4 py-2 text-center">{{ discount.expiration_date }}</td>
+                            <td class="px-4 py-2 text-center">{{ discount.is_use }}</td>
+                            <td class="px-4 py-2 text-center">{{ discount.is_expired }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% block custom_css %}
+        <style>
+            th {
+                border-bottom: 2px solid rgba(118, 118, 118, 0.31);
+            }
+        </style>
+    {% endblock %}
+{% endblock %}
