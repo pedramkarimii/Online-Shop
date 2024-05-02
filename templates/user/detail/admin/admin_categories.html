@@ -1,0 +1,89 @@
+{% extends "base/base.html" %}
+{% block title %}
+    <title>Category</title>
+{% endblock %}
+{% block content %}
+    <div class="container mx-auto mb-8 mt-8">
+        <div class="overflow-x-auto">
+            <h1 class="text-2xl text-center bg-gray-800  text-gray-100 mt-8 pt-4 p-4 font-bold">Category</h1>
+            <table class="table-auto w-full rounded-lg border border-gray-300">
+                <tbody>
+                <tr class="bg-gray-200 font-bold text-red-700">
+                    <td class="px-4 py-2 text-center">Name</td>
+                    <td class="px-4 py-2 text-center">Parent Category</td>
+                    <td class="px-4 py-2 text-center">Category Picture</td>
+                    <td class="px-4 py-2 text-center">Is Sub Category</td>
+                    <td class="px-4 py-2 text-center">Edit</td>
+                    <td class="px-4 py-2 text-center">Delete</td>
+                </tr>
+                {% if admin_categories %}
+
+                    {% for category in admin_categories %}
+                        <tr class="bg-white text-gray-800">
+                            <td class="px-4 py-2 text-center">{{ category.name }}</td>
+                            <td class="px-4 py-2 text-center">{{ category.parent_category }}</td>
+                            <td class="px-4 py-2 text-center">{{ category.is_sub_category }}</td>
+
+                            {% if category.category_picture %}
+                                <td class="px-4 py-2 text-center">
+                                    <img src="{{ category.category_picture.url }}" alt="{{ category.name }} Logo"
+                                         class=" ml-12 pl-12 "
+                                         style="width: 100px; height: auto;">
+                                </td>
+                            {% else %}
+                                <td class="px-4 py-2 text-center">None</td>
+                            {% endif %}
+                            <td class="px-2 py-2 text-center">
+                                <a href="{% url "category_update" pk=category.id %}">
+                                    <button
+                                            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                                        Edit
+                                    </button>
+                                </a>
+                            </td>
+                            <td class="p-1 text-center">
+                                <a href="{% url "category_delete" pk=category.id %}">
+                                    <button
+                                            class="bg-red-500 hover:bg-red-700 text-white font-bold p-2 rounded">
+                                        Delete
+                                    </button>
+                                </a>
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+                {% else %}
+                    {% for category in supervisor_categories %}
+                        <tr class="bg-white text-gray-800">
+                            <td class="px-4 py-2 text-center">{{ category.name }}</td>
+                            <td class="px-4 py-2 text-center">{{ category.parent_category }}</td>
+                            <td class="px-4 py-2 text-center">{{ category.is_sub_category }}</td>
+
+                            {% if category.category_picture %}
+                                <td class="px-4 py-2 text-center">
+                                    <img src="{{ category.category_picture.url }}" alt="{{ category.name }} Logo"
+                                         class=" ml-12 pl-12 "
+                                         style="width: 100px; height: auto;">
+                                </td>
+                            {% else %}
+                                <td class="px-4 py-2 text-center">None</td>
+                            {% endif %}
+                            <td class="px-2 py-2 text-center">
+
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% block custom_css %}
+        <style>
+            th {
+                border-bottom: 2px solid rgba(118, 118, 118, 0.31);
+            }
+        </style>
+    {% endblock %}
+{% endblock %}
