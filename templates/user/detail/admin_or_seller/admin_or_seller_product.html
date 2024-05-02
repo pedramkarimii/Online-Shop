@@ -1,0 +1,140 @@
+{% extends "base/base.html" %}
+{% block title %}
+    <title>Product</title>
+{% endblock %}
+{% block content %}
+    <div class="container mx-auto mb-8 mt-8">
+        <div class="overflow-x-auto">
+            <h1 class="text-2xl text-center bg-gray-800  text-gray-100 mt-8 pt-4 p-4 font-bold">Product</h1>
+            <table class="table-auto w-full rounded-lg border border-gray-300">
+                <tbody>
+                <tr class="bg-gray-200 font-bold text-red-700">
+                    <td class="px-4 py-2 text-center">User</td>
+                    <td class="px-4 py-2 text-center">Brand</td>
+                    <td class="px-4 py-2 text-center">Name</td>
+                    <td class="px-4 py-2 text-center">Description</td>
+                    <td class="px-4 py-2 text-center">Price</td>
+                    <td class="px-4 py-2 text-center">Size</td>
+                    <td class="px-4 py-2 text-center">Color</td>
+                    <td class="px-4 py-2 text-center">Material</td>
+                    <td class="px-4 py-2 text-center">Weight</td>
+                    <td class="px-4 py-2 text-center">Height</td>
+                    <td class="px-4 py-2 text-center">Width</td>
+                    <td class="px-4 py-2 text-center">Warranty</td>
+                    <td class="px-4 py-2 text-center">Quantity</td>
+                    <td class="px-4 py-2 text-center">Product Picture</td>
+                    <td class="px-4 py-2 text-center">Edit</td>
+                    <td class="px-4 py-2 text-center">Delete</td>
+                </tr>
+                {% if products %}
+
+                    {% for product in products %}
+                        <tr class="bg-white text-gray-800">
+                            <td class="px-4 py-2 text-center">{{ product.brand.user }}</td>
+                            <td class="px-4 py-2 text-center">{{ product.brand }}</td>
+                            <td class="px-4 py-2 text-center">{{ product.name }}</td>
+                            <td class="px-4 py-2 text-center">{{ product.description }}</td>
+                            <td class="px-4 py-2 text-center">{{ product.price }}</td>
+                            <td class="px-4 py-2 text-center">{{ product.size }}</td>
+                            <td class="px-4 py-2 text-center">{{ product.color }}</td>
+                            <td class="px-4 py-2 text-center">{{ product.material }}</td>
+                            <td class="px-4 py-2 text-center">{{ product.weight }}</td>
+                            <td class="px-4 py-2 text-center">{{ product.height }}</td>
+                            <td class="px-4 py-2 text-center">{{ product.width }}</td>
+                            <td class="px-4 py-2 text-center">{{ product.warranty }}</td>
+                            <td class="px-4 py-2 text-center">{{ product.quantity }}</td>
+                            {% for media in product.media_products.all %}
+
+                                {% if media.product_picture.url %}
+
+                                    <td class="">
+                                        <img src="{{ media.product_picture.url }}" alt="{{ product.name }}"
+                                             class="  "
+                                             style="width: 100px; height: auto;"
+                                        >
+                                    </td>
+                                {% else %}
+                                    <td class="px-4 py-2 text-center">None</td>
+                                {% endif %}
+                            {% endfor %}
+                            <td class="px-2 py-2 text-center">
+                                <a href="{% url "product_update" pk=product.id %}">
+                                    <button
+                                            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                                        Edit
+                                    </button>
+                                </a>
+                            </td>
+                            <td class="p-1 text-center">
+                                <a href="{% url "product_delete" pk=product.id %}">
+                                    <button
+                                            class="bg-red-500 hover:bg-red-700 text-white font-bold p-2 rounded">
+                                        Delete
+                                    </button>
+                                </a>
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+                {% else %}
+                    {% for product in get_product %}
+                        <tr class="bg-white text-gray-800">
+                            <td class="px-4 py-2 text-center">{{ product.brand.user }}</td>
+                            <td class="px-4 py-2 text-center">{{ product.brand }}</td>
+                            <td class="px-4 py-2 text-center">{{ product.name }}</td>
+                            <td class="px-4 py-2 text-center">{{ product.description }}</td>
+                            <td class="px-4 py-2 text-center">{{ product.price }}</td>
+                            <td class="px-4 py-2 text-center">{{ product.size }}</td>
+                            <td class="px-4 py-2 text-center">{{ product.color }}</td>
+                            <td class="px-4 py-2 text-center">{{ product.material }}</td>
+                            <td class="px-4 py-2 text-center">{{ product.weight }}</td>
+                            <td class="px-4 py-2 text-center">{{ product.height }}</td>
+                            <td class="px-4 py-2 text-center">{{ product.width }}</td>
+                            <td class="px-4 py-2 text-center">{{ product.warranty }}</td>
+                            <td class="px-4 py-2 text-center">{{ product.quantity }}</td>
+
+                            {% for media in product.media_products.all %}
+
+                                {% if media.product_picture.url %}
+
+                                    <td class="">
+                                        <img src="{{ media.product_picture.url }}" alt="{{ product.name }}"
+                                             class=" "
+                                             style="width: 100px; height: auto;">
+                                    </td>
+                                {% else %}
+                                    <td class="px-4 py-2 text-center">None</td>
+                                {% endif %}
+                            {% endfor %}
+                            <td class="px-2 py-2 text-center">
+                                <a href="{% url "product_update" pk=product.id %}">
+                                    <button
+                                            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                                        Edit
+                                    </button>
+                                </a>
+                            </td>
+                            <td class="p-1 text-center">
+                                <a href="{% url "product_delete" pk=product.id %}">
+                                    <button
+                                            class="bg-red-500 hover:bg-red-700 text-white font-bold p-2 rounded">
+                                        Delete
+                                    </button>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% block custom_css %}
+        <style>
+            th {
+                border-bottom: 2px solid rgba(118, 118, 118, 0.31);
+            }
+        </style>
+    {% endblock %}
+{% endblock %}
