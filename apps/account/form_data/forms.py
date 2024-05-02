@@ -294,6 +294,34 @@ class ProfileCreateForm(forms.ModelForm):
         return profile
 
 
+class ProfileUpdateForm(ProfileCreateForm):
+    def __init__(self, *args, **kwargs):
+        self.profile_instance = kwargs.pop('profile_instance', None)
+        super().__init__(*args, **kwargs)
+
+    def save(self, commit=True):
+        profile = super().save(commit=False)  # noqa
+        profile.name = self.cleaned_data['name']
+        profile.last_name = self.cleaned_data['last_name']
+        profile.gender = self.cleaned_data['gender']
+        profile.age = self.cleaned_data['age']
+        profile.profile_picture = self.cleaned_data['profile_picture']
+        if self.profile_instance:  # noqa
+            if profile.name == self.profile_instance.name:  # noqa
+                profile.name = self.profile_instance.name
+            if profile.last_name == self.profile_instance.last_name:
+                profile.last_name = self.profile_instance.last_name
+            if profile.gender == self.profile_instance.gender:
+                profile.gender = self.profile_instance.gender
+            if profile.age == self.profile_instance.age:
+                profile.age = self.profile_instance.age
+            if profile.gender == self.profile_instance.gender:
+                profile.gender = self.profile_instance.gender
+        if commit:
+            profile.save()
+        return profile
+
+
 class RoleCreateForm(forms.ModelForm):
     """
     This class defines a form for creating a role.
@@ -385,34 +413,6 @@ class RoleUpdateForm(RoleCreateForm):
         if commit:
             role.save()
         return role
-
-
-class ProfileUpdateForm(ProfileCreateForm):
-    def __init__(self, *args, **kwargs):
-        self.profile_instance = kwargs.pop('profile_instance', None)
-        super().__init__(*args, **kwargs)
-
-    def save(self, commit=True):
-        profile = super().save(commit=False)  # noqa
-        profile.name = self.cleaned_data['name']
-        profile.last_name = self.cleaned_data['last_name']
-        profile.gender = self.cleaned_data['gender']
-        profile.age = self.cleaned_data['age']
-        profile.profile_picture = self.cleaned_data['profile_picture']
-        if self.profile_instance:  # noqa
-            if profile.name == self.profile_instance.name:  # noqa
-                profile.name = self.profile_instance.name
-            if profile.last_name == self.profile_instance.last_name:
-                profile.last_name = self.profile_instance.last_name
-            if profile.gender == self.profile_instance.gender:
-                profile.gender = self.profile_instance.gender
-            if profile.age == self.profile_instance.age:
-                profile.age = self.profile_instance.age
-            if profile.gender == self.profile_instance.gender:
-                profile.gender = self.profile_instance.gender
-        if commit:
-            profile.save()
-        return profile
 
 
 class UserRegistrationForm(CleanDataUserForm):
