@@ -1,10 +1,37 @@
 from django.test import TestCase
-from apps.account.models import Address, CodeDiscount
+from apps.account.models import Address, CodeDiscount, UserAuth
 from django.contrib.auth import get_user_model
 from datetime import date
 from datetime import datetime, timedelta
+import uuid
 
 User = get_user_model()
+
+
+class TestUserAuthModel(TestCase):
+
+    def setUp(self):
+        self.user_data = {
+            "username": "pedramkarimi",
+            "email": "pedram.9060@example.com",
+            "phone_number": "09128355747",
+            "name": "pedram",
+            "last_name": "karimi",
+            "gender": "Male",
+            "age": 30,
+            "profile_picture": None,
+        }
+        self.user = User.objects.create(**self.user_data)
+
+    def test_user_auth_create(self):
+        UserAuth.objects.create(user_id=self.user.id, token_type=UserAuth.ACCESS_TOKEN, uuid=uuid.uuid4())
+        self.assertEqual(UserAuth.objects.count(), 1)
+
+    def test_ordering_user_auth(self):
+        for i in range(10):
+            UserAuth.objects.create(user_id=self.user.id, token_type=UserAuth.ACCESS_TOKEN, uuid=uuid.uuid4())
+
+        self.assertEqual(UserAuth.objects.first().id, 10)
 
 
 class UserModelTestCase(TestCase):
@@ -118,8 +145,8 @@ class AddressModelTestCase(TestCase):
             city="Tehran",
             street="123 Main St",
             building_number="5A",
-            floor_number="3",
-            postal_code="12345",
+            floor_number=3,
+            postal_code=12345,
             notes="This is a test address"
         )
 
@@ -132,8 +159,8 @@ class AddressModelTestCase(TestCase):
                 city="Tehran",
                 street="456 Elm St",
                 building_number="5B",
-                floor_number="4",
-                postal_code="54321",
+                floor_number=4,
+                postal_code=54321,
                 notes="Another test address"
             )
 
@@ -146,8 +173,8 @@ class AddressModelTestCase(TestCase):
             city="Tehran",
             street="123 Main St",
             building_number="5A",
-            floor_number="3",
-            postal_code="12345",
+            floor_number=3,
+            postal_code=12345,
             notes="This is a test address"
         )
 
@@ -158,8 +185,8 @@ class AddressModelTestCase(TestCase):
         self.assertEqual(address.city, "Tehran")
         self.assertEqual(address.street, "123 Main St")
         self.assertEqual(address.building_number, "5A")
-        self.assertEqual(address.floor_number, "3")
-        self.assertEqual(address.postal_code, "12345")
+        self.assertEqual(address.floor_number, 3)
+        self.assertEqual(address.postal_code, 12345)
         self.assertEqual(address.notes, "This is a test address")
 
     def test_address_update(self):
@@ -171,8 +198,8 @@ class AddressModelTestCase(TestCase):
             city="Tehran",
             street="123 Main St",
             building_number="5A",
-            floor_number="3",
-            postal_code="12345",
+            floor_number=3,
+            postal_code=12345,
             notes="This is a test address"
         )
 
@@ -195,8 +222,8 @@ class AddressModelTestCase(TestCase):
             city="Tehran",
             street="123 Main St",
             building_number="5A",
-            floor_number="3",
-            postal_code="12345",
+            floor_number=3,
+            postal_code=12345,
             notes="This is a test address"
         )
 
@@ -216,8 +243,8 @@ class AddressModelTestCase(TestCase):
             city="Tehran",
             street="123 Main St",
             building_number="5A",
-            floor_number="3",
-            postal_code="12345",
+            floor_number=3,
+            postal_code=12345,
             notes="This is a test address"
         )
 
@@ -240,8 +267,8 @@ class AddressModelTestCase(TestCase):
             city="Tehran",
             street="123 Main St",
             building_number="5A",
-            floor_number="3",
-            postal_code="12345",
+            floor_number=3,
+            postal_code=12345,
             notes="This is a test address"
         )
 
@@ -304,7 +331,7 @@ class CodeDiscountModelTestCase(TestCase):
         # Delete the discount code
         discount_code.delete()
         # Assert that the discount code is deleted successfully
-        with self.assertRaises(CodeDiscount.DoesNotExist): # noqa
+        with self.assertRaises(CodeDiscount.DoesNotExist):  # noqa
             CodeDiscount.objects.get(id=discount_code.id)
 
     def test_is_expired(self):
