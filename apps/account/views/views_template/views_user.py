@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
 from django.utils.translation import gettext_lazy as _
 from apps.account.form_data import forms
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import DetailView
 from apps.account.models import User
@@ -20,7 +20,8 @@ class UserUpdateView(MustBeLogingCustomView):
         Initialize the form_class, next_page_home, next_page_change_user, user_instance, template name.
         Set up method to retrieve the current user instance.
         """
-        self.form_class = forms.CustomUserChangeForm  # noqa
+        self.form_class = forms.UserUpdateForm  # noqa
+        self.user_instance = get_object_or_404(User, pk=kwargs['pk'])
         self.next_page_home = reverse_lazy('home')  # noqa
         self.next_page_change_user = reverse_lazy('change_user')  # noqa
         self.template_change_user = 'user/account/change_info_user.html'  # noqa
