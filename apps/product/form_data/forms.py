@@ -43,8 +43,8 @@ class BrandCreateForm(forms.ModelForm):
             'logo': _('Logo')
         }
         help_texts = {
-            'name': _('Enter the name of the brand.'),
-            'phone_number': _('Enter the phone number of the brand.'),
+            'name': _('Enter the name of the brand .'),
+            'phone_number': _('(021 4444 44 44) Enter the phone number of the brand.'),
             'description': _('Enter the description of the brand.'),
             'location': _('Enter the location of the brand.'),
             'logo': _('Enter the logo of the brand.')
@@ -119,9 +119,7 @@ class BrandUpdateForm(BrandCreateForm):
         super().__init__(*args, **kwargs)
 
     def save(self, commit=True):
-
         brand = super().save(commit=False)  # noqa
-        brand.user = self.cleaned_data['user']
         brand.name = self.cleaned_data['name']
         brand.phone_number = self.cleaned_data['phone_number']
         brand.description = self.cleaned_data['description']
@@ -256,6 +254,7 @@ class CategoryUpdateForm(CategoryCreateForm):
 
         if commit:
             category.save()
+        return category
 
 
 class ProductCreateForm(forms.ModelForm):
@@ -618,10 +617,10 @@ class CommentCreateForm(forms.ModelForm):
 
 
 class DiscountCreateForm(forms.ModelForm):
-    product = forms.ModelChoiceField(queryset=Product.objects.all(), widget=forms.Select(
+    product = forms.ModelChoiceField(queryset=Product.objects.all(), required=False, widget=forms.Select(
         attrs={'class': 'form-select mt-1 pt-2 py-2 px-4 focus:ring-indigo-500 focus:border-indigo-500 '
                         'block w-full shadow-sm sm:text-sm border-gray-300 rounded-md'}))
-    category = forms.ModelChoiceField(queryset=Category.objects.all(), widget=forms.Select(
+    category = forms.ModelChoiceField(queryset=Category.objects.all(), required=False, widget=forms.Select(
         attrs={'class': 'form-select mt-1 pt-2 py-2 px-4 focus:ring-indigo-500 focus:border-indigo-500 '
                         'block w-full shadow-sm sm:text-sm border-gray-300 rounded-md'}))
 
@@ -703,6 +702,26 @@ class DiscountCreateForm(forms.ModelForm):
             'percentage_discount': [validators.PercentageDiscountValidator()],
             'numerical_discount': [validators.NumericalDiscountValidator()],
         }
+
+    # def clean(self):
+    #     cleaned_data = super().clean()
+    #     percentage_discount = cleaned_data.get('percentage_discount')
+    #     numerical_discount = cleaned_data.get('numerical_discount')
+    #     product = cleaned_data.get('product')
+    #     category = cleaned_data.get('category')
+    #
+    #     if not percentage_discount and not numerical_discount:
+    #         raise ValidationError(_('Either percentage discount or numerical discount must be provided.'))
+    #
+    #     if percentage_discount and numerical_discount:
+    #         raise ValidationError(_('Only one type of discount can be provided.'))
+    #
+    #     if Discount.objects.filter(product=product).exists():
+    #         raise ValidationError(_(f'Discount product already exists.'))
+    #
+    #     if Discount.objects.filter(category=category).exists():
+    #         raise ValidationError(_(f'Discount category already exists.'))
+    #     return cleaned_data
 
     def save(self, commit=True):
         """
