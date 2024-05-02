@@ -54,7 +54,7 @@
 
             {% if not request.user.profile.name and request.user.is_authenticated %}
                 <a
-                        href="#"
+                        href="http://127.0.0.1:8000/profile-create/{{ request.user.pk }}/"
                         class="block px-4 py-2  text-sm text-black-800 hover:bg-gray-500 hover:rounded-md"
                         onclick="redirectToCreateProfile()"
                 >Create Profile</a
@@ -81,15 +81,14 @@
 
 
                 <a
-                        href="#"
+                        href="http://127.0.0.1:8000/user-update/{{ request.user.pk }}/"
                         class="block px-4 py-2  text-sm text-black-800 hover:bg-gray-500 hover:rounded-md"
                         onclick="redirectToChangeUser()"
                 >Update Info Account</a
                 >
                 <a
-                        href="#"
+                        href="http://127.0.0.1:8000/profile-update/{{ request.user.pk }}/"
                         class="block px-4 py-2  text-sm text-black-800 hover:bg-gray-500 hover:rounded-md"
-                        onclick="redirectToChangeProfile()"
                 >Edite Profile</a
                 >
                 <a
@@ -202,13 +201,6 @@
         window.location.href = "{% url 'user_change_password' %}";
     }
 
-    function redirectToChangeUser() {
-        window.location.href = "{% url 'user_update' %}";
-    }
-
-    function redirectToChangeProfile() {
-        window.location.href = "{% url 'profile_create' %}";
-    }
 
     function redirectToCreateAddress() {
         window.location.href = `address_create/`;
