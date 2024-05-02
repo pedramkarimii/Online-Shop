@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 from apps.account.form_data import forms
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import DetailView
 from apps.core.mixin.mixin_views_template import HttpsOptionNotLogoutMixin as MustBeLogingCustomView
@@ -65,9 +65,8 @@ class ProfileUpdateView(MustBeLogingCustomView):
 
     def setup(self, request, *args, **kwargs):
         self.profile_instance = get_object_or_404(forms.Profile, pk=kwargs['pk'])  # noqa
-        self.form_class = forms.DiscountCodeUpdateForm  # noqa
-        self.next_page_home = reverse_lazy('home')  # noqa
-        self.template_chnage_info_profile = 'user/profile/chnage_info_profile.html.html'  # noqa
+        self.form_class = forms.ProfileUpdateForm  # noqa
+        self.template_chnage_info_profile = 'user/profile/change_info_profile.html'  # noqa
         self.request_files = request.FILES  # noqa
         self.request_post = request.POST  # noqa
         return super().setup(request, *args, **kwargs)
