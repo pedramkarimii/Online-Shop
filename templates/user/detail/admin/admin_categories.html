@@ -11,8 +11,10 @@
                 <tr class="bg-gray-200 font-bold text-red-700">
                     <td class="px-4 py-2 text-center">Name</td>
                     <td class="px-4 py-2 text-center">Parent Category</td>
-                    <td class="px-4 py-2 text-center">Category Picture</td>
+
                     <td class="px-4 py-2 text-center">Is Sub Category</td>
+                    <td class="px-4 py-2 text-center">Is Deleted</td>
+                    <td class="px-4 py-2 text-center">Category Picture</td>
                     <td class="px-4 py-2 text-center">Edit</td>
                     <td class="px-4 py-2 text-center">Delete</td>
                 </tr>
@@ -23,6 +25,7 @@
                             <td class="px-4 py-2 text-center">{{ category.name }}</td>
                             <td class="px-4 py-2 text-center">{{ category.parent_category }}</td>
                             <td class="px-4 py-2 text-center">{{ category.is_sub_category }}</td>
+                            <td class="px-4 py-2 text-center">{{ category.is_deleted }}</td>
 
                             {% if category.category_picture %}
                                 <td class="px-4 py-2 text-center">
@@ -59,6 +62,7 @@
                             <td class="px-4 py-2 text-center">{{ category.name }}</td>
                             <td class="px-4 py-2 text-center">{{ category.parent_category }}</td>
                             <td class="px-4 py-2 text-center">{{ category.is_sub_category }}</td>
+                            <td class="px-4 py-2 text-center">{{ category.is_deleted }}</td>
 
                             {% if category.category_picture %}
                                 <td class="px-4 py-2 text-center">
