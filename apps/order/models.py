@@ -34,7 +34,7 @@ class OrderItem(mixin_model.TimestampsStatusFlagMixin):
 class Order(mixin_model.TimestampsStatusFlagMixin):
     """Model representing an order placed by a user."""
 
-    address = models.ForeignKey(Address, on_delete=models.CASCADE, related_name="address_order")
+    address = models.OneToOneField(Address, on_delete=models.CASCADE, related_name="address_order")
     status = models.CharField(max_length=20, choices=validators.StatusChoice.CHOICES,
                               validators=[validators.StatusValidator()],
                               verbose_name=_('Status'))
