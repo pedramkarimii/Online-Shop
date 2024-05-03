@@ -220,8 +220,6 @@ class Comment(mixin_model.TimestampsStatusFlagMixin):
 class FavoritesBasket(mixin_model.TimestampsStatusFlagMixin):
     """Model representing a user's favorite or basket products."""
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='user_favorites_baskets')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_favorites_baskets')
-    available = models.BooleanField(default=True)
     quantity = models.PositiveSmallIntegerField(default=0)
 
     objects = managers.FavoritesBasketManager()
@@ -229,19 +227,13 @@ class FavoritesBasket(mixin_model.TimestampsStatusFlagMixin):
 
     def __str__(self):
         """Return a string representation of the FavoritesBasket."""
-        return f'{self.user} - {self.product.name} - {self.available} - {self.quantity}'
+        return f'{self.user}  - {self.quantity}'
 
     class Meta:
         """Additional metadata about the FavoritesBasket model."""
         ordering = ('user',)
         verbose_name = 'Favorites Basket'
         verbose_name_plural = 'Favorites Baskets'
-        constraints = [
-            models.UniqueConstraint(fields=['user', 'product'], name='unique_favorites_basket')
-        ]
-        indexes = [
-            models.Index(fields=['user', 'product'], name='indexes_favorites_basket')
-        ]
 
 
 class Discount(mixin_model.TimestampsStatusFlagMixin):
@@ -275,6 +267,25 @@ class Discount(mixin_model.TimestampsStatusFlagMixin):
         indexes = [
             models.Index(fields=['product', 'category']),
         ]
+
+
+class OrderItemFavoritesBasket(mixin_model.TimestampsStatusFlagMixin):
+    """Model representing an order item associated with a favorite or basket product."""
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='order_items_favorites_baskets')
+    favorites_basket = models.ForeignKey(FavoritesBasket, on_delete=models.CASCADE,
+                                         related_name='order_items_favorites_baskets')
+    available = models.BooleanField(default=True)
+    quantity = models.PositiveSmallIntegerField(default=0)
+
+    def __str__(self):
+        """Return a string representation of the OrderItemFavoritesBasket."""
+        return f'{self.product} - {self.favorites_basket} - {self.quantity}'
+
+    class Meta:
+        """Additional metadata about the OrderItemFavoritesBasket model."""
+        ordering = ('product',)
+        verbose_name = 'Order Item Favorites Basket'
+        verbose_name_plural = 'Order Items Favorites Baskets'
 
 
 class WarehouseKeeper(mixin_model.TimestampsStatusFlagMixin):
