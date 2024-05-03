@@ -21,12 +21,12 @@ class HomeView(View):
         return super().setup(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
-        categories = forms.Category.objects.all()
-        products = forms.Product.objects.all()
-        products_search = forms.Product.objects.all()
+        categories = forms.Category.objects.all().filter(is_deleted=False)
+        products = forms.Product.objects.all().filter(is_deleted=False)
+        products_search = forms.Product.objects.all().filter(is_deleted=False)
         form_search = self.form_class_search(request.GET)
         last_week = timezone.now() - timedelta(days=7)
-        products_new = forms.Product.objects.all().filter(create_time__gte=last_week)
+        products_new = forms.Product.objects.all().filter(create_time__gte=last_week,is_deleted=False)
         numerical_discount = None
         percentage_discount = None
         product_discount = None
