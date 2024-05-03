@@ -1,5 +1,6 @@
 from django.contrib import admin
-from apps.product.models import Product, Comment, Brand, Category, Media, WarehouseKeeper, Discount, FavoritesBasket
+from apps.product.models import Product, Comment, Brand, Category, Media, WarehouseKeeper, Discount, FavoritesBasket, \
+    OrderItemFavoritesBasket
 
 
 class MediaInline(admin.StackedInline):
@@ -229,16 +230,42 @@ class CommentAdmin(admin.ModelAdmin):
 
 @admin.register(FavoritesBasket)
 class FavoritesBasketAdmin(admin.ModelAdmin):
-    list_display = ('user', 'product', 'available', 'quantity')
-    search_fields = ('user__username', 'product__name', 'available', 'quantity')
+    list_display = ('user', 'quantity')
+    search_fields = ('user__username', 'quantity')
     ordering = ('-create_time', '-update_time')
-    list_filter = ('user__username', 'product__name', 'available', 'quantity')
+    list_filter = ('user__username', 'quantity')
     date_hierarchy = 'create_time'
     list_per_page = 30
-    readonly_fields = ('available', 'create_time', 'update_time')
+    readonly_fields = ('create_time', 'update_time')
     fieldsets = (
         ('Creation Favorites Basket', {
-            'fields': ('user', 'product', 'quantity')
+            'fields': ('user',)
+        }),
+        ('Data', {
+            'fields': ('create_time', 'update_time')
+        }),
+    )
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('user__username', 'quantity')
+        }),
+    )
+
+
+@admin.register(OrderItemFavoritesBasket)
+class OrderItemFavoritesBasketAdmin(admin.ModelAdmin):
+    list_display = ('product', 'favorites_basket', 'quantity', 'available', 'create_time', 'update_time')
+
+    search_fields = ('product', 'quantity')
+    ordering = ('-create_time', '-update_time')
+    list_filter = ('product', 'quantity')
+    date_hierarchy = 'create_time'
+    list_per_page = 30
+    readonly_fields = ('create_time', 'update_time')
+    fieldsets = (
+        ('Creation Favorites Basket', {
+            'fields': ('product', 'favorites_basket' 'quantity',)
         }),
         ('Data', {
             'fields': ('available', 'create_time', 'update_time')
@@ -247,7 +274,7 @@ class FavoritesBasketAdmin(admin.ModelAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('user__username', 'product__name', 'available', 'quantity')
+            'fields': ('product', 'favorites_basket', 'quantity')
         }),
     )
 
