@@ -86,8 +86,8 @@ class CategoryDetailView(generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         category = self.object
-        related_products = category.category_products.all()
-        products_search = category.category_products.all()
+        related_products = category.category_products.all().filter(is_deleted=False)
+        products_search = category.category_products.all().filter(is_deleted=False)
         form_search = self.form_class_search(self.request.GET)
 
         for product in related_products:
