@@ -22,6 +22,7 @@
                     <td class="px-4 py-2 text-center">Width</td>
                     <td class="px-4 py-2 text-center">Warranty</td>
                     <td class="px-4 py-2 text-center">Quantity</td>
+                    <td class="px-4 py-2 text-center">Is Active</td>
                     <td class="px-4 py-2 text-center">Product Picture</td>
                     <td class="px-4 py-2 text-center">Edit</td>
                     <td class="px-4 py-2 text-center">Delete</td>
@@ -43,6 +44,7 @@
                             <td class="px-4 py-2 text-center">{{ product.width }}</td>
                             <td class="px-4 py-2 text-center">{{ product.warranty }}</td>
                             <td class="px-4 py-2 text-center">{{ product.quantity }}</td>
+                            <td class="px-4 py-2 text-center">{{ product.is_active }}</td>
                             {% for media in product.media_products.all %}
 
                                 {% if media.product_picture.url %}
@@ -93,6 +95,7 @@
                             <td class="px-4 py-2 text-center">{{ product.width }}</td>
                             <td class="px-4 py-2 text-center">{{ product.warranty }}</td>
                             <td class="px-4 py-2 text-center">{{ product.quantity }}</td>
+                        <td class="px-4 py-2 text-center">{{ product.is_active }}</td>
 
                             {% for media in product.media_products.all %}
 
