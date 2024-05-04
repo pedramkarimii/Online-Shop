@@ -1,0 +1,81 @@
+{% extends "base/base.html" %}
+{% block title %}
+    <title>Role</title>
+{% endblock %}
+{% block content %}
+    <div class="container mx-auto mb-8 mt-8">
+        <div class="overflow-x-auto">
+            <h1 class="text-2xl text-center bg-gray-800  text-gray-100 mt-8 pt-4 p-4 font-bold">Role</h1>
+            <table class="table-auto w-full rounded-lg border border-gray-300">
+                <tbody>
+                <tr class="bg-gray-200 font-bold text-red-700">
+                    <td class="px-4 py-2 text-center">Code Discount</td>
+                    <td class="px-4 py-2 text-center">Golden</td>
+                    <td class="px-4 py-2 text-center">Silver</td>
+                    <td class="px-4 py-2 text-center">Bronze</td>
+                    <td class="px-4 py-2 text-center">Seller</td>
+                    <td class="px-4 py-2 text-center">Is Active</td>
+                    <td class="px-4 py-2 text-center">Is Delete</td>
+                    <td class="px-4 py-2 text-center">Edit</td>
+                    <td class="px-4 py-2 text-center">Delete</td>
+                </tr>
+                {% if admin_role %}
+
+                    {% for role in admin_role %}
+                        <tr class="bg-white text-gray-800">
+                            <td class="px-4 py-2 text-center">{{ role.code_discount }}</td>
+                            <td class="px-4 py-2 text-center">{{ role.golden }}</td>
+                            <td class="px-4 py-2 text-center">{{ role.silver }}</td>
+                            <td class="px-4 py-2 text-center">{{ role.bronze }}</td>
+                            <td class="px-4 py-2 text-center">{{ role.seller }}</td>
+                            <td class="px-4 py-2 text-center">{{ role.is_active }}</td>
+                            <td class="px-4 py-2 text-center">{{ role.is_deleted }}</td>
+
+
+                            <td class="px-2 py-2 text-center">
+                                <a href="{% url "role_update" pk=role.id %}">
+                                    <button
+                                            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                                        Edit
+                                    </button>
+                                </a>
+                            </td>
+                            <td class="p-1 text-center">
+                                <a href="{% url "role_delete" pk=role.id %}">
+                                    <button
+                                            class="bg-red-500 hover:bg-red-700 text-white font-bold p-2 rounded">
+                                        Delete
+                                    </button>
+                                </a>
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+                {% else %}
+                    {% for role in supervisor_role %}
+                        <tr class="bg-white text-gray-800">
+                            <td class="px-4 py-2 text-center">{{ role.code_discount }}</td>
+                            <td class="px-4 py-2 text-center">{{ role.golden }}</td>
+                            <td class="px-4 py-2 text-center">{{ role.silver }}</td>
+                            <td class="px-4 py-2 text-center">{{ role.bronze }}</td>
+                            <td class="px-4 py-2 text-center">{{ role.seller }}</td>
+                            <td class="px-4 py-2 text-center">{{ role.is_active }}</td>
+                            <td class="px-4 py-2 text-center">{{ role.is_deleted }}</td>
+
+
+                        </tr>
+                    {% endfor %}
+                {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% block custom_css %}
+        <style>
+            th {
+                border-bottom: 2px solid rgba(118, 118, 118, 0.31);
+            }
+        </style>
+    {% endblock %}
+{% endblock %}
