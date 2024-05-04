@@ -1,7 +1,7 @@
 from django.test import TestCase
 from apps.account.models import User, Address, CodeDiscount
 from apps.order.models import OrderItem, Order
-from apps.product.models import Brand, Media, Category, Product, Comment, WarehouseKeeper, Discount, FavoritesBasket
+from apps.product.models import Brand, Media, Category, Product, Comment, AddToInventory, Discount, Wishlist
 from datetime import timedelta
 from decimal import Decimal
 from django.utils import timezone
@@ -216,7 +216,7 @@ class CommentTestCase(TestCase):
 #                                               name="Test Product")
 #
 #         # Create a warehouse keeper with the product
-#         self.warehouse_keeper = WarehouseKeeper.objects.create(user=self.user, brand=self.brand, product=self.product)
+#         self.warehouse_keeper = AddToInventory.objects.create(user=self.user, brand=self.brand, product=self.product)
 #
 #         # Assuming you have a valid OrderItem instance named 'order_item'
 #         self.order_item = OrderItem.objects.create(user=self.user, product=self.product, quantity=1,
@@ -348,7 +348,7 @@ class WarehouseKeeperTestCase(TestCase):
                                               price=100, quantity=10)
 
     def test_create_warehouse_keeper(self):
-        warehouse_keeper = WarehouseKeeper.objects.create(
+        warehouse_keeper = AddToInventory.objects.create(
             user=self.user,
             brand=self.brand,
             product=self.product,
@@ -358,7 +358,7 @@ class WarehouseKeeperTestCase(TestCase):
         self.assertIsNotNone(warehouse_keeper)
 
     def test_update_warehouse_keeper(self):
-        warehouse_keeper = WarehouseKeeper.objects.create(
+        warehouse_keeper = AddToInventory.objects.create(
             user=self.user,
             brand=self.brand,
             product=self.product,
@@ -367,11 +367,11 @@ class WarehouseKeeperTestCase(TestCase):
         )
         warehouse_keeper.quantity = 10
         warehouse_keeper.save()
-        updated_warehouse_keeper = WarehouseKeeper.objects.get(id=warehouse_keeper.id)
+        updated_warehouse_keeper = AddToInventory.objects.get(id=warehouse_keeper.id)
         self.assertEqual(updated_warehouse_keeper.quantity, 10)
 
     def test_delete_warehouse_keeper(self):
-        warehouse_keeper = WarehouseKeeper.objects.create(
+        warehouse_keeper = AddToInventory.objects.create(
             user=self.user,
             brand=self.brand,
             product=self.product,
@@ -379,19 +379,19 @@ class WarehouseKeeperTestCase(TestCase):
             available=True
         )
         warehouse_keeper.delete()
-        with self.assertRaises(WarehouseKeeper.DoesNotExist):  # noqa
-            WarehouseKeeper.objects.get(id=warehouse_keeper.id)
+        with self.assertRaises(AddToInventory.DoesNotExist):  # noqa
+            AddToInventory.objects.get(id=warehouse_keeper.id)
 
     def test_soft_delete_warehouse_keeper(self):
-        warehouse_keeper = WarehouseKeeper.objects.create(
+        warehouse_keeper = AddToInventory.objects.create(
             user=self.user,
             brand=self.brand,
             product=self.product,
             quantity=5,
             available=True
         )
-        WarehouseKeeper.soft_delete.filter(id=warehouse_keeper.id).delete()
-        soft_deleted_code_warehouse_keeper = WarehouseKeeper.soft_delete.archive().filter(
+        AddToInventory.soft_delete.filter(id=warehouse_keeper.id).delete()
+        soft_deleted_code_warehouse_keeper = AddToInventory.soft_delete.archive().filter(
             id=warehouse_keeper.id).values(
             'is_deleted').first()
         self.assertIsNotNone(soft_deleted_code_warehouse_keeper)
@@ -409,26 +409,26 @@ class FavoritesBasketTestCase(TestCase):
                                               price=100, quantity=10)
 
     def test_create_favorites_basket(self):
-        favorites_basket = FavoritesBasket.objects.create(user=self.user, product=self.product)
+        favorites_basket = Wishlist.objects.create(user=self.user, product=self.product)
         self.assertIsNotNone(favorites_basket)
-        self.assertEqual(FavoritesBasket.objects.count(), 1)
+        self.assertEqual(Wishlist.objects.count(), 1)
 
     def test_update_favorites_basket(self):
-        favorites_basket = FavoritesBasket.objects.create(user=self.user, product=self.product)
+        favorites_basket = Wishlist.objects.create(user=self.user, product=self.product)
         favorites_basket.quantity = 2
         favorites_basket.save()
-        updated_favorites_basket = FavoritesBasket.objects.get(pk=favorites_basket.pk)
+        updated_favorites_basket = Wishlist.objects.get(pk=favorites_basket.pk)
         self.assertEqual(updated_favorites_basket.quantity, 2)
 
     def test_delete_favorites_basket(self):
-        favorites_basket = FavoritesBasket.objects.create(user=self.user, product=self.product)
+        favorites_basket = Wishlist.objects.create(user=self.user, product=self.product)
         favorites_basket.delete()
-        self.assertEqual(FavoritesBasket.objects.count(), 0)
+        self.assertEqual(Wishlist.objects.count(), 0)
 
     def test_soft_delete_favorites_basket(self):
-        favorites_basket = FavoritesBasket.objects.create(user=self.user, product=self.product)
-        FavoritesBasket.soft_delete.filter(id=favorites_basket.id).delete()
-        soft_deleted_favorites_basket = FavoritesBasket.soft_delete.archive().filter(
+        favorites_basket = Wishlist.objects.create(user=self.user, product=self.product)
+        Wishlist.soft_delete.filter(id=favorites_basket.id).delete()
+        soft_deleted_favorites_basket = Wishlist.soft_delete.archive().filter(
             id=favorites_basket.id).values(
             'is_deleted').first()
         self.assertIsNotNone(soft_deleted_favorites_basket)
