@@ -8,23 +8,22 @@ from apps.product.form_data import forms
 from apps.core.permission.template_permission_admin import CRUD
 
 
-class WarehouseKeeperCreateView(CRUD.AdminPermissionRequiredMixinView):
+class AddToInventoryCreateView(CRUD.AdminPermissionRequiredMixinView):
     def setup(self, request, *args, **kwargs):
         """Initialize the success_url."""
-        self.form_class = forms.WarehouseKeeperCreateForm  # noqa
+        self.form_class = forms.AddToInventoryCreateForm  # noqa
         self.next_page_warehouse_keeper_create = reverse_lazy('warehouse_keeper_create')  # noqa
-        self.template_warehouse_keeper_create = 'product/warehouse_keeper/warehouse_keeper_create.html'  # noqa
+        self.template_add_to_inventory_create = 'product/warehouse_keeper/warehouse_keeper_create.html'  # noqa
         self.request_post = request.POST  # noqa
         return super().setup(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
-        return render(request, self.template_warehouse_keeper_create, {'form': self.form_class()})
+        return render(request, self.template_add_to_inventory_create, {'form': self.form_class()})
 
     def post(self, request, *args, **kwargs):
         form = self.form_class(self.request_post)
         if form.is_valid():  # noqa
             warehouse_keeper = form.save(commit=False)
-            warehouse_keeper.user = warehouse_keeper.brand.user
             warehouse_keeper.save()
             messages.success(request, _(f'Warehouse Keeper created successfully.'), extra_tags='success')
             return redirect(self.next_page_home)
@@ -32,9 +31,9 @@ class WarehouseKeeperCreateView(CRUD.AdminPermissionRequiredMixinView):
             messages.error(request, _(f'Error creating warehouse keeper.'), extra_tags='error')
 
 
-class AdminWarehouseKeeperListView(CRUD.AdminPermissionRequiredMixinView, generic.ListView):
+class AdminAddToInventoryListView(CRUD.AdminPermissionRequiredMixinView, generic.ListView):
     http_method_names = ['get']  # noqa
-    model = forms.WarehouseKeeper
+    model = forms.AddToInventory
 
     def setup(self, request, *args, **kwargs):
         self.context_object_name = 'warehouse_keeper'
@@ -42,11 +41,11 @@ class AdminWarehouseKeeperListView(CRUD.AdminPermissionRequiredMixinView, generi
         return super().setup(request, *args, **kwargs)
 
     def get_queryset(self):
-        return forms.WarehouseKeeper.objects.all()
+        return forms.AddToInventory.objects.all()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)  # noqa
-        warehouse_keepers = forms.WarehouseKeeper.objects.all()
+        warehouse_keepers = forms.AddToInventory.objects.all()
         if self.request.user.is_superuser or self.request.user.is_staff:
             context['admin_warehouse_keeper'] = warehouse_keepers
             return context
@@ -56,9 +55,9 @@ class AdminWarehouseKeeperListView(CRUD.AdminPermissionRequiredMixinView, generi
             return context
 
 
-class WarehouseKeeperDetailView(CRUD.AdminPermissionRequiredMixinView, generic.DetailView):
+class AddToInventoryDetailView(CRUD.AdminPermissionRequiredMixinView, generic.DetailView):
     http_method_names = ['get']  # noqa
-    model = forms.WarehouseKeeper
+    model = forms.AddToInventory
 
     def setup(self, request, *args, **kwargs):
         self.context_object_name = 'warehouse_keeper'
@@ -79,43 +78,43 @@ class WarehouseKeeperDetailView(CRUD.AdminPermissionRequiredMixinView, generic.D
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        warehouse_keeper = forms.WarehouseKeeper.objects.all()
+        warehouse_keeper = forms.AddToInventory.objects.all()
         context['warehouse_keeper'] = warehouse_keeper
         return context
 
 
-class WarehouseKeeperUpdateView(CRUD.AdminPermissionRequiredMixinView):
+class AddToInventoryUpdateView(CRUD.AdminPermissionRequiredMixinView):
 
     def setup(self, request, *args, **kwargs):
         """Initialize the success_url and retrieve the warehouse keeper instance."""
 
-        self.form_class = forms.WarehouseKeeperUpdateForm  # noqa
+        self.form_class = forms.AddToInventoryUpdateForm  # noqa
         self.template_warehouse_keeper_update = 'product/warehouse_keeper/warehouse_keeper_update.html'  # noqa
         self.request_post = request.POST  # noqa
         return super().setup(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
-        form = self.form_class(instance=self.warehouse_keeper_instance)
+        form = self.form_class(instance=self.add_to_inventory_instance_instance)
         return render(request, self.template_warehouse_keeper_update,
-                      {'form': form, 'warehouse_keeper': self.warehouse_keeper_instance})
+                      {'form': form, 'warehouse_keeper': self.add_to_inventory_instance_instance})
 
     def post(self, request, *args, **kwargs):
-        form = self.form_class(self.request_post, instance=self.warehouse_keeper_instance)  # noqa
+        form = self.form_class(self.request_post, instance=self.add_to_inventory_instance_instance)  # noqa
         if form.is_valid():  # noqa
-            warehouse_keeper = form.save(commit=False)
-            warehouse_keeper.user = warehouse_keeper.brand.user
-            warehouse_keeper.save()
+            add_to_inventory = form.save(commit=False)
+            add_to_inventory.user = add_to_inventory.inventory.user
+            add_to_inventory.save()
             messages.success(request, _(f'Warehouse Keeper updated successfully.'), extra_tags='success')
             return redirect(self.next_page_home)
         else:
             messages.error(request, _(f'Error updating warehouse keeper.'), extra_tags='error')
 
 
-class WarehouseKeeperDeleteView(CRUD.AdminPermissionRequiredMixinView, DetailView):
+class AddToInventoryDeleteView(CRUD.AdminPermissionRequiredMixinView, DetailView):
     """
     View for displaying warehouse keeper details and providing an option for soft deletion.
     """
-    model = forms.WarehouseKeeper
+    model = forms.AddToInventory
     template_name = 'product/warehouse_keeper/warehouse_keeper_delete.html'
 
     def get(self, request, *args, **kwargs):
@@ -129,7 +128,7 @@ class WarehouseKeeperDeleteView(CRUD.AdminPermissionRequiredMixinView, DetailVie
         """
         Handle soft deletion of the warehouse keeper.
         """
-        warehouse_keeper = self.get_object()
-        forms.WarehouseKeeper.soft_delete.filter(pk=warehouse_keeper.id).delete()
+        add_to_inventory = self.get_object()
+        forms.AddToInventory.soft_delete.filter(pk=add_to_inventory.id).delete()
         messages.success(request, _(f'Warehouse Keeper has been successfully soft deleted.'), extra_tags='success')
-        return redirect('home')
+        return redirect(self.next_page_home)
