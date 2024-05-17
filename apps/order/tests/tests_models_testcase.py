@@ -5,7 +5,7 @@ from django.test import TestCase
 from django.utils import timezone
 from apps.order.models import Order, OrderItem, OrderPayment
 from apps.account.models import User, Address, CodeDiscount
-from apps.product.models import Category, Brand, Product, WarehouseKeeper
+from apps.product.models import Category, Brand, Product, AddToInventory
 
 
 class OrderItemTestCase(TestCase):
@@ -97,7 +97,7 @@ class OrderTestCase(TestCase):
             postal_code=12345,
             notes="This is a test address"
         )
-        self.warehouse_keeper = WarehouseKeeper.objects.create(user=self.user, brand=self.brand, product=self.product)
+        self.warehouse_keeper = AddToInventory.objects.create(user=self.user, brand=self.brand, product=self.product)
 
     def test_create_order(self):
         order = Order.objects.create(

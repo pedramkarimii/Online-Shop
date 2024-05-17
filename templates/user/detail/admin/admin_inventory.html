@@ -1,39 +1,37 @@
 {% extends "base/base.html" %}
 {% block title %}
-    <title>Add Product in Inventory</title>
+    <title>Inventory</title>
 {% endblock %}
 {% block content %}
     <div class="container mx-auto mb-8 mt-8">
         <div class="overflow-x-auto">
-            <h1 class="text-2xl text-center bg-gray-800  text-gray-100 mt-8 pt-4 p-4 font-bold">Add Product in Inventory</h1>
+            <h1 class="text-2xl text-center bg-gray-800  text-gray-100 mt-8 pt-4 p-4 font-bold">Inventory</h1>
             <table class="table-auto w-full rounded-lg border border-gray-300">
                 <tbody>
                 <tr class="bg-gray-200 font-bold text-red-700">
-                    <td class="px-4 py-2 text-center">Inventory</td>
-                    <td class="px-4 py-2 text-center">Product</td>
-                    <td class="px-4 py-2 text-center">Quantity</td>
+                    <td class="px-4 py-2 text-center">name</td>
+                    <td class="px-4 py-2 text-center">quantity</td>
+                    <td class="px-4 py-2 text-center">available</td>
+                    <td class="px-4 py-2 text-center">description</td>
                     <td class="px-4 py-2 text-center">Is Active</td>
                     <td class="px-4 py-2 text-center">Is Delete</td>
                     <td class="px-4 py-2 text-center">Edit</td>
                     <td class="px-4 py-2 text-center">Delete</td>
                 </tr>
-                {% if admin_warehouse_keeper %}
-                    <li>
+                {% if admin_inventories %}
 
-
-                    </li>
-
-                    {% for warehouse_keeper in admin_warehouse_keeper %}
+                    {% for inventory in admin_inventories %}
                         <tr class="bg-white text-gray-800">
-                            <td class="px-4 py-2 text-center">{{ warehouse_keeper.inventory }}</td>
-                            <td class="px-4 py-2 text-center">{{ warehouse_keeper.product }}</td>
-                            <td class="px-4 py-2 text-center">{{ warehouse_keeper.quantity }}</td>
-                            <td class="px-4 py-2 text-center">{{ warehouse_keeper.is_active }}</td>
-                            <td class="px-4 py-2 text-center">{{ warehouse_keeper.is_deleted }}</td>
+                            <td class="px-4 py-2 text-center">{{ inventory.name }}</td>
+                            <td class="px-4 py-2 text-center">{{ inventory.quantity }}</td>
+                            <td class="px-4 py-2 text-center">{{ inventory.available }}</td>
+                            <td class="px-4 py-2 text-center">{{ inventory.description }}</td>
+                            <td class="px-4 py-2 text-center">{{ inventory.is_active }}</td>
+                            <td class="px-4 py-2 text-center">{{ inventory.is_deleted }}</td>
 
 
                             <td class="px-2 py-2 text-center">
-                                <a href="{% url "warehouse_keeper_update" pk=warehouse_keeper.id %}">
+                                <a href="{% url "inventory_update" pk=inventory.id %}">
                                     <button
                                             class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                                         Edit
@@ -41,7 +39,7 @@
                                 </a>
                             </td>
                             <td class="p-1 text-center">
-                                <a href="{% url "warehouse_keeper_delete" pk=warehouse_keeper.id %}">
+                                <a href="{% url "inventory_delete" pk=inventory.id %}">
                                     <button
                                             class="bg-red-500 hover:bg-red-700 text-white font-bold p-2 rounded">
                                         Delete
@@ -53,13 +51,14 @@
 
                     {% endfor %}
                 {% else %}
-                    {% for warehouse_keeper in supervisor_warehouse_keeper %}
+                    {% for inventory in supervisor_inventories %}
                         <tr class="bg-white text-gray-800">
-                            <td class="px-4 py-2 text-center">{{ warehouse_keeper.inventory }}</td>
-                            <td class="px-4 py-2 text-center">{{ warehouse_keeper.product }}</td>
-                            <td class="px-4 py-2 text-center">{{ warehouse_keeper.quantity }}</td>
-                            <td class="px-4 py-2 text-center">{{ warehouse_keeper.is_active }}</td>
-                            <td class="px-4 py-2 text-center">{{ warehouse_keeper.is_deleted }}</td>
+                            <td class="px-4 py-2 text-center">{{ inventory.name }}</td>
+                            <td class="px-4 py-2 text-center">{{ inventory.quantity }}</td>
+                            <td class="px-4 py-2 text-center">{{ inventory.available }}</td>
+                            <td class="px-4 py-2 text-center">{{ inventory.description }}</td>
+                            <td class="px-4 py-2 text-center">{{ inventory.is_active }}</td>
+                            <td class="px-4 py-2 text-center">{{ inventory.is_deleted }}</td>
 
 
                         </tr>

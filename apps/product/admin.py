@@ -1,6 +1,5 @@
 from django.contrib import admin
-from apps.product.models import Product, Comment, Brand, Category, Media, WarehouseKeeper, Discount, FavoritesBasket, \
-    OrderItemFavoritesBasket
+from apps.product.models import Product, Comment, Brand, Category, Media, AddToInventory, Discount, Wishlist, Inventory
 
 
 class MediaInline(admin.StackedInline):
@@ -168,28 +167,28 @@ class DiscountAdmin(admin.ModelAdmin):
     )
 
 
-@admin.register(WarehouseKeeper)
-class WarehouseKeeperAdmin(admin.ModelAdmin):
+@admin.register(AddToInventory)
+class AddToInventoryAdmin(admin.ModelAdmin):
     """
-    Admin panel configuration for WarehouseKeeper model.
+    Admin panel configuration for AddToInventory model.
     """
 
     list_display = (
-        'user', 'brand', 'product', 'quantity', 'create_time', 'update_time', 'is_deleted', 'is_active'
+        'inventory', 'product', 'quantity', 'create_time', 'update_time', 'is_deleted', 'is_active'
     )
     search_fields = (
-        'user__username', 'brand__name', 'product__name', 'quantity', 'create_time', 'update_time'
+        'inventory__name', 'product__name', 'quantity', 'create_time', 'update_time'
     )
     ordering = ('-create_time', '-update_time')
     list_filter = (
-        'user__username', 'brand__name', 'product__name', 'quantity', 'create_time', 'update_time'
+        'inventory__name', 'product__name', 'quantity', 'create_time', 'update_time'
     )
     date_hierarchy = 'create_time'
     list_per_page = 30
     readonly_fields = ('create_time', 'update_time', 'is_deleted', 'is_active')
     fieldsets = (
-        ('Creation Warehouse Keeper', {
-            'fields': ('user', 'brand', 'product', 'quantity')
+        ('Creation Add To Inventory', {
+            'fields': ('inventory', 'product', 'quantity')
         }),
         ('Data', {
             'fields': ('create_time', 'update_time', 'is_deleted', 'is_active')
@@ -198,7 +197,32 @@ class WarehouseKeeperAdmin(admin.ModelAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('user__username', 'brand', 'product', 'quantity')
+            'fields': ('inventory', 'product', 'quantity')
+        }),
+    )
+
+
+@admin.register(Inventory)
+class InventoryAdmin(admin.ModelAdmin):
+    list_display = ('name', 'quantity', 'available', 'create_time', 'update_time', 'is_deleted', 'is_active')
+    search_fields = ('name', 'create_time', 'update_time')
+    ordering = ('-create_time', '-update_time')
+    list_filter = ('name', 'create_time', 'update_time')
+    date_hierarchy = 'create_time'
+    list_per_page = 30
+    readonly_fields = ('available', 'create_time', 'update_time', 'is_deleted', 'is_active')
+    fieldsets = (
+        ('Creation Inventory', {
+            'fields': ('name', 'quantity')
+        }),
+        ('Data', {
+            'fields': ('available', 'create_time', 'update_time', 'is_deleted', 'is_active')
+        }),
+    )
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('name', 'quantity',)
         }),
     )
 
@@ -228,18 +252,18 @@ class CommentAdmin(admin.ModelAdmin):
     )
 
 
-@admin.register(FavoritesBasket)
-class FavoritesBasketAdmin(admin.ModelAdmin):
-    list_display = ('user', 'quantity')
-    search_fields = ('user__username', 'quantity')
+@admin.register(Wishlist)
+class WishlistAdmin(admin.ModelAdmin):
+    list_display = ('user', 'product', 'order', 'quantity', 'total_price', 'create_time', 'update_time')
+    search_fields = ('user__username', 'product')
     ordering = ('-create_time', '-update_time')
-    list_filter = ('user__username', 'quantity')
+    list_filter = ('user__username', 'product', 'order')
     date_hierarchy = 'create_time'
     list_per_page = 30
     readonly_fields = ('create_time', 'update_time')
     fieldsets = (
-        ('Creation Favorites Basket', {
-            'fields': ('user',)
+        ('Creation Wishlist', {
+            'fields': ('user', 'product', 'order', 'quantity', 'total_price')
         }),
         ('Data', {
             'fields': ('create_time', 'update_time')
@@ -248,33 +272,7 @@ class FavoritesBasketAdmin(admin.ModelAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('user__username', 'quantity')
-        }),
-    )
-
-
-@admin.register(OrderItemFavoritesBasket)
-class OrderItemFavoritesBasketAdmin(admin.ModelAdmin):
-    list_display = ('product', 'favorites_basket', 'quantity', 'available', 'create_time', 'update_time')
-
-    search_fields = ('product', 'quantity')
-    ordering = ('-create_time', '-update_time')
-    list_filter = ('product', 'quantity')
-    date_hierarchy = 'create_time'
-    list_per_page = 30
-    readonly_fields = ('create_time', 'update_time')
-    fieldsets = (
-        ('Creation Favorites Basket', {
-            'fields': ('product', 'favorites_basket' 'quantity',)
-        }),
-        ('Data', {
-            'fields': ('available', 'create_time', 'update_time')
-        }),
-    )
-    add_fieldsets = (
-        (None, {
-            'classes': ('wide',),
-            'fields': ('product', 'favorites_basket', 'quantity')
+            'fields': ('user__username', 'product', 'order', 'quantity', 'total_price',)
         }),
     )
 
