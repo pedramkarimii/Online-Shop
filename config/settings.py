@@ -59,9 +59,10 @@ TEMPLATES = [
     },
 ]
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'apps.account.users_auth.authenticate.JWTAuthentication',
-    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ]
 }
 # Applications
 APPLICATIONS = ["account", "order", "product", "core"]
@@ -78,6 +79,22 @@ JWT_AUTH_ENCRYPT_KEY = b'32 bytes'
 JWT_AUTH_GET_USER_BY_ACCESS_TOKEN = True
 JWT_AUTH_CACHE_USING = True
 
+# CELERY
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_BROKER_URL = config("CELERY_BROKER_URL")
+CELERY_BROKER_BACKEND = config("CELERY_BROKER_BACKEND")
+CELERY_RESULT_BACKEND = config("CELERY_RESULT_BACKEND")
+
+# AWS
+DEFAULT_FILE_STORAGE = config("DEFAULT_FILE_STORAGE")
+AWS_ACCESS_KEY_ID = config("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = config("AWS_SECRET_ACCESS_KEY")
+AWS_S3_ENDPOINT_URL = config("AWS_S3_ENDPOINT_URL")
+AWS_STORAGE_BUCKET_NAME = config("AWS_STORAGE_BUCKET_NAME")
+AWS_SERVICE_NAME = config("AWS_SERVICE_NAME")
+AWS_S3_FILE_OVERWRITE = config("AWS_S3_FILE_OVERWRITE", cast=bool, default=False)
+AWS_LOCAL_STORAGE = f"{BASE_DIR}storage/aws/"
+
 # Mode Handling:
 if DEBUG:
     INSTALLED_APPS = [
@@ -90,7 +107,8 @@ if DEBUG:
         "django.contrib.staticfiles",
         # Third-party
         "rest_framework",
-
+        "storages",
+        "django_celery_beat",
         # Application
         *list(map(lambda app: f"apps.{app}", APPLICATIONS)),
     ]
@@ -132,6 +150,8 @@ else:
         "django.contrib.contenttypes",
         # Third-party
         "rest_framework",
+        "storages",
+        "django_celery_beat",
         # Application
         *list(map(lambda app: f"apps.{app}", APPLICATIONS)),
     ]
@@ -153,12 +173,3 @@ else:
     EMAIL_HOST_USER = config("EMAIL_HOST_USER")
     EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
     DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL")
-
-    DEFAULT_FILE_STORAGE = config("DEFAULT_FILE_STORAGE")
-    AWS_ACCESS_KEY_ID = config("AWS_ACCESS_KEY_ID")
-    AWS_SECRET_ACCESS_KEY = config("AWS_SECRET_ACCESS_KEY")
-    AWS_S3_ENDPOINT_URL = config("AWS_S3_ENDPOINT_URL")
-    AWS_STORAGE_BUCKET_NAME = config("AWS_STORAGE_BUCKET_NAME")
-    AWS_SERVICE_NAME = config("AWS_SERVICE_NAME")
-    AWS_S3_FILE_OVERWRITE = config("AWS_S3_FILE_OVERWRITE", cast=bool, default=False)
-    AWS_LOCAL_STORAGE = f"{BASE_DIR}storage/aws/"
