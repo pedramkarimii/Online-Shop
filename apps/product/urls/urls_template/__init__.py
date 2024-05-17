@@ -8,4 +8,5 @@ urlpatterns = [
     path("", include("apps.product.urls.urls_template.discount")),
     path("", include("apps.product.urls.urls_template.add_to_inventory")),
     path("", include("apps.product.urls.urls_template.inventory")),
+    path("", include("apps.product.urls.urls_template.wishlist")),
 ]
