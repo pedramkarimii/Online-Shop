@@ -62,6 +62,12 @@ class Media(mixin_model.TimestampsStatusFlagMixin):
     objects = managers.MediaManager()
     soft_delete = soft_delete_manager.DeleteManager()
 
+    def get_img(self):
+        if self.product_picture:
+            return self.product_picture.url
+        else:
+            return None
+
     class Meta:
         """
         Meta options for the Media model:
@@ -242,9 +248,6 @@ class Wishlist(mixin_model.TimestampsStatusFlagMixin):
         verbose_name_plural = 'Favorites Baskets'
         indexes = [
             models.Index(fields=['user', 'product']),
-        ]
-        constraints = [
-            models.UniqueConstraint(fields=['user'], name='unique_user')
         ]
 
 
