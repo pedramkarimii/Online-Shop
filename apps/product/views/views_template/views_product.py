@@ -1,6 +1,6 @@
 from django.contrib import messages
 from django.urls import reverse_lazy
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from django.utils.translation import gettext_lazy as _
 from django.views import generic
 
@@ -122,7 +122,7 @@ class ProductUpdateView(CRUD.SellerOrAdminProductUpdateOrDeletePermissionRequire
 
     def setup(self, request, *args, **kwargs):
         """Initialize the success_url and retrieve the product instance."""
-        self.product_instance = get_object_or_404(forms.Product, pk=kwargs['pk'])  # noqa
+
         self.form_class = forms.ProductUpdateForm  # noqa
         self.template_product_update = 'product/product/product_update.html'  # noqa
         self.request_files = request.FILES  # noqa
