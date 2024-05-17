@@ -1,7 +1,7 @@
 from django import forms
 from apps.core import validators
 from django.utils.translation import gettext_lazy as _
-from apps.product.models import Brand, Product, Comment, Category, Discount, AddToInventory, Inventory
+from apps.product.models import Brand, Product, Comment, Category, Discount, AddToInventory, Inventory, Wishlist
 
 
 class BrandCreateForm(forms.ModelForm):
@@ -479,7 +479,7 @@ class ProductUpdateForm(ProductCreateForm):
         self.product_instance = kwargs.pop('product_instance', None)
         super().__init__(*args, **kwargs)
 
-    def save(self, commit=True):
+    def save(self, commit=True):  # noqa
         product = super().save(commit=False)  # noqa
 
         product.category = self.cleaned_data['category']
@@ -526,10 +526,8 @@ class ProductUpdateForm(ProductCreateForm):
                 product.warranty = self.product_instance.warranty
             if product.quantity == self.product_instance.quantity:
                 product.quantity = self.product_instance.quantity
-
         if commit:
             product.save()
-
         return product
 
 
@@ -707,26 +705,6 @@ class DiscountCreateForm(forms.ModelForm):
             'numerical_discount': [validators.NumericalDiscountValidator()],
         }
 
-    # def clean(self):
-    #     cleaned_data = super().clean()
-    #     percentage_discount = cleaned_data.get('percentage_discount')
-    #     numerical_discount = cleaned_data.get('numerical_discount')
-    #     product = cleaned_data.get('product')
-    #     category = cleaned_data.get('category')
-    #
-    #     if not percentage_discount and not numerical_discount:
-    #         raise ValidationError(_('Either percentage discount or numerical discount must be provided.'))
-    #
-    #     if percentage_discount and numerical_discount:
-    #         raise ValidationError(_('Only one type of discount can be provided.'))
-    #
-    #     if Discount.objects.filter(product=product).exists():
-    #         raise ValidationError(_(f'Discount product already exists.'))
-    #
-    #     if Discount.objects.filter(category=category).exists():
-    #         raise ValidationError(_(f'Discount category already exists.'))
-    #     return cleaned_data
-
     def save(self, commit=True):
         """
         Method to save the Discount object.
@@ -776,6 +754,97 @@ class DiscountUpdateForm(DiscountCreateForm):
             discount.save()
 
         return discount
+
+
+class WishlistAddForm(forms.ModelForm):
+    class Meta:
+        model = Wishlist
+        fields = ['product', 'order', 'quantity', 'total_price']
+        widgets = {
+            'product': forms.Select(
+                attrs={'class': 'form-select mt-1 pt-2 py-2 px-4 focus:ring-indigo-500 focus:border-indigo-500 '
+                                'block w-full shadow-sm sm:text-sm border-gray-300 rounded-md'}),
+            'order': forms.Select(
+                attrs={'class': 'form-select mt-1 pt-2 py-2 px-4 focus:ring-indigo-500 focus:border-indigo-500 '
+                                'block w-full shadow-sm sm:text-sm border-gray-300 rounded-md'}),
+            'quantity': forms.NumberInput(attrs={
+                'class': 'form-control mt-1 pt-2 py-2 px-4 focus:ring-indigo-500 focus:border-indigo-500 '
+                         'block w-full shadow-sm sm:text-sm border-gray-300 rounded-md'}),
+            'total_price': forms.NumberInput(attrs={
+                'class': 'form-control mt-1 pt-2 py-2 px-4 focus:ring-indigo-500 focus:border-indigo-500 '
+                         'block w-full shadow-sm sm:text-sm border-gray-300 rounded-md'}),
+        }
+        labels = {
+            'product': _(),
+            'order': _(),
+            'quantity': _(),
+            'total_price': _(),
+        }
+        error_messages = {
+            'product': {
+                'required': _('Product is required'),
+                'invalid': _('Inventory must be a valid Product')
+            },
+            'order': {
+                'required': _('Order is required'),
+                'invalid': _('Order must be a valid Order')
+            },
+            'quantity': {
+                'required': _('Quantity is required'),
+                'invalid': _('Quantity must be a valid integer')
+            },
+            'total_price': {
+                'required': _('Total Price is required'),
+                'invalid': _('Total Price must be a valid integer')
+            }
+        }
+        required = {
+            'product': True,
+            'order': False,
+            'quantity': True,
+            'total_price': True
+        }
+
+    def save(self, commit=True):
+        """
+        Method to save the AddToInventory object.
+        """
+        add_to_wishlist = super().save(commit=False)
+        add_to_wishlist.product = self.cleaned_data['product']
+        add_to_wishlist.order = self.cleaned_data['order']
+        add_to_wishlist.quantity = self.cleaned_data['quantity']
+        add_to_wishlist.total_price = self.cleaned_data['total_price']
+        if commit:
+            add_to_wishlist.save()
+        return add_to_wishlist
+
+
+class WishlistUpdateForm(WishlistAddForm):
+    def __init__(self, *args, **kwargs):
+        self.add_to_wishlist_instance = kwargs.pop('add_to_wishlist_instance', None)
+        super().__init__(*args, **kwargs)
+
+    def save(self, commit=True):
+        """
+        Method to save the AddToInventory object.
+        """
+        add_to_wishlist = super().save(commit=False)
+        add_to_wishlist.product = self.cleaned_data['product']
+        add_to_wishlist.order = self.cleaned_data['order']
+        add_to_wishlist.quantity = self.cleaned_data['quantity']
+        add_to_wishlist.total_price = self.cleaned_data['total_price']
+        if self.add_to_inventory_instance:  # noqa
+            if add_to_wishlist.product == self.add_to_wishlist_instance.product:
+                add_to_wishlist.product = self.add_to_wishlist_instance.product
+            if add_to_wishlist.order == self.add_to_wishlist_instance.order:
+                add_to_wishlist.order = self.add_to_wishlist_instance.order
+            if add_to_wishlist.quantity == self.add_to_wishlist_instance.quantity:
+                add_to_wishlist.quantity = self.add_to_wishlist_instance.quantity
+            if add_to_wishlist.total_price == self.add_to_wishlist_instance.total_price:
+                add_to_wishlist.total_price = self.add_to_wishlist_instance.total_price
+        if commit:
+            add_to_wishlist.save()
+        return add_to_wishlist
 
 
 class AddToInventoryCreateForm(forms.ModelForm):
