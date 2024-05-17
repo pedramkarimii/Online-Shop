@@ -1,7 +1,7 @@
 from django import forms
 from apps.core import validators
 from django.utils.translation import gettext_lazy as _
-from apps.product.models import Brand, Product, Comment, Category, Discount, WarehouseKeeper
+from apps.product.models import Brand, Product, Comment, Category, Discount, AddToInventory, Inventory, Wishlist
 
 
 class BrandCreateForm(forms.ModelForm):
@@ -242,7 +242,7 @@ class CategoryUpdateForm(CategoryCreateForm):
         category.parent_category = self.cleaned_data['parent_category']
         category.category_picture = self.cleaned_data['category_picture']
         category.is_sub_category = self.cleaned_data['is_sub_category']
-        if self.category_instance:
+        if self.category_instance:  # noqa
             if category.name == self.category_instance.name:  # noqa
                 category.name = self.category_instance.name
             if category.parent_category == self.category_instance.parent_category:
@@ -267,7 +267,8 @@ class ProductCreateForm(forms.ModelForm):
                                           'class': 'form-select mt-1 pt-2 py-2 px-4 focus:ring-indigo-500 '
                                                    'focus:border-indigo-500 '
                                                    'block w-full shadow-sm sm:text-sm border-gray-300 rounded-md'}))
-    brand = forms.ModelChoiceField(label=_('Brand'), queryset=Brand.objects.all(),
+    brand = forms.ModelChoiceField(label=_('Brand'),
+                                   queryset=Brand.objects.all().filter(is_active=True, is_deleted=False),
                                    widget=forms.Select(attrs={
                                        'class': 'form-select mt-1 pt-2 py-2 px-4 focus:ring-indigo-500 '
                                                 'focus:border-indigo-500 '
@@ -478,7 +479,7 @@ class ProductUpdateForm(ProductCreateForm):
         self.product_instance = kwargs.pop('product_instance', None)
         super().__init__(*args, **kwargs)
 
-    def save(self, commit=True):
+    def save(self, commit=True):  # noqa
         product = super().save(commit=False)  # noqa
 
         product.category = self.cleaned_data['category']
@@ -525,10 +526,8 @@ class ProductUpdateForm(ProductCreateForm):
                 product.warranty = self.product_instance.warranty
             if product.quantity == self.product_instance.quantity:
                 product.quantity = self.product_instance.quantity
-
         if commit:
             product.save()
-
         return product
 
 
@@ -543,7 +542,8 @@ class CommentCreateForm(forms.ModelForm):
         attrs={'class': 'form-control mt-1 pt-2 py-2 px-4 focus:ring-indigo-500 focus:border-indigo-500 '
                         'block w-full shadow-sm sm:text-sm border-gray-300 rounded-md'}))
 
-    reply = forms.ModelChoiceField(queryset=Comment.objects.all(), required=False,
+    reply = forms.ModelChoiceField(queryset=Comment.objects.all().filter(is_active=True, is_deleted=False),
+                                   required=False,
                                    widget=forms.Select(
                                        attrs={'class': 'form-select mt-1 pt-2 py-2 px-4 focus:ring-indigo-500 '
                                                        'focus:border-indigo-500 '
@@ -617,12 +617,14 @@ class CommentCreateForm(forms.ModelForm):
 
 
 class DiscountCreateForm(forms.ModelForm):
-    product = forms.ModelChoiceField(queryset=Product.objects.all(), required=False, widget=forms.Select(
-        attrs={'class': 'form-select mt-1 pt-2 py-2 px-4 focus:ring-indigo-500 focus:border-indigo-500 '
-                        'block w-full shadow-sm sm:text-sm border-gray-300 rounded-md'}))
-    category = forms.ModelChoiceField(queryset=Category.objects.all(), required=False, widget=forms.Select(
-        attrs={'class': 'form-select mt-1 pt-2 py-2 px-4 focus:ring-indigo-500 focus:border-indigo-500 '
-                        'block w-full shadow-sm sm:text-sm border-gray-300 rounded-md'}))
+    product = forms.ModelChoiceField(queryset=Product.objects.all().filter(is_active=True, is_deleted=False),
+                                     required=False, widget=forms.Select(
+            attrs={'class': 'form-select mt-1 pt-2 py-2 px-4 focus:ring-indigo-500 focus:border-indigo-500 '
+                            'block w-full shadow-sm sm:text-sm border-gray-300 rounded-md'}))
+    category = forms.ModelChoiceField(queryset=Category.objects.all().filter(is_active=True, is_deleted=False),
+                                      required=False, widget=forms.Select(
+            attrs={'class': 'form-select mt-1 pt-2 py-2 px-4 focus:ring-indigo-500 focus:border-indigo-500 '
+                            'block w-full shadow-sm sm:text-sm border-gray-300 rounded-md'}))
 
     class Meta:
         model = Discount
@@ -703,26 +705,6 @@ class DiscountCreateForm(forms.ModelForm):
             'numerical_discount': [validators.NumericalDiscountValidator()],
         }
 
-    # def clean(self):
-    #     cleaned_data = super().clean()
-    #     percentage_discount = cleaned_data.get('percentage_discount')
-    #     numerical_discount = cleaned_data.get('numerical_discount')
-    #     product = cleaned_data.get('product')
-    #     category = cleaned_data.get('category')
-    #
-    #     if not percentage_discount and not numerical_discount:
-    #         raise ValidationError(_('Either percentage discount or numerical discount must be provided.'))
-    #
-    #     if percentage_discount and numerical_discount:
-    #         raise ValidationError(_('Only one type of discount can be provided.'))
-    #
-    #     if Discount.objects.filter(product=product).exists():
-    #         raise ValidationError(_(f'Discount product already exists.'))
-    #
-    #     if Discount.objects.filter(category=category).exists():
-    #         raise ValidationError(_(f'Discount category already exists.'))
-    #     return cleaned_data
-
     def save(self, commit=True):
         """
         Method to save the Discount object.
@@ -774,13 +756,111 @@ class DiscountUpdateForm(DiscountCreateForm):
         return discount
 
 
-class WarehouseKeeperCreateForm(forms.ModelForm):
-    brand = forms.ModelChoiceField(queryset=Brand.objects.all(), widget=forms.Select(
-        attrs={'class': 'form-select mt-1 pt-2 py-2 px-4 focus:ring-indigo-500 focus:border-indigo-500 '
-                        'block w-full shadow-sm sm:text-sm border-gray-300 rounded-md'}))
-    product = forms.ModelChoiceField(queryset=Product.objects.all(), widget=forms.Select(
-        attrs={'class': 'form-select mt-1 pt-2 py-2 px-4 focus:ring-indigo-500 focus:border-indigo-500 '
-                        'block w-full shadow-sm sm:text-sm border-gray-300 rounded-md'}))
+class WishlistAddForm(forms.ModelForm):
+    class Meta:
+        model = Wishlist
+        fields = ['product', 'order', 'quantity', 'total_price']
+        widgets = {
+            'product': forms.Select(
+                attrs={'class': 'form-select mt-1 pt-2 py-2 px-4 focus:ring-indigo-500 focus:border-indigo-500 '
+                                'block w-full shadow-sm sm:text-sm border-gray-300 rounded-md'}),
+            'order': forms.Select(
+                attrs={'class': 'form-select mt-1 pt-2 py-2 px-4 focus:ring-indigo-500 focus:border-indigo-500 '
+                                'block w-full shadow-sm sm:text-sm border-gray-300 rounded-md'}),
+            'quantity': forms.NumberInput(attrs={
+                'class': 'form-control mt-1 pt-2 py-2 px-4 focus:ring-indigo-500 focus:border-indigo-500 '
+                         'block w-full shadow-sm sm:text-sm border-gray-300 rounded-md'}),
+            'total_price': forms.NumberInput(attrs={
+                'class': 'form-control mt-1 pt-2 py-2 px-4 focus:ring-indigo-500 focus:border-indigo-500 '
+                         'block w-full shadow-sm sm:text-sm border-gray-300 rounded-md'}),
+        }
+        labels = {
+            'product': _(),
+            'order': _(),
+            'quantity': _(),
+            'total_price': _(),
+        }
+        error_messages = {
+            'product': {
+                'required': _('Product is required'),
+                'invalid': _('Inventory must be a valid Product')
+            },
+            'order': {
+                'required': _('Order is required'),
+                'invalid': _('Order must be a valid Order')
+            },
+            'quantity': {
+                'required': _('Quantity is required'),
+                'invalid': _('Quantity must be a valid integer')
+            },
+            'total_price': {
+                'required': _('Total Price is required'),
+                'invalid': _('Total Price must be a valid integer')
+            }
+        }
+        required = {
+            'product': True,
+            'order': False,
+            'quantity': True,
+            'total_price': True
+        }
+
+    def save(self, commit=True):
+        """
+        Method to save the AddToInventory object.
+        """
+        add_to_wishlist = super().save(commit=False)
+        add_to_wishlist.product = self.cleaned_data['product']
+        add_to_wishlist.order = self.cleaned_data['order']
+        add_to_wishlist.quantity = self.cleaned_data['quantity']
+        add_to_wishlist.total_price = self.cleaned_data['total_price']
+        if commit:
+            add_to_wishlist.save()
+        return add_to_wishlist
+
+
+class WishlistUpdateForm(WishlistAddForm):
+    def __init__(self, *args, **kwargs):
+        self.add_to_wishlist_instance = kwargs.pop('add_to_wishlist_instance', None)
+        super().__init__(*args, **kwargs)
+
+    def save(self, commit=True):
+        """
+        Method to save the AddToInventory object.
+        """
+        add_to_wishlist = super().save(commit=False)
+        add_to_wishlist.product = self.cleaned_data['product']
+        add_to_wishlist.order = self.cleaned_data['order']
+        add_to_wishlist.quantity = self.cleaned_data['quantity']
+        add_to_wishlist.total_price = self.cleaned_data['total_price']
+        if self.add_to_inventory_instance:  # noqa
+            if add_to_wishlist.product == self.add_to_wishlist_instance.product:
+                add_to_wishlist.product = self.add_to_wishlist_instance.product
+            if add_to_wishlist.order == self.add_to_wishlist_instance.order:
+                add_to_wishlist.order = self.add_to_wishlist_instance.order
+            if add_to_wishlist.quantity == self.add_to_wishlist_instance.quantity:
+                add_to_wishlist.quantity = self.add_to_wishlist_instance.quantity
+            if add_to_wishlist.total_price == self.add_to_wishlist_instance.total_price:
+                add_to_wishlist.total_price = self.add_to_wishlist_instance.total_price
+        if commit:
+            add_to_wishlist.save()
+        return add_to_wishlist
+
+
+class AddToInventoryCreateForm(forms.ModelForm):
+    inventory = forms.ModelChoiceField(queryset=Inventory.objects.all().filter(is_active=True, is_deleted=False),
+                                       widget=forms.Select(
+                                           attrs={
+                                               'class': 'form-select mt-1 pt-2 py-2 px-4 '
+                                                        'focus:ring-indigo-500 focus:border-indigo-500 '
+                                                        'block w-full shadow-sm sm:text-sm border-gray-300 '
+                                                        'rounded-md'}))
+    product = forms.ModelChoiceField(queryset=Product.objects.all().filter(is_active=True, is_deleted=False),
+                                     widget=forms.Select(
+                                         attrs={
+                                             'class': 'form-select mt-1 pt-2 py-2 px-4 '
+                                                      'focus:ring-indigo-500 focus:border-indigo-500 '
+                                                      'block w-full shadow-sm sm:text-sm border-gray-300 rounded-md'}))
     quantity = forms.IntegerField(label=_('Quantity'), min_value=0, max_value=10000,
                                   widget=forms.NumberInput(attrs={
                                       'class': 'form-control mt-1 pt-2 py-2 px-4 focus:ring-indigo-500 '
@@ -788,11 +868,15 @@ class WarehouseKeeperCreateForm(forms.ModelForm):
                                                'block w-full shadow-sm sm:text-sm border-gray-300 '
                                                'rounded-md'}))
 
+    def __init__(self, *args, **kwargs):
+        super(AddToInventoryCreateForm, self).__init__(*args, **kwargs)
+        self.fields['inventory'].label_from_instance = lambda obj: f'{obj.name}'
+
     class Meta:
-        model = WarehouseKeeper
-        fields = ['brand', 'product', 'quantity']
+        model = AddToInventory
+        fields = ['inventory', 'product', 'quantity']
         widgets = {
-            'brand': forms.Select(
+            'inventory': forms.Select(
                 attrs={'class': 'form-select mt-1 pt-2 py-2 px-4 focus:ring-indigo-500 focus:border-indigo-500 '
                                 'block w-full shadow-sm sm:text-sm border-gray-300 rounded-md'}),
             'product': forms.Select(
@@ -803,19 +887,19 @@ class WarehouseKeeperCreateForm(forms.ModelForm):
                          'block w-full shadow-sm sm:text-sm border-gray-300 rounded-md'})
         }
         labels = {
-            'brand': _('Brand'),
+            'inventory': _('Inventory'),
             'product': _('Product'),
             'quantity': _('Quantity')
         }
         help_texts = {
-            'brand': _('Select a brand for the product'),
+            'inventory': _('Select a inventory for the product'),
             'product': _('Select a product for the warehouse keeper'),
             'quantity': _('Enter a quantity for the product')
         }
         error_messages = {
             'brand': {
-                'required': _('Brand is required'),
-                'invalid': _('Brand must be a valid brand')
+                'required': _('Inventory is required'),
+                'invalid': _('Inventory must be a valid brand')
             },
             'product': {
                 'required': _('Product is required'),
@@ -827,48 +911,134 @@ class WarehouseKeeperCreateForm(forms.ModelForm):
             }
         }
         required = {
-            'brand': True,
+            'inventory': True,
             'product': True,
             'quantity': True
         }
 
     def save(self, commit=True):
         """
-        Method to save the WarehouseKeeper object.
+        Method to save the AddToInventory object.
         """
-        warehouse_keeper = super().save(commit=False)
-        warehouse_keeper.brand = self.cleaned_data['brand']
-        warehouse_keeper.product = self.cleaned_data['product']
-        warehouse_keeper.quantity = self.cleaned_data['quantity']
+        add_to_inventory = super().save(commit=False)
+        add_to_inventory.inventory = self.cleaned_data['inventory']
+        add_to_inventory.product = self.cleaned_data['product']
+        add_to_inventory.quantity = self.cleaned_data['quantity']
         if commit:
-            warehouse_keeper.save()
-        return warehouse_keeper
+            add_to_inventory.save()
+        return add_to_inventory
 
 
-class WarehouseKeeperUpdateForm(WarehouseKeeperCreateForm):
+class AddToInventoryUpdateForm(AddToInventoryCreateForm):
     def __init__(self, *args, **kwargs):
-        self.warehouse_keeper_instance = kwargs.pop('warehouse_keeper_instance', None)
+        self.add_to_inventory_instance = kwargs.pop('add_to_inventory_instance', None)
         super().__init__(*args, **kwargs)
 
     def save(self, commit=True):
-        warehouse_keeper = super().save(commit=False)
+        add_to_inventory = super().save(commit=False)
 
-        warehouse_keeper.brand = self.cleaned_data['brand']
-        warehouse_keeper.product = self.cleaned_data['product']
-        warehouse_keeper.quantity = self.cleaned_data['quantity']
+        add_to_inventory.inventory = self.cleaned_data['inventory']
+        add_to_inventory.product = self.cleaned_data['product']
+        add_to_inventory.quantity = self.cleaned_data['quantity']
 
-        if self.warehouse_keeper_instance:  # noqa
-            if warehouse_keeper.brand == self.warehouse_keeper_instance.brand:
-                warehouse_keeper.brand = self.warehouse_keeper_instance.brand
-            if warehouse_keeper.product == self.warehouse_keeper_instance.product:
-                warehouse_keeper.product = self.warehouse_keeper_instance.product
-            if warehouse_keeper.quantity == self.warehouse_keeper_instance.quantity:
-                warehouse_keeper.quantity = self.warehouse_keeper_instance.quantity
+        if self.add_to_inventory_instance:  # noqa
+            if add_to_inventory.inventory == self.add_to_inventory_instance.inventory:
+                add_to_inventory.inventory = self.add_to_inventory_instance.inventory
+            if add_to_inventory.product == self.add_to_inventory_instance.product:
+                add_to_inventory.product = self.add_to_inventory_instance.product
+            if add_to_inventory.quantity == self.add_to_inventory_instance.quantity:
+                add_to_inventory.quantity = self.add_to_inventory_instance.quantity
 
         if commit:
-            warehouse_keeper.save()
+            add_to_inventory.save()
 
-        return warehouse_keeper
+        return add_to_inventory
+
+
+class InventoryCreateForm(forms.ModelForm):
+    class Meta:
+        model = Inventory
+        fields = ['name', 'quantity', 'description']
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'class': 'form-control mt-1 pt-2 py-2 px-4 focus:ring-indigo-500 focus:border-indigo-500 '
+                         'block w-full shadow-sm sm:text-sm border-gray-300 rounded-md'}),
+            'quantity': forms.NumberInput(
+                attrs={'class': 'form-control mt-1 pt-2 py-2 px-4 focus:ring-indigo-500 focus:border-indigo-500 '
+                                'block w-full shadow-sm sm:text-sm border-gray-300 rounded-md'}),
+            'description': forms.Textarea(attrs={
+                'class': 'form-control mt-1 pt-2 py-2 px-4 focus:ring-indigo-500 focus:border-indigo-500 '
+                         'block w-full shadow-sm sm:text-sm border-gray-300 rounded-md'})
+        }
+        labels = {
+            'name': _('Name'),
+            'quantity': _('Quantity'),
+            'description': _('Description')
+        }
+        help_texts = {
+            'name': _('Enter a name for the inventory'),
+            'quantity': _('Enter a quantity for the inventory'),
+            'description': _('Enter a description for the inventory')
+        }
+        error_messages = {
+            'name': {
+                'required': _('Name is required'),
+                'invalid': _('Name must be a valid name')
+            },
+            'quantity': {
+                'required': _('Quantity is required'),
+                'invalid': _('Quantity must be a valid integer')
+            },
+            'description': {
+                'required': _('Description is required'),
+                'invalid': _('Description must be a valid description')
+            }
+        }
+        required = {
+            'name': True,
+            'quantity': False,
+            'description': False
+        }
+        validators = {
+            'name': validators.NameValidator(),
+            'description': validators.NameValidator()
+        }
+
+    def save(self, commit=True):
+        inventory = super().save(commit=False)
+
+        inventory.name = self.cleaned_data['name']
+        inventory.quantity = self.cleaned_data['quantity']
+        inventory.description = self.cleaned_data['description']
+        if commit:
+            inventory.save()
+        return inventory
+
+
+class InventoryUpdateForm(InventoryCreateForm):
+    def __init__(self, *args, **kwargs):
+        self.inventory_instance = kwargs.pop('inventory_instance', None)
+        super().__init__(*args, **kwargs)
+
+    def save(self, commit=True):
+        inventory = super().save(commit=False)
+
+        inventory.name = self.cleaned_data['name']
+        inventory.quantity = self.cleaned_data['quantity']
+        inventory.description = self.cleaned_data['description']
+
+        if self.inventory_instance:  # noqa
+            if inventory.name == self.inventory_instance.name:
+                inventory.name = self.inventory_instance.name
+            if inventory.quantity == self.inventory_instance.quantity:
+                inventory.quantity = self.inventory_instance.quantity
+            if inventory.description == self.inventory_instance.description:
+                inventory.description = self.inventory_instance.description
+
+        if commit:
+            inventory.save()
+
+        return inventory
 
 
 class SearchForm(forms.Form):

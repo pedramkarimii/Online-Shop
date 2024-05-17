@@ -136,6 +136,7 @@ class UserAuth(mixin_model.TimestampsStatusFlagMixin):
     user_id = models.IntegerField(verbose_name=_("user id"), )
     token_type = models.PositiveSmallIntegerField(choices=TOKEN_TYPE_CHOICES,
                                                   verbose_name=_("token type"))
+    device_login_count = models.PositiveSmallIntegerField(default=0, verbose_name=_("device login count"))
     uuid = models.UUIDField(verbose_name=_("uuid"), unique=True)
 
     objects = managers.UserAuthManager()

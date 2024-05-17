@@ -1,13 +1,10 @@
 from apps.account.models import CodeDiscount, Role
 from apps.core.mixin.mixin_views_template import HttpsOptionNotLogoutMixin, messages, PermissionRequiredMixin, \
     redirect, get_object_or_404
-from apps.product.models import Product, Brand, Category, WarehouseKeeper, Discount
+from apps.product.models import Product, Brand, Category, AddToInventory, Discount, Inventory
 
 
 class MainPermissionRequiredMixinView(PermissionRequiredMixin, HttpsOptionNotLogoutMixin):
-    permission_required = (
-        'Seller',
-    )
 
     def dispatch(self, request, *args, **kwargs):
         try:  # noqa
@@ -21,10 +18,14 @@ class MainPermissionRequiredMixinView(PermissionRequiredMixin, HttpsOptionNotLog
         except Exception:  # noqa
             pass
         try:
-            self.warehouse_keeper_instance = get_object_or_404(WarehouseKeeper, pk=kwargs['pk'])  # noqa
+            self.inventory_instance = get_object_or_404(Inventory, pk=kwargs['pk'])  # noqa
         except Exception:  # noqa
             pass
-        try: # noqa
+        try:
+            self.add_to_inventory_instance = get_object_or_404(AddToInventory, pk=kwargs['pk'])  # noqa
+        except Exception:  # noqa
+            pass
+        try:  # noqa
             self.discount_instance = get_object_or_404(Discount, pk=kwargs['pk'])  # noqa
         except Exception:  # noqa
             pass

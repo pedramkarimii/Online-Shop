@@ -5,7 +5,7 @@ import pytz
 from django.utils import timezone
 
 
-class FavoritesBasketQuerySet(models.QuerySet):
+class WishlistQuerySet(models.QuerySet):
     def available(self):
         return self.filter(available=True)
 
@@ -25,9 +25,12 @@ class FavoritesBasketQuerySet(models.QuerySet):
         return self.filter(product=product)
 
 
-class FavoritesBasketManager(models.Manager):
+class WishlistManager(models.Manager):
     def get_queryset(self):
-        return FavoritesBasketQuerySet(self.model, using=self._db)
+        """Get the queryset object associated with this manager."""
+        if not hasattr(self.__class__, '__queryset'):
+            self.__class__.__queryset = WishlistQuerySet(self.model)
+        return self.__queryset
 
     def available(self):
         return self.get_queryset().available()
@@ -130,7 +133,7 @@ class CodeDiscountManager(models.Manager):
         return self.get_queryset().get_discount_by_code_and_user(code, user)
 
 
-class WarehouseKeeperQuerySet(models.QuerySet):
+class AddToInventoryQuerySet(models.QuerySet):
     def available_products(self):
         """
         Returns warehouse keepers with available products.
@@ -168,13 +171,13 @@ class WarehouseKeeperQuerySet(models.QuerySet):
         return self.annotate(total_quantity=Sum('quantity')).filter(total_quantity__lt=value)
 
 
-class WarehouseKeeperManager(models.Manager):
+class AddToInventoryManager(models.Manager):
     def get_queryset(self):
         """
         Get the queryset object associated with this manager.
         """
         if not hasattr(self.__class__, '__queryset'):
-            self.__class__.__queryset = WarehouseKeeperQuerySet(self.model)
+            self.__class__.__queryset = AddToInventoryQuerySet(self.model)
         return self.__queryset
 
     def available_products(self):
@@ -212,6 +215,20 @@ class WarehouseKeeperManager(models.Manager):
         Returns warehouse keepers with a total quantity lower than the specified value using the custom queryset.
         """
         return self.get_queryset().total_quantity_lower_than(value)
+
+
+class InventoryQuerySet(models.QuerySet):
+    pass
+
+
+class InventoryManager(models.Manager):
+    def get_queryset(self):
+        """
+        Get the queryset object associated with this manager.
+        """
+        if not hasattr(self.__class__, '__queryset'):
+            self.__class__.__queryset = InventoryQuerySet(self.model)
+        return self.__queryset
 
 
 class BrandQuerySet(models.QuerySet):

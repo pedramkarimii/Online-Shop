@@ -79,10 +79,12 @@
                                                         <!-- Display actual product rating if available -->
                                                     </div>
                                                     <div class="product-btns">
+                                                        <form action="{% url 'wishlist_add' product.pk %}" method="post">
+                                                        {% csrf_token %}
                                                         <button class="add-to-wishlist" tabindex="-1"><i
-                                                                class="fa fa-heart-o"></i><span
-                                                                class="tooltipp">add to wishlist</span>
+                                                                class="fa fa-heart-o"></i>
                                                         </button>
+                                                    </form>
                                                         <button class="add-to-compare" tabindex="-1"><i
                                                                 class="fa fa-exchange"></i><span
                                                                 class="tooltipp">add to compare</span>
@@ -388,10 +390,12 @@
                                                     <!-- Display actual product rating if available -->
                                                 </div>
                                                 <div class="product-btns">
-                                                    <button class="add-to-wishlist" tabindex="-1"><i
-                                                            class="fa fa-heart-o"></i><span
-                                                            class="tooltipp">add to wishlist</span>
-                                                    </button>
+                                                    <form action="{% url 'wishlist_add' product.pk %}" method="post">
+                                                        {% csrf_token %}
+                                                        <button class="add-to-wishlist" tabindex="-1"><i
+                                                                class="fa fa-heart-o"></i>
+                                                        </button>
+                                                    </form>
                                                     <button class="add-to-compare" tabindex="-1"><i
                                                             class="fa fa-exchange"></i><span
                                                             class="tooltipp">add to compare</span>

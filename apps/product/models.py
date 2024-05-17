@@ -1,6 +1,8 @@
 from functools import partial
 from apps.core.upload_to_filename import maker
 from django.db import models
+
+from apps.order.models import Order
 from apps.product import managers
 from apps.core import managers as delete_managers
 from apps.account.models import User
@@ -59,6 +61,12 @@ class Media(mixin_model.TimestampsStatusFlagMixin):
 
     objects = managers.MediaManager()
     soft_delete = soft_delete_manager.DeleteManager()
+
+    def get_img(self):
+        if self.product_picture:
+            return self.product_picture.url
+        else:
+            return None
 
     class Meta:
         """
@@ -217,23 +225,30 @@ class Comment(mixin_model.TimestampsStatusFlagMixin):
         ]
 
 
-class FavoritesBasket(mixin_model.TimestampsStatusFlagMixin):
+class Wishlist(mixin_model.TimestampsStatusFlagMixin):
     """Model representing a user's favorite or basket products."""
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='user_favorites_baskets')
-    quantity = models.PositiveSmallIntegerField(default=0)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='user_wishlist')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_wishlist')
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='order_wishlist', null=True,
+                              blank=True)
+    quantity = models.PositiveSmallIntegerField(default=1)
+    total_price = models.PositiveIntegerField(default=0)
 
-    objects = managers.FavoritesBasketManager()
+    objects = managers.WishlistManager()
     soft_delete = soft_delete_manager.DeleteManager()
 
     def __str__(self):
-        """Return a string representation of the FavoritesBasket."""
-        return f'{self.user}  - {self.quantity}'
+        """Return a string representation of the Wishlist."""
+        return f'{self.user} - {self.product} - {self.quantity}'
 
     class Meta:
-        """Additional metadata about the FavoritesBasket model."""
+        """Additional metadata about the Wishlist model."""
         ordering = ('user',)
         verbose_name = 'Favorites Basket'
         verbose_name_plural = 'Favorites Baskets'
+        indexes = [
+            models.Index(fields=['user', 'product']),
+        ]
 
 
 class Discount(mixin_model.TimestampsStatusFlagMixin):
@@ -269,46 +284,45 @@ class Discount(mixin_model.TimestampsStatusFlagMixin):
         ]
 
 
-class OrderItemFavoritesBasket(mixin_model.TimestampsStatusFlagMixin):
-    """Model representing an order item associated with a favorite or basket product."""
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='order_items_favorites_baskets')
-    favorites_basket = models.ForeignKey(FavoritesBasket, on_delete=models.CASCADE,
-                                         related_name='order_items_favorites_baskets')
-    available = models.BooleanField(default=True)
-    quantity = models.PositiveSmallIntegerField(default=0)
-
-    def __str__(self):
-        """Return a string representation of the OrderItemFavoritesBasket."""
-        return f'{self.product} - {self.favorites_basket} - {self.quantity}'
-
-    class Meta:
-        """Additional metadata about the OrderItemFavoritesBasket model."""
-        ordering = ('product',)
-        verbose_name = 'Order Item Favorites Basket'
-        verbose_name_plural = 'Order Items Favorites Baskets'
-
-
-class WarehouseKeeper(mixin_model.TimestampsStatusFlagMixin):
-    """Model representing a user responsible for managing inventory in a warehouse."""
-
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='user_warehouse_keepers')
-    brand = models.ForeignKey(Brand, on_delete=models.CASCADE, related_name='brand_warehouse_keepers')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_warehouse_keepers')
+class Inventory(mixin_model.TimestampsStatusFlagMixin):
+    """Model representing a warehouse inventory."""
+    name = models.CharField(max_length=100, verbose_name=_('Name'))
     quantity = models.PositiveSmallIntegerField(default=0)
     available = models.BooleanField(default=True)
+    description = models.TextField(max_length=500, verbose_name=_('Description'))
 
-    objects = managers.WarehouseKeeperManager()
+    objects = managers.InventoryManager()
     soft_delete = delete_managers.DeleteManager()
 
     def __str__(self):
-        """Return a string representation of the WarehouseKeeper."""
-        return f'{self.user} - {self.product} - {self.quantity}'
+        """Return a string representation of the Inventory."""
+        return f'{self.quantity} - {self.available}'
 
     class Meta:
-        """Additional metadata about the WarehouseKeeper model."""
+        """Additional metadata about the Inventory model."""
+        ordering = ('name',)
+        verbose_name = 'Inventory'
+        verbose_name_plural = 'Inventories'
+
+
+class AddToInventory(mixin_model.TimestampsStatusFlagMixin):
+    """Model representing a user responsible for managing inventory in a warehouse."""
+    inventory = models.ForeignKey(Inventory, on_delete=models.CASCADE, related_name='inventory_add_to_inventory')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_add_to_inventory')
+    quantity = models.PositiveSmallIntegerField(default=0)
+
+    objects = managers.AddToInventoryManager()
+    soft_delete = delete_managers.DeleteManager()
+
+    def __str__(self):
+        """Return a string representation of the AddToInventory."""
+        return f'{self.inventory} - {self.product} - {self.quantity}'
+
+    class Meta:
+        """Additional metadata about the AddToInventory model."""
         ordering = ('product',)
-        verbose_name = 'Warehouse Keeper'
-        verbose_name_plural = 'Warehouse Keepers'
+        verbose_name = 'AddToInventory'
+        verbose_name_plural = 'AddToInventories'
         indexes = [
-            models.Index(fields=['user', 'product']),
+            models.Index(fields=['inventory', 'product']),
         ]

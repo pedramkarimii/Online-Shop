@@ -151,6 +151,6 @@ class DiscountDeleteView(CRUD.AdminPermissionRequiredMixinView, DetailView):
         Handle soft deletion of the discount.
         """
         discount = self.get_object()
-        forms.Discount.soft_delete.filter(pk=discount.id).delete()
+        forms.Discount.objects.filter(pk=discount.id).delete()
         messages.success(request, _(f'Discount has been successfully soft deleted.'), extra_tags='success')
         return redirect('home')

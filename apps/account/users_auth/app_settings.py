@@ -1,7 +1,6 @@
 import functools
 from datetime import timedelta
 from Crypto.Random import get_random_bytes
-
 from apps.account.users_auth.client import IP_ADDRESS, DEVICE_NAME
 from apps.account.users_auth.constants import USER_ID, UUID_FIELD
 
@@ -62,6 +61,10 @@ class AppSettings:
     @property
     def get_user_by_access_token(self):
         return self._setting("GET_USER_BY_ACCESS_TOKEN", False)
+
+    @property
+    def get_device_limit(self):
+        return self._setting("DEVICE_LIMIT", None)
 
 
 @functools.lru_cache

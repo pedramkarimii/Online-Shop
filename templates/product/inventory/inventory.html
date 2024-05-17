@@ -1,0 +1,36 @@
+{% extends "base/base.html" %}
+{% block title %}
+    <title>Inventory</title>
+{% endblock %}
+{% block content %}
+    <div class="container mx-auto mb-8 mt-8">
+        <div class="overflow-x-auto">
+            <h1 class="text-2xl font-bold mt-8 mb-4">Inventory</h1>
+            <table class="table-auto w-full mt-2 rounded-lg border border-gray-300">
+                <tbody>
+                    <tr class="bg-gray-200 text-gray-700">
+                        <td class="px-4 py-2 text-center">name</td>
+                        <td class="px-4 py-2 text-center">quantity</td>
+                        <td class="px-4 py-2 text-center">available</td>
+                        <td class="px-4 py-2 text-center">description</td>
+                    </tr>
+                    {% for inventory in inventories %}
+                        <tr class="bg-white text-gray-800">
+                            <td class="px-4 py-2 text-center">{{ inventory.name }}</td>
+                            <td class="px-4 py-2 text-center">{{ inventory.quantity }}</td>
+                            <td class="px-4 py-2 text-center">{{ inventory.available }}</td>
+                            <td class="px-4 py-2 text-center">{{ inventory.description }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% block custom_css %}
+        <style>
+            th {
+                border-bottom: 2px solid rgba(118, 118, 118, 0.31);
+            }
+        </style>
+    {% endblock %}
+{% endblock %}
