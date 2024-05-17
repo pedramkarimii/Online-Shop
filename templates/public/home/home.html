@@ -209,10 +209,12 @@
                                                         <!-- Display actual product rating if available -->
                                                     </div>
                                                     <div class="product-btns">
+                                                       <form action="{% url 'wishlist_add' product.pk %}" method="post">
+                                                        {% csrf_token %}
                                                         <button class="add-to-wishlist" tabindex="-1"><i
-                                                                class="fa fa-heart-o"></i><span
-                                                                class="tooltipp">add to wishlist</span>
+                                                                class="fa fa-heart-o"></i>
                                                         </button>
+                                                    </form>
                                                         <button class="add-to-compare" tabindex="-1"><i
                                                                 class="fa fa-exchange"></i><span
                                                                 class="tooltipp">add to compare</span>
@@ -324,6 +326,9 @@
                 <!-- Products tab & slick -->
                 <div class="col-md-12">
                     <div class="row">
+                    
+                    
+                    
                         {% for product in products_new %}
                             {% for media in product.media_products.all %}
                                 <div class="products-tabs">
@@ -351,30 +356,26 @@
                                                        tabindex="-1">{{ product.name | default:"Product Name Goes Here" }}</a>
                                                 </h3>
 
+                                            
+
                                                 {% for discount in product.product_code_discounts.all %}
 
                                                     {% if discount.percentage_discount %}
-                                                        <h3 class="product-price"> Off
+
+                                                        <h3 class="product-price">
+                                                            Off
                                                             {{ discount.percentage_discount }}%
                                                             <del class="product-old-price  mt-3">{{ product.price }}</del>
                                                         </h3>
+
                                                     {% else %}
-                                                        <h3 class="product-price"> Off
+                                                        <h3 class="product-price">
+                                                            Off
                                                             ${{ discount.numerical_discount }}
                                                             <del class="product-old-price  mt-3">{{ product.price }}</del>
                                                         </h3>
+
                                                     {% endif %}
-                                                    {#                                                        {% elif discount.numerical_discount and not  discount.percentage_discount %}#}
-                                                    {#                                                            <h3 class="product-price">#}
-                                                    {#                                                                Off {{ discount.percentage_discount }}%#}
-                                                    {#                                                                <del class="product-old-price  mt-3">{{ product.price }}</del>#}
-                                                    {#                                                            </h3>#}
-                                                    {#                                                        {% elif  discount.numerical_discount and  not discount.percentage_discount %}#}
-                                                    {#                                                            <h3 class="product-price"> Off#}
-                                                    {#                                                                ${{ discount.numerical_discount }}#}
-                                                    {#                                                                <del class="product-old-price  mt-3">{{ product.price }}</del>#}
-                                                    {#                                                            </h3>#}
-                                                    {#                                                        {% endif %}#}
                                                 {% endfor %}
                                                 {% if not product.product_code_discounts.all %}
                                                     <h3 class="product-price mt-3">
@@ -386,10 +387,13 @@
                                                     <!-- Display actual product rating if available -->
                                                 </div>
                                                 <div class="product-btns">
-                                                    <button class="add-to-wishlist" tabindex="-1"><i
-                                                            class="fa fa-heart-o"></i><span
-                                                            class="tooltipp">add to wishlist</span>
-                                                    </button>
+                                                    <form action="{% url 'wishlist_add_api' product.pk %}" method="post">
+                                                        {% csrf_token %}
+                                                        <button class="add-to-wishlist" tabindex="-1"><i
+                                                                class="fa fa-heart-o"></i>
+                                                        </button>
+                                                    </form>
+
                                                     <button class="add-to-compare" tabindex="-1"><i
                                                             class="fa fa-exchange"></i><span
                                                             class="tooltipp">add to compare</span>
@@ -414,7 +418,11 @@
                                     <button class="slick-next slick-arrow" aria-label="Next" type="button"
                                             style="display: inline-block;">Next
                                     </button>
-                                </div>{% endfor %} {% endfor %}
+                                </div>
+                            
+                            {% endfor %} {% endfor %}
+                    
+                     
                     </div>
 
                     <!-- /tab -->
@@ -552,10 +560,12 @@
                                                     <!-- Display actual product rating if available -->
                                                 </div>
                                                 <div class="product-btns">
-                                                    <button class="add-to-wishlist" tabindex="-1"><i
-                                                            class="fa fa-heart-o"></i><span
-                                                            class="tooltipp">add to wishlist</span>
-                                                    </button>
+                                                    <form action="{% url 'wishlist_add' product.pk %}" method="post">
+                                                        {% csrf_token %}
+                                                        <button class="add-to-wishlist" tabindex="-1"><i
+                                                                class="fa fa-heart-o"></i>
+                                                        </button>
+                                                    </form>
                                                     <button class="add-to-compare" tabindex="-1"><i
                                                             class="fa fa-exchange"></i><span
                                                             class="tooltipp">add to compare</span>
