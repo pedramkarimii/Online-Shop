@@ -5,15 +5,11 @@ FROM python:3.10-slim AS builder
 ARG POETRY_VERSION="1.1.11"
 
 # Install system dependencies required for building Python packages and Poetry
-RUN apk update \
-    && apk add --no-cache --virtual .build-deps \
-        build-base \
-        libffi-dev \
-        postgresql-dev \
-    && apk add --no-cache \
-        postgresql-client \
-    && pip install --no-cache-dir "poetry==$POETRY_VERSION" \
-    && apk del .build-deps
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    build-essential libffi-dev libpq-dev && \
+    pip install --upgrade pip && \
+    pip install "poetry==$POETRY_VERSION"
 
 # Set the working directory inside the container
 WORKDIR /code
@@ -33,13 +29,13 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PATH="/venv/bin:$PATH"
 
 # Install runtime dependencies
-RUN apk update \
-    && apk add --no-cache \
-        libpq \
-    && rm -rf /var/cache/apk/*
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    libpq-dev && \
+    pip install "celery"
 
 # Create a non-root user and switch to it
-RUN addgroup -g 1000 appgroup && adduser -u 1000 -G appgroup -D appuser
+RUN groupadd -r appgroup && useradd -r -g appgroup appuser
 USER appuser
 
 # Set the working directory inside the container
