@@ -1,29 +1,45 @@
 services:
   db:
+    container_name: postgres
     image: postgres:alpine
     restart: on-failure
     environment:
       POSTGRES_DB: your_database_name
       POSTGRES_USER: your_database_user
       POSTGRES_PASSWORD: 1234
+    ports:
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - main
 
   redis:
+    container_name: redis
     image: redis:alpine
     restart: on-failure
+    ports:
+      - "6379:6379"
+    networks:
+      - main
 
   rabbitmq:
+    container_name: rabbitmq
     image: rabbitmq:alpine
     ports:
       - "5672:5672"
       - "15672:15672"
     restart: on-failure
+    networks:
+      - main
 
   celery-worker:
-    image: celery:alpine
+    build:
+      context: .
+      dockerfile: utility/Dockerfile
+    container_name: celery-worker
     restart: on-failure
-    command: celery worker -A config -l info
+    command: celery worker -A config -l info --force-root=True
     volumes:
       - ./apps:/code/apps
       - ./config:/code/config
@@ -32,11 +48,24 @@ services:
       - db
       - redis
       - rabbitmq
+    networks:
+      - main
 
-  celery-beat:
-    image: celery:alpine
+  app:
+    build:
+      context: .
+      dockerfile: utility/Dockerfile
+    container_name: app
     restart: on-failure
-    command: celery beat -A config -l info
+    command: sh -c "\
+      rm -rf db.sqlite3 && \
+      find . -path '*/migrations/*.py' -not -name '__init__.py' -delete && \
+      python manage.py makemigrations && \
+      python manage.py migrate && \
+      echo \"from django.contrib.auth import get_user_model; \
+      User = get_user_model(); \
+      User.objects.create_superuser(phone_number='09128355747', username='pedramkarimi', email='pedram.9060@gmail.com', password='qwertyQ@1')\" | python manage.py shell && \
+      gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 4 --threads 4"
     volumes:
       - ./apps:/code/apps
       - ./config:/code/config
@@ -45,9 +74,13 @@ services:
       - db
       - redis
       - rabbitmq
+    expose:
+      - "8000"
+    networks:
+      - main
 
 networks:
-  default:
+  main:
 
 volumes:
   postgres_data:
