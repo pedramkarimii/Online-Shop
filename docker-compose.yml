@@ -1,59 +1,53 @@
 services:
-  rabbitmq:
-    container_name: rabbitmq
-    image: rabbitmq:latest
-    networks:
-      - main
-    ports:
-      - "5672:5672"
+  db:
+    image: postgres:alpine
     restart: on-failure
-
-  postgres:
-    container_name: postgres
-    image: postgres:latest
     environment:
-      - POSTGRES_DB=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-    networks:
-      - main
-    ports:
-      - "5432:5432"
-    restart: on-failure
+      POSTGRES_DB: your_database_name
+      POSTGRES_USER: your_database_user
+      POSTGRES_PASSWORD: 1234
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  celery_worker:
-    container_name: celery_worker
-    command: "celery -A A worker -l INFO"
-    depends_on:
-      - app
-      - rabbitmq
-      - postgres
-    image: app-image
-    environment:
-      - C_FORCE_ROOT="true"
-    networks:
-      - main
+  redis:
+    image: redis:alpine
     restart: on-failure
 
-  app:
-    build: .
-    command: sh -c "python manage.py migrate && gunicorn A.wsgi -b 0.0.0.0:8000"
-    container_name: app
-    volumes:
-      - .:/code/
-    depends_on:
-      - postgres
-      - rabbitmq
-    expose:
-      - "8000"
-    networks:
-      - main
+  rabbitmq:
+    image: rabbitmq:alpine
+    ports:
+      - "5672:5672"
+      - "15672:15672"
     restart: on-failure
+
+  celery-worker:
+    image: celery:alpine
+    restart: on-failure
+    command: celery worker -A config -l info
+    volumes:
+      - ./apps:/code/apps
+      - ./config:/code/config
+      - ./utility:/code/utility
+    depends_on:
+      - db
+      - redis
+      - rabbitmq
+
+  celery-beat:
+    image: celery:alpine
+    restart: on-failure
+    command: celery beat -A config -l info
+    volumes:
+      - ./apps:/code/apps
+      - ./config:/code/config
+      - ./utility:/code/utility
+    depends_on:
+      - db
+      - redis
+      - rabbitmq
 
 networks:
-  main:
+  default:
 
 volumes:
   postgres_data:
