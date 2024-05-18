@@ -1,0 +1,38 @@
+services:
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:latest
+    networks:
+      - main
+    ports:
+      - "5672:5672"
+    restart: on-failure
+
+  postgres:
+    container_name: postgres
+    image: postgres:latest
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    networks:
+      - main
+    ports:
+      - "5432:5432"
+    restart: on-failure
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  celery_worker:
+    container_name: celery_worker
+    command: "celery -A A worker -l INFO"
+    depends_on:
+      - app
+      - rabbitmq
+      - postgres
+    image: app-image
+    environment:
+      - C_FORCE_ROOT="true"
+    networks:
+      - main
+    restart: on-failure
