@@ -8,7 +8,7 @@ urlpatterns = [
     path("", include("apps.account.urls")),
     path("", include("apps.order.urls")),
     path("", include("apps.product.urls")),
-    path("", include("apps.core.bucket.urls")),
+    path("", include("utility.bucket.urls")),
 ]
 
 """Check if the application is in debug mode."""
