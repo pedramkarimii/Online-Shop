@@ -1,3 +1,5 @@
+import os
+from datetime import datetime
 import boto3
 from django.conf import settings
 import logging
@@ -23,16 +25,27 @@ class Bucket:
             return None
 
     def delete_object(self, key):
-        self.connection_s3_client.delete_object(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=key)
         try:
+            # Delete object from S3 bucket
             self.connection_s3_client.delete_object(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=key)
+            logger.info(f"Deleted object '{key}' from bucket '{settings.AWS_STORAGE_BUCKET_NAME}'")
+
+            local_file_path = settings.AWS_LOCAL_STORAGE + key
+            if os.path.exists(local_file_path):
+                os.remove(local_file_path)
+                logger.info(f"Deleted local file '{local_file_path}'")
+
             return True
         except Exception as e:
-            logging.error(f"Error deleting object from bucket: {e}")
+            logger.error(f"Error deleting object '{key}' from bucket '{settings.AWS_STORAGE_BUCKET_NAME}': {e}")
             return False
 
     def download_object(self, key):
         local_file_path = settings.AWS_LOCAL_STORAGE + key
+        local_file_path = local_file_path.replace('%Y', str(datetime.now().year))
+        local_file_path = local_file_path.replace('%m', str(datetime.now().month))
+        local_dir_path = os.path.dirname(local_file_path)
+        os.makedirs(local_dir_path, exist_ok=True)  # Create directories if they don't exist
         try:
             with open(local_file_path, 'wb') as f:
                 self.connection_s3_client.download_fileobj(settings.AWS_STORAGE_BUCKET_NAME, key, f)
