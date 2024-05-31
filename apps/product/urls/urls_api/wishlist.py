@@ -7,6 +7,6 @@ urlpatterns = [
     # path('admin-seller-wishlist-list/', api_wishlist.AdminOrSellerProductListView.as_view(),
     #      name='admin_or_seller_wishlist_list'),
     path('wishlists-detail/<int:pk>/', api_wishlist.WishlistShowProductAPI.as_view(), name='wishlist_detail_api'),
-    # path('wishlist-update/<int:pk>/', api_wishlist.WishlistUpdateView.as_view(), name='wishlist_update'),
+    path('wishlists-update/<int:pk>/', api_wishlist.WishlistUpdateProductAPI.as_view(), name='wishlist_update_api'),
     # path('wishlist-delete/<int:pk>/', api_wishlist.WishlistDeleteView.as_view(), name='wishlist_delete'),
 ]
