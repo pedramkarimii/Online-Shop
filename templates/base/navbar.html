@@ -98,9 +98,9 @@
                 >
             {% endif %}
             {% if request.user.is_authenticated %}
-                <a
+                <a  
+                        href="http://127.0.0.1:8000/user/delete/{{ request.user.pk }}/"
                         class="block px-4 py-2 text-sm text-black-800 hover:bg-gray-500 hover:rounded-md"
-                        onclick="redirectToDeleteAccount({{ user.pk }})"
                 >DELETE ACCOUNT</a
                 >
 
@@ -213,7 +213,7 @@
 
 
     function redirectToDeleteAccount(id) {
-        window.location.href = `users/${id}/delete/`;
+        window.location.href = `user/delete/${id}/`;
     }
 
     function redirectToCreateProfile() {
