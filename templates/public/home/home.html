@@ -55,6 +55,11 @@
                                     class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 hover:rounded-md"
                                     onclick="redirectToDeleteBrand()">Detail Inventory</a
                             ></li>
+                            <li><a
+                                    href="http://127.0.0.1:8000/showbucket"
+                                    class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 hover:rounded-md"
+                            >Detail Bucket</a
+                            ></li>
                             </ul>
                         {% endif %}
                 </div>
@@ -209,12 +214,13 @@
                                                         <!-- Display actual product rating if available -->
                                                     </div>
                                                     <div class="product-btns">
-                                                       <form action="{% url 'wishlist_add' product.pk %}" method="post">
-                                                        {% csrf_token %}
-                                                        <button class="add-to-wishlist" tabindex="-1"><i
-                                                                class="fa fa-heart-o"></i>
-                                                        </button>
-                                                    </form>
+                                                        <form action="{% url 'wishlist_add' product.pk %}"
+                                                              method="post">
+                                                            {% csrf_token %}
+                                                            <button class="add-to-wishlist" tabindex="-1"><i
+                                                                    class="fa fa-heart-o"></i>
+                                                            </button>
+                                                        </form>
                                                         <button class="add-to-compare" tabindex="-1"><i
                                                                 class="fa fa-exchange"></i><span
                                                                 class="tooltipp">add to compare</span>
@@ -326,9 +332,8 @@
                 <!-- Products tab & slick -->
                 <div class="col-md-12">
                     <div class="row">
-                    
-                    
-                    
+
+
                         {% for product in products_new %}
                             {% for media in product.media_products.all %}
                                 <div class="products-tabs">
@@ -356,7 +361,7 @@
                                                        tabindex="-1">{{ product.name | default:"Product Name Goes Here" }}</a>
                                                 </h3>
 
-                                            
+
 
                                                 {% for discount in product.product_code_discounts.all %}
 
@@ -387,7 +392,8 @@
                                                     <!-- Display actual product rating if available -->
                                                 </div>
                                                 <div class="product-btns">
-                                                    <form action="{% url 'wishlist_add_api' product.pk %}" method="post">
+                                                    <form action="{% url 'wishlist_add_api' product.pk %}"
+                                                          method="post">
                                                         {% csrf_token %}
                                                         <button class="add-to-wishlist" tabindex="-1"><i
                                                                 class="fa fa-heart-o"></i>
@@ -419,10 +425,10 @@
                                             style="display: inline-block;">Next
                                     </button>
                                 </div>
-                            
+
                             {% endfor %} {% endfor %}
-                    
-                     
+
+
                     </div>
 
                     <!-- /tab -->
@@ -562,10 +568,14 @@
                                                 <div class="product-btns">
                                                     <form action="{% url 'wishlist_add' product.pk %}" method="post">
                                                         {% csrf_token %}
+                                                        <input type="hidden" name="product" value="{{ product.pk }}">
+                                                        <input type="hidden" name="quantity" value="1">
+                                                        <input type="hidden" name="total_price"
+                                                               value="{{ product.price }}">
                                                         <button class="add-to-wishlist" tabindex="-1"><i
-                                                                class="fa fa-heart-o"></i>
-                                                        </button>
+                                                                class="fa fa-heart-o"></i></button>
                                                     </form>
+
                                                     <button class="add-to-compare" tabindex="-1"><i
                                                             class="fa fa-exchange"></i><span
                                                             class="tooltipp">add to compare</span>
