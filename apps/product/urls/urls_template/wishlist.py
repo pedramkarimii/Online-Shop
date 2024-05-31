@@ -11,5 +11,5 @@ urlpatterns = [
          name='show_wishlist-detail'),
     # path('wishlist-detail/<int:pk>/', views_wishlist.WishlistDetailView.as_view(), name='wishlist_detail'),
     path('wishlist-update/<int:pk>/', views_wishlist.WishlistUpdateProductView.as_view(), name='wishlist_update'),
-    # path('wishlist-delete/<int:pk>/', views_wishlist.WishlistDeleteView.as_view(), name='wishlist_delete'),
+    path('wishlist-delete/<int:pk>/', views_wishlist.WishlistDeleteProductView.as_view(), name='wishlist_delete'),
 ]
