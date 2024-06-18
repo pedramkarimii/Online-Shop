@@ -5,9 +5,9 @@
 >
     <div class="container">
         <ul class="header-links pull-right ">
-            <li><a href="#"><i class="fa fa-phone"></i> +021-4444-8844</a></li>
-            <li><a href="#"><i class="fa fa-envelope-o"></i> email@email.com</a></li>
-            <li><a href="#"><i class="fa fa-map-marker"></i> 1734 Stonecoal Road</a></li>
+            <li><a href="#"><i class="fa fa-phone"></i> 021-4444-8844</a></li>
+            <li><a href="#"><i class="fa fa-envelope-o"></i> pedram.9060@email.com</a></li>
+            <li><a href="#"><i class="fa fa-map-marker"></i> 1734 Sardar Jangal Road</a></li>
         </ul>
 
         <div class="text-3xl font-bold leading-none header-links pull-left">
@@ -54,9 +54,9 @@
 
             {% if not request.user.profile.name and request.user.is_authenticated %}
                 <a
-                        href="http://127.0.0.1:8000/profile-create/{{ request.user.pk }}/"
+                        href="http://127.0.0.1:8000/profile-create/"
                         class="block px-4 py-2  text-sm text-black-800 hover:bg-gray-500 hover:rounded-md"
-                        onclick="redirectToCreateProfile()"
+{#                        onclick="redirectToCreateProfile()"#}
                 >Create Profile</a
                 >
             {% endif %}
