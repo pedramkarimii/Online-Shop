@@ -29,9 +29,9 @@ class ProductDiscountMixin(generic.View):
 
     def add_products_from_cookies_to_wishlist_authenticated(self):
         cookies_to_delete = []
-        if self.request.session and any(key.startswith("product_") for key in self.request.COOKIES):
+        if self.request.session and any(key.startswith("product_wishlist") for key in self.request.COOKIES):
             for cookie_key, cookie_value in self.request.COOKIES.items():  # noqa
-                if cookie_key.startswith("product_"):
+                if cookie_key.startswith("product_wishlist"):
                     product_data = json.loads(cookie_value)
                     product_id = product_data.get('product')
                     quantity = product_data.get('quantity', 0)
@@ -51,7 +51,7 @@ class ProductDiscountMixin(generic.View):
 
     def add_product_to_wishlist_cookie(self):
         product_discount = self.calculate_product_discount(self.product_instance, self.latest_discount)
-        cookie_key = f"product_{self.signed_product_id}"
+        cookie_key = f"product_wishlist{self.signed_product_id}"
         if cookie_key not in self.request.COOKIES:
             product_data = {
                 'product': self.product_instance.pk,
@@ -70,7 +70,7 @@ class ProductDiscountMixin(generic.View):
             return self.add_exist_product_to_wishlist_cookie(self.signed_product_id, product_discount)
 
     def add_exist_product_to_wishlist_cookie(self, signed_product_id, product_discount):
-        cookie_key = f"product_{signed_product_id}"
+        cookie_key = f"product_wishlist{signed_product_id}"
         if cookie_key in self.request.COOKIES:
             product_data = json.loads(self.request.COOKIES[cookie_key])  # noqa
             product_id = product_data.get('product')
@@ -117,13 +117,15 @@ class ProductDiscountMixin(generic.View):
             return response
 
     def calculate_product_discount(self, product_instance, latest_discount):  # noqa
-        if product_instance is None:
-            return None
-
-        product_price = product_instance.price
-
         if latest_discount is None:
             return None
+        try:
+            product_price = product_instance.price
+        except AttributeError:
+            if isinstance(product_instance, (int, float)):
+                product_price = product_instance
+            else:
+                return None
 
         numerical_discount = latest_discount.numerical_discount
         percentage_discount = latest_discount.percentage_discount
