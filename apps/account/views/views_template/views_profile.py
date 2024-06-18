@@ -6,6 +6,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import DetailView
 from apps.core.mixin.mixin_views_template import HttpsOptionNotLogoutMixin as MustBeLogingCustomView
+from apps.order.models import Order, OrderItem
+from apps.product.models import Product
 
 
 class ProfileCreateView(MustBeLogingCustomView):
@@ -109,11 +111,20 @@ class ProfileDetailView(MustBeLogingCustomView, DetailView):
             Q(bronze=self.request.user) |
             Q(seller=self.request.user)
         ).values_list('code_discount', flat=True)
-
         code_discounts = forms.CodeDiscount.objects.filter(id__in=user_cods_discount)
-
+        orders = Order.objects.filter(order_item__user=self.request.user).distinct()
+        products = Product.objects.all()
+        order_items = OrderItem.objects.filter(order_items__order_item__product__in=
+                                               products.all())
+        unique_product_names = set()
+        for order_item in order_items:
+            if order_item.user == self.request.user:
+                unique_product_names.add(order_item.product.name)
+        name_product_in_order = ','.join(unique_product_names)
+        context['name_product_in_order'] = name_product_in_order
         context['cods_discount'] = code_discounts
         context['profile'] = profile
+        context['orders'] = orders
 
         context['addresses'] = addresses
 
