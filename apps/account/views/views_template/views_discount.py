@@ -1,10 +1,16 @@
 from django.contrib import messages
+from django.db import transaction
+from django.db.models import Q
+from django.http import JsonResponse
 from django.utils.translation import gettext_lazy as _
 from django.views import generic
 from apps.account.form_data import forms
 from django.shortcuts import render, redirect
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
+from apps.account.models import Role, CodeDiscount
 from apps.core.permission.template_permission_admin import CRUD
+from apps.order.models import OrderItem
+from apps.product.mixin import ProductDiscountMixin
 
 
 class DiscountCodCreateView(CRUD.AdminPermissionRequiredMixinView):
@@ -131,3 +137,58 @@ class DiscountCodDeleteView(CRUD.AdminPermissionRequiredMixinView, generic.Detai
         forms.CodeDiscount.soft_delete.filter(pk=code_discount.id).delete()
         messages.success(request, _(f'Code Discount has been successfully soft deleted.'), extra_tags='success')
         return redirect(self.next_page_home)
+
+
+class WishlistDiscountCodProductView(generic.View):
+    def setup(self, request, *args, **kwargs):
+        """Initialize necessary variables."""
+        self.user_instance = request.user.id
+        self.user_authenticated = request.user.is_authenticated
+        self.code_discounts_role = CodeDiscount.objects.filter(
+            is_expired=False,
+            is_active=True
+        ).order_by('-create_time').first()
+        self.request_code_discount = request.POST.get('code_discount')
+        self.request_total_price = request.POST.get('total_price')
+        return super().setup(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        if self.user_authenticated:
+            return self.discount_cod_product_from_wishlist(request)
+        else:
+            return self.transition_to_authentication(request)
+
+    def discount_cod_product_from_wishlist(self, request):
+        code_discount = self.code_discounts_role.code
+        user_has_discount = Role.objects.filter(
+            code_discount__code=code_discount,
+            is_deleted=False,
+            is_active=True
+        ).filter(
+            Q(golden=self.user_instance) | Q(silver=self.user_instance) | Q(bronze=self.user_instance) | Q(
+                seller=self.user_instance)
+        ).exists()
+        if user_has_discount and code_discount == self.request_code_discount:
+            new_total_price = int(self.request_total_price)
+            calculate = ProductDiscountMixin()  # Adjust this if necessary
+            product_discount = calculate.calculate_product_discount(new_total_price, self.code_discounts_role)
+
+            order_item_qs = OrderItem.objects.filter(user=self.user_instance).first()
+            print('order_item_qs:', order_item_qs)
+            if order_item_qs:
+                with transaction.atomic():
+                    order_item_qs.total_price = product_discount
+                    order_item_qs.save()
+                    messages.success(request, 'Coupon applied successfully.')
+                    return JsonResponse({'success': True})
+            else:
+                return JsonResponse({'success': False, 'error': 'Wishlist not found.'})
+        else:
+            return JsonResponse({'success': False, 'error': 'User does not have the discount or invalid coupon.'})
+
+    def transition_to_authentication(self, request):
+        request.session['code_discount'] = self.request_code_discount
+        request.session['total_price'] = self.request_total_price
+
+        login_url = f"{reverse('login')}?next={request.get_full_path()}"
+        return redirect(login_url)
