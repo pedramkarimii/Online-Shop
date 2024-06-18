@@ -9,9 +9,9 @@ from django.utils.translation import gettext_lazy as _
 class OrderItem(mixin_model.TimestampsStatusFlagMixin):
     """Model representing an item within an order."""
 
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="user_order_items")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_order_items")
     product = models.ForeignKey('product.Product', on_delete=models.CASCADE, related_name="product_order_items")
-    order = models.ForeignKey('Order', on_delete=models.CASCADE, related_name="order_order_items")
+    # order = models.ForeignKey('Order', on_delete=models.CASCADE, related_name="order_order_items")
     total_price = models.IntegerField(default=0)
     quantity = models.PositiveIntegerField(default=1, validators=[validators.QuantityValidators()],
                                            verbose_name=_('Quantity'))
@@ -28,13 +28,13 @@ class OrderItem(mixin_model.TimestampsStatusFlagMixin):
         verbose_name_plural = 'Order Items'
         indexes = [
             models.Index(
-                fields=('user', 'product', 'order'), name='order_item')]
+                fields=('user', 'product'), name='order_item')]
 
 
 class Order(mixin_model.TimestampsStatusFlagMixin):
     """Model representing an order placed by a user."""
-
-    address = models.OneToOneField(Address, on_delete=models.CASCADE, related_name="address_order")
+    order_item = models.ManyToManyField(OrderItem, related_name="order_items", verbose_name=_('Order Items'))
+    address = models.ForeignKey(Address, on_delete=models.CASCADE, related_name="address_order")
     status = models.CharField(max_length=20, choices=validators.StatusChoice.CHOICES,
                               validators=[validators.StatusValidator()],
                               verbose_name=_('Status'))
