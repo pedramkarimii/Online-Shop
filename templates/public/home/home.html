@@ -217,15 +217,35 @@
                                                         <form action="{% url 'wishlist_add' product.pk %}"
                                                               method="post">
                                                             {% csrf_token %}
+                                                            <input type="hidden" name="product"
+                                                                   value="{{ product.pk }}">
+                                                            <input type="hidden" name="quantity" value="1">
+                                                            <input type="hidden" name="total_price"
+                                                                   value="{{ product.price }}">
                                                             <button class="add-to-wishlist" tabindex="-1"><i
-                                                                    class="fa fa-heart-o"></i>
+                                                                    class="fa fa-heart-o"></i><span class="tooltipp">Add to Wishlist</span>
                                                             </button>
                                                         </form>
-                                                        <button class="add-to-compare" tabindex="-1"><i
-                                                                class="fa fa-exchange"></i><span
-                                                                class="tooltipp">add to compare</span>
-                                                        </button>
+
+                                                        <form action="{% url 'add_order_item' product.pk %}"
+                                                              method="post">
+                                                            {% csrf_token %}
+                                                            <input type="hidden" name="user"
+                                                                   value="{{ request.user.pk }}">
+                                                            <input type="hidden" name="product"
+                                                                   value="{{ product.pk }}">
+                                                            <input type="hidden" name="order" value="{{ order.pk }}">
+                                                            <input type="hidden" name="quantity" value="1">
+                                                            <input type="hidden" name="total_price"
+                                                                   value="{{ product.price }}">
+                                                            <button class="add-to-wishlist" tabindex="-1">
+                                                                <i class="fa fa-exchange"></i>
+                                                                <span class="tooltipp mb-4 mt-4">Add to Basket</span>
+                                                            </button>
+
+                                                        </form>
                                                         <a href="http://127.0.0.1:8000/product-detail/{{ product.pk }}/"
+
 
                                                         <button class="quick-view" tabindex="-1"><i
                                                                 class="fa fa-eye"></i><span
@@ -392,18 +412,31 @@
                                                     <!-- Display actual product rating if available -->
                                                 </div>
                                                 <div class="product-btns">
-                                                    <form action="{% url 'wishlist_add_api' product.pk %}"
-                                                          method="post">
+                                                    <form action="{% url 'wishlist_add' product.pk %}" method="post">
                                                         {% csrf_token %}
+                                                        <input type="hidden" name="product" value="{{ product.pk }}">
+                                                        <input type="hidden" name="quantity" value="1">
+                                                        <input type="hidden" name="total_price"
+                                                               value="{{ product.price }}">
                                                         <button class="add-to-wishlist" tabindex="-1"><i
-                                                                class="fa fa-heart-o"></i>
+                                                                class="fa fa-heart-o"></i><span class="tooltipp">Add to Wishlist</span>
                                                         </button>
                                                     </form>
 
-                                                    <button class="add-to-compare" tabindex="-1"><i
-                                                            class="fa fa-exchange"></i><span
-                                                            class="tooltipp">add to compare</span>
-                                                    </button>
+                                                    <form action="{% url 'add_order_item' product.pk %}" method="post">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="user" value="{{ request.user.pk }}">
+                                                        <input type="hidden" name="product" value="{{ product.pk }}">
+                                                        <input type="hidden" name="order" value="{{ order.pk }}">
+                                                        <input type="hidden" name="quantity" value="1">
+                                                        <input type="hidden" name="total_price"
+                                                               value="{{ product.price }}">
+                                                        <button class="add-to-wishlist" tabindex="-1">
+                                                            <i class="fa fa-exchange"></i>
+                                                            <span class="tooltipp mb-4 mt-4">Add to Basket</span>
+                                                        </button>
+
+                                                    </form>
                                                     <a href="http://127.0.0.1:8000/product-detail/{{ product.pk }}/"
 
                                                     <button class="quick-view" tabindex="-1"><i
@@ -573,13 +606,32 @@
                                                         <input type="hidden" name="total_price"
                                                                value="{{ product.price }}">
                                                         <button class="add-to-wishlist" tabindex="-1"><i
-                                                                class="fa fa-heart-o"></i></button>
+                                                                class="fa fa-heart-o"></i><span class="tooltipp">Add to Wishlist</span>
+                                                        </button>
                                                     </form>
 
-                                                    <button class="add-to-compare" tabindex="-1"><i
-                                                            class="fa fa-exchange"></i><span
-                                                            class="tooltipp">add to compare</span>
-                                                    </button>
+                                                    <form action="{% url 'add_order_item' product.pk %}" method="post">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="user" value="{{ request.user.pk }}">
+                                                        <input type="hidden" name="product" value="{{ product.pk }}">
+                                                        <input type="hidden" name="order" value="{{ order.pk }}">
+                                                        <input type="hidden" name="quantity" value="1">
+                                                        <input type="hidden" name="total_price"
+                                                               value="{{ product.price }}">
+                                                        <button class="add-to-wishlist" tabindex="-1">
+                                                            <i class="fa fa-exchange"></i>
+                                                            <span class="tooltipp mb-4 mt-4">Add to Basket</span>
+                                                        </button>
+
+                                                    </form>
+
+                                                    {#<button class="add-to-compare" tabindex="-1">#}
+                                                    {#    <a href="{% url 'add_order_item' product.pk %}">#}
+                                                    {#        <i class="fa fa-exchange"></i>#}
+                                                    {#    </a>#}
+                                                    {#    <span class="tooltipp">Add to Basket</span>#}
+                                                    {#</button>#}
+
                                                     <a href="http://127.0.0.1:8000/product-detail/{{ product.pk }}/">
                                                         <button class="quick-view" tabindex="-1"><i
                                                                 class="fa fa-eye"></i><span
