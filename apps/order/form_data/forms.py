@@ -1,3 +1,5 @@
+import datetime
+
 from django import forms
 from apps.core import validators
 from django.utils.translation import gettext_lazy as _
@@ -235,3 +237,93 @@ class OrderForm(forms.ModelForm):
         if commit:
             order.save()
         return order
+
+
+class OrderPaymentForm(forms.ModelForm):
+    class Meta:
+        model = OrderPayment
+        fields = [
+            'cardholder_name', 'card_number', 'expiration_date', 'cvv'
+        ]
+        widgets = {
+            'cardholder_name': forms.TextInput(
+                attrs={
+                    'class': 'form-control mt-1 pt-2 py-2 px-4 bg-with mb-8 focus:ring-indigo-500'
+                             ' focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md'}),
+            'card_number': forms.TextInput(
+                attrs={
+                    'class': 'form-control mt-1 pt-2 py-2 px-4 bg-with mb-8 focus:ring-indigo-500'
+                             ' focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md'}),
+            'expiration_date': forms.DateInput(
+                attrs={'class': 'form-control', 'placeholder': _('YYYY-MM-DD'), 'type': 'date'}),
+            'cvv': forms.TextInput(
+                attrs={
+                    'class': 'form-control mt-1 pt-2 py-2 px-4 bg-with mb-8 focus:ring-indigo-500'
+                             ' focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md'}),
+        }
+        labels = {
+            'order': _('Order'),
+            'amount': _('Amount'),
+            'cardholder_name': _('Cardholder Name'),
+            'card_number': _('Card Number'),
+            'expiration_date': _('Expiration Date'),
+            'cvv': _('CVV'),
+        }
+        help_texts = {
+            'order': _('Select the order.'),
+            'amount': _('Enter the amount.'),
+            'cardholder_name': _('Enter the cardholder name.'),
+            'card_number': _('Enter the card number.'),
+            'expiration_date': _('Select the expiration date.'),
+            'cvv': _('Enter the CVV.'),
+        }
+        error_messages = {
+            'order': {
+                'required': _('Order is required.')
+            },
+            'amount': {
+                'required': _('Amount is required.')
+            },
+            'cardholder_name': {
+                'required': _('Cardholder name is required.')
+            },
+            'card_number': {
+                'required': _('Card number is required.')
+            },
+            'expiration_date': {
+                'required': _('Expiration date is required.')
+            },
+            'cvv': {
+                'required': _('CVV is required.')
+            },
+        }
+        validators = {
+            'cardholder_name': [validators.CardholderNameValidator],
+            'amount': [validators.AmountValidator],
+            'card_number': [validators.CardNumberValidator],
+            'cvv': [validators.CVVValidator],
+        }
+
+    def clean_expiration_date(self):
+        expiration_date = self.cleaned_data.get('expiration_date')
+
+        if not isinstance(expiration_date, datetime.date):
+            raise ValidationError(_('Invalid date format.'))
+
+        if expiration_date < datetime.date.today():
+            raise ValidationError(_('Expiration date must be in the future.'))
+        return expiration_date
+
+    def save(self, commit=True):
+        """
+        Method to save the OrderPayment object.
+        """
+        order_payment = super().save(commit=False)
+        print(self.cleaned_data['cardholder_name'])
+        order_payment.cardholder_name = self.cleaned_data['cardholder_name']
+        order_payment.card_number = self.cleaned_data['card_number']
+        order_payment.expiration_date = self.cleaned_data['expiration_date']
+        order_payment.cvv = self.cleaned_data['cvv']
+        if commit:
+            order_payment.save()
+        return order_payment
