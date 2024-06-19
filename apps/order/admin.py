@@ -89,14 +89,14 @@ class OrderPaymentAdmin(admin.ModelAdmin):
     """
 
     list_display = (
-        'order', 'amount', 'cardholder_name', 'card_number', 'expiration_date', 'cvv', 'status', 'payment_time',
+        'transaction_payment', 'order', 'amount', 'cardholder_name', 'card_number', 'expiration_date', 'cvv', 'status', 'payment_time',
         'is_paid', 'is_failed', 'is_canceled'
     )
     list_filter = (
-        'order__address__user__username', 'amount', 'status', 'is_paid', 'is_failed', 'is_canceled'
+        'transaction_payment', 'order__address__user__username', 'amount', 'status', 'is_paid', 'is_failed', 'is_canceled'
     )
-    search_fields = ('order__address__user__username', 'status')
-    readonly_fields = ('payment_time', 'is_failed', 'is_canceled', 'is_paid')
+    search_fields = ('transaction_payment', 'order__address__user__username', 'status')
+    readonly_fields = ('transaction_payment', 'payment_time', 'is_failed', 'is_canceled', 'is_paid')
     ordering = ('-payment_time',)
     date_hierarchy = 'payment_time'
     list_per_page = 30
@@ -109,7 +109,7 @@ class OrderPaymentAdmin(admin.ModelAdmin):
             )
         }),
         ('Data', {
-            'fields': ('payment_time', 'is_paid', 'is_failed', 'is_canceled')
+            'fields': ('transaction_payment', 'payment_time', 'is_paid', 'is_failed', 'is_canceled')
         }),
     )
     add_fieldsets = (
