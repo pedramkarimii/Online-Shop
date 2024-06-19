@@ -141,26 +141,51 @@
             <div class="row">
                 <div class="col-md-6">
                     <div class="row mb-5">
-                        <div class="col-md-6 mb-3 mb-md-0">
-                            <button class="btn btn-black btn-sm btn-block">Update Cart</button>
+                            <button class="btn ml-4 mt-44 btn-black btn-sm btn-block">Add To Basket</button>
                         </div>
-                        <div class="col-md-6">
-                            <button class="btn btn-outline-black btn-sm btn-block">Continue Shopping</button>
-                        </div>
+{#                        <div class="col-md-6">#}
+{#                            <button class="btn btn-outline-black btn-sm btn-block">Continue Shopping</button>#}
+{#                        </div>#}
                     </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <label class="text-black h4" for="coupon">Coupon</label>
-                            <p>Enter your coupon code if you have one.</p>
-                        </div>
-                        <div class="col-md-8 mb-3 mb-md-0">
-                            <input type="text" class="form-control py-3" id="coupon" placeholder="Coupon Code">
-                        </div>
-                        <div class="col-md-4">
-                            <button class="btn btn-black">Apply Coupon</button>
-                        </div>
-                    </div>
-                </div>
+                    
+{#                    {% if request.user.is_authenticated %}#}
+{#                    <div class="row">#}
+{#    <div class="col-md-12">#}
+{#        <label class="text-black h4" for="coupon">Coupon</label>#}
+{#        <p>Enter your coupon code if you have one.</p>#}
+{#    </div>#}
+{#    <div class="col-md-8 mb-3 mb-md-0">#}
+{#        <input type="text" class="form-control py-3" id="coupon" placeholder="Coupon Code">#}
+{#    </div>#}
+{#    {% if wishlist_items.items %}#}
+{##}
+{##}
+{#                                    {% for product_id, product_data in wishlist_items.items %}#}
+{#                                    {% if forloop.first %}#}
+{#    <div class="col-md-8 mb-3 mb-md-0">#}
+{#        <input type="hidden" class="form-control py-3" id="total-price" value={{ sum_total_price }}> <!-- Hidden input for total price -->#}
+{#    </div>#}
+{#     {% endif %}#}
+{#                                    {% endfor %}#}
+{#                                {% endif %}#}
+{#                                {% if wishlist_items_cookies %}#}
+{#    {% for key, item in wishlist_items_cookies.items %}#}
+{#        {% if forloop.first %}#}
+{#        <div class="col-md-8 mb-3 mb-md-0">#}
+{#        <input type="hidden" class="form-control py-3" id="total-price" value={{ sum_total_price }}> <!-- Hidden input for total price -->#}
+{#    </div>#}
+{#     {% endif %}#}
+{#    {% endfor %}#}
+{#{% endif %}#}
+{#    <div class="col-md-4">#}
+{#        <a href="http://127.0.0.1:8000/discount-cod-wishlist/">#}
+{#        <button class="btn btn-black" id="apply-coupon-btn">Apply Coupon</button> <!-- Removed data-pk attribute -->#}
+{#    </a>#}
+{#    </div>#}
+{#</div>#}
+{#</div>{% endif %}#}
+
+
                 <div class="col-md-6 pl-14">
                     <div class="">
                         <div class="col-md-7">
@@ -169,17 +194,17 @@
                                     <h3 class="text-black h4 text-uppercase ">Cart Totals</h3>
                                 </div>
                             </div>
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <span class="text-black">Discount</span>
-                                </div>
-                                <div class="col-md-6 text-right">
-                                    <strong class="text-black">$230.00</strong>
-                                </div>
-                            </div>
+{#                            <div class="row mb-3">#}
+{#                                <div class="col-md-6">#}
+{#                                    <span class="text-black">Discount</span>#}
+{#                                </div>#}
+{#                                <div class="col-md-6 text-right">#}
+{#                                    <strong class="text-black">$230.00</strong>#}
+{#                                </div>#}
+{#                            </div>#}
                             <div class="row mb-5">
                                 <div class="col-md-6">
-                                    <span class="text-black mr-2 pr-2">Total Price All Product</span>
+                                    <span class="text-black mr-2 pr-2">Total Price</span>
                                 </div>
                                 {% if wishlist_items.items %}
 
@@ -188,7 +213,7 @@
                                     {% if forloop.first %}
                                         <div class="col-md-6 text-right">
 
-                                            <strong class="text-black  total-price ">${{ sum_total_price }}</strong>
+                                            <strong class="text-black  total-price-all ">${{ sum_total_price }}</strong>
                                         </div>
                                         {% endif %}
                                     {% endfor %}
@@ -197,22 +222,22 @@
     {% for key, item in wishlist_items_cookies.items %}
         {% if forloop.first %}
             <div class="col-md-6 text-right">
-                <strong class="text-black mr-2 pr-2 total-price-cookies">${{ sum_total_price }}</strong>
+                <strong class="text-black mr-2 pr-2 total-price ">${{ sum_total_price }}</strong>
             </div>
         {% endif %}
     {% endfor %}
 {% endif %}
 
 
-                            </div>
 
                             <div class="row">
-                                <div class="col-md-12 mr-2 pr-2">
+                                <div class="col-md-12 mt-14 mr-2 pr-2">
 
-                                    <button class="btn btn-black btn-lg py-3 btn-block mr-2 pr-2"
-                                            onclick="window.location='checkout.html'">Proceed To Checkout
-                                    </button>
+                                    <a href="http://127.0.0.1:8000/checkout" > <button class="btn btn-black btn-lg py-3 btn-block mr-2 pr-2"
+                                           >Proceed To Checkout
+                                    </button> </a>
                                 </div>
+                                
                             </div>
                         </div>
                     </div>
@@ -541,4 +566,45 @@ function dataProductCookiesPkToDelete(productId, event) {
             return null;
         }
     </script>
+
+
+{#<script>#}
+{#    $(document).ready(function() {#}
+{#        $('#apply-coupon-btn').click(function(event) {#}
+{#            event.preventDefault();#}
+{#            var couponCode = $('#coupon').val();#}
+{#            var totalPrice = $('.total-price-all').text().replace('$', '').trim();  // Updated selector and cleaned up the price#}
+{##}
+{#            console.log("Applying coupon with the following details:");#}
+{#            console.log("Coupon Code:", couponCode);#}
+{#            console.log("Total Price:", totalPrice);#}
+{##}
+{#            $.ajax({#}
+{#    url: '/discount-cod-wishlist/',#}
+{#    type: 'POST',#}
+{#    data: {#}
+{#        'code_discount': couponCode,#}
+{#        'total_price': totalPrice,#}
+{#        'csrfmiddlewaretoken': '{{ csrf_token }}'#}
+{#    },#}
+{#    success: function(response) {#}
+{#        console.log("Response received:", response);#}
+{#        if (response.success) {#}
+{#            alert('Coupon applied successfully!');#}
+{#        } else {#}
+{#            alert('Failed to apply coupon: ' + response.error);#}
+{#        }#}
+{#    },#}
+{#    error: function(xhr, status, error) {#}
+{#        console.log("Error occurred:", error);#}
+{#        alert('An error occurred: ' + error);#}
+{#    }#}
+{# });#}
+{##}
+{#        });#}
+{#    });#}
+{#</script>#}
+
+
+
 {% endblock %}
