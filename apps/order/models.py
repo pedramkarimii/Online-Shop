@@ -63,7 +63,7 @@ class Order(mixin_model.TimestampsStatusFlagMixin):
 
     def __str__(self):
         """Return a string representation of the Order."""
-        return f' {self.address} - {self.status}'
+        return f' {self.transaction_id} - {self.payment_method} - {self.finally_price} '
 
     class Meta:
         """Additional metadata about the Order model."""
@@ -81,7 +81,7 @@ class OrderPayment(models.Model):
     order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name="order_payments")
     amount = models.SmallIntegerField(default=0, validators=[validators.AmountValidator()],
                                       verbose_name=_('Amount'))
-    cardholder_name = models.CharField(max_length=100, validators=[validators.CardholderNameValidator()],
+    cardholder_name = models.CharField(max_length=100, validators=[validators.NameValidator()],
                                        verbose_name=_('Cardholder Name'))
     card_number = models.CharField(max_length=12, validators=[validators.CardNumberValidator()],
                                    verbose_name=_('Card Number'))
@@ -89,10 +89,10 @@ class OrderPayment(models.Model):
     cvv = models.CharField(max_length=4, validators=[validators.CVVValidator()],
                            verbose_name=_('CVV'))
 
-    status = models.CharField(max_length=20,
-                              choices=[(status.value, status.name.capitalize()) for status in
-                                       mixin_model.PaymentStatusMixin],
-                              default=mixin_model.PaymentStatusMixin.PENDING.value, verbose_name=_('Status'))
+    status = models.CharField(max_length=20, verbose_name=_('Status'))
+    transaction_payment = models.CharField(max_length=36,  unique=True,
+                                           default=mixin_model.generate_transaction_id,
+                                           verbose_name=_('Transaction Payment'))
     payment_time = models.DateTimeField(auto_now_add=True, editable=False, verbose_name=_('Payment Time'))
     is_paid = models.BooleanField(default=False)
     is_failed = models.BooleanField(default=False)
