@@ -29,8 +29,9 @@
                 </tr>
                 </tbody>
             </table>
-            {% if orders %}
+            {% if orders  %}
                 {% for order in orders %}
+                {% if orders and order.deliver_order == False %}
                     <h1 class="text-2xl text-center bg-gray-800  text-gray-100 mt-8 pt-4 p-4 font-bold ">Order
                         Shipped</h1>
                     <table class="table-auto w-full rounded-lg border border-gray-300">
@@ -129,12 +130,15 @@
                         {% endif %}
 
                     </tr>
-                {% endfor %}
             {% endif %}
+            {% endfor %}
+            {% endif %}
+        
             </tbody>
             </table>
-            {% if orders and order.deliver_order == True %}
+            
                 {% for order in orders %}
+                    {% if orders and order.deliver_order == True %}
                     <h1 class="text-2xl text-center bg-gray-800 text-gray-100 mt-24 pt-4 p-4 font-bold ">Order
                         Delivered</h1>
 
@@ -234,8 +238,8 @@
                         {% endif %}
 
                     </tr>
+                    {% endif %}
                 {% endfor %}
-            {% endif %}
             </tbody>
             </table>
             <h1 class="text-2xl text-center bg-gray-800 text-gray-100 mt-24 pt-4 p-4 font-bold ">Addresses</h1>
