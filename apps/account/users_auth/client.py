@@ -7,6 +7,13 @@ from .constants import IP_ADDRESS, DEVICE_NAME
 
 
 def get_ip_address(request: HttpRequest) -> str:
+    """
+    Retrieve the client's IP address from the HTTP request.
+    Args:
+    - request (HttpRequest): The HTTP request object.
+    Returns:
+
+    """
     ip_address = request.META.get('HTTP_X_FORWARDED_FOR', None)
     if ip_address:
         ip_address = ip_address.split(",")[0]
@@ -25,6 +32,13 @@ def get_ip_address(request: HttpRequest) -> str:
 
 
 def get_client_info(request: HttpRequest) -> Dict:
+    """
+    Retrieve client information including device name and IP address from the HTTP request.
+    Args:
+    - request (HttpRequest): The HTTP request object.
+    Returns:
+    - Dict: A dictionary containing client information with keys 'DEVICE_NAME' and 'IP_ADDRESS'.
+    """
     return {
         DEVICE_NAME: request.META.get('HTTP_USER_AGENT', ''),
         IP_ADDRESS: get_ip_address(request=request)
