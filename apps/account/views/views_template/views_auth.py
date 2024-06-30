@@ -43,6 +43,10 @@ class LoginVerifyCodeView(MustBeLogoutCustomView):
         return render(request, self.template_verifycode, {'form': self.form()})
 
     def post(self, request):
+        """
+        Handle POST requests for code verification.
+        Validates the submitted form data and checks if the entered code matches the stored code.
+        """
         form = self.form(request.POST)
         if form.is_valid():
             user_session = request.session['user_login_info']
@@ -215,10 +219,15 @@ class LoginVerifyCodeEmailView(MustBeLogoutCustomView):
         return super().setup(request, *args, **kwargs)
 
     def get(self, request):
+        """
+        Handle GET requests to display the code verification form for email login.
+        """
         return render(request, self.template_verifycode, {'form': self.form_class()})
 
     def post(self, request):
-
+        """
+        Handle POST requests for code verification via email.
+        """
         user_session = request.session.get('user_login_info')
         user = forms.User.objects.filter(email=user_session['email'])
         form = self.form_class(request.POST)
