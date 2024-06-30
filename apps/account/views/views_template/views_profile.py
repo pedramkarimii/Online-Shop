@@ -66,6 +66,9 @@ class ProfileUpdateView(MustBeLogingCustomView):
     http_method_names = ['get', 'post']
 
     def setup(self, request, *args, **kwargs):
+        """
+        Initialize the form, next page1, page2, template name.
+        """
         self.profile_instance = get_object_or_404(forms.Profile, pk=kwargs['pk'])  # noqa
         self.form_class = forms.ProfileUpdateForm  # noqa
         self.template_chnage_info_profile = 'user/profile/change_info_profile.html'  # noqa
@@ -74,10 +77,16 @@ class ProfileUpdateView(MustBeLogingCustomView):
         return super().setup(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
+        """
+        Renders the form for updating the user's profile.
+        """
         form = self.form_class(instance=self.profile_instance)
         return render(request, self.template_chnage_info_profile, {'form': form, 'profile': self.profile_instance})
 
     def post(self, request, *args, **kwargs):
+        """
+        Handles form submission for updating the user's profile.
+        """
         form = self.form_class(self.request_post, self.request_files, instance=self.profile_instance)  # noqa
         if form.is_valid():  # noqa
             profile = form.save(commit=False)
@@ -93,14 +102,23 @@ class ProfileDetailView(MustBeLogingCustomView, DetailView):
     model = forms.Profile  # Set the model
 
     def setup(self, request, *args, **kwargs):
+        """
+        Initialize the context object name and template name.
+        """
         self.context_object_name = 'profile'
         self.template_name = 'user/profile/profile.html'
         return super().setup(request, *args, **kwargs)
 
     def get_object(self, queryset=None):
+        """
+        Returns the profile instance for the current user.
+        """
         return self.request.user.profile
 
     def get_context_data(self, **kwargs):
+        """
+        Adds additional context data for rendering the template.
+        """
         context = super().get_context_data(**kwargs)
         profile = self.object
 
