@@ -1,14 +1,16 @@
 import datetime
-
 from django import forms
 from apps.core import validators
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
-
 from apps.order.models import OrderItem, Order, OrderPayment
 
 
 class OrderItemForm(forms.ModelForm):
+    """
+    Form for creating and updating OrderItem objects.
+    """
+
     class Meta:
         model = OrderItem
         fields = [
@@ -71,6 +73,10 @@ class OrderItemForm(forms.ModelForm):
 
 
 class OrderForm(forms.ModelForm):
+    """
+    Form for creating and updating Order objects.
+    """
+
     class Meta:
         model = Order
         fields = ['address', 'payment_method', 'code_discount', 'finally_price']
@@ -216,30 +222,20 @@ class OrderForm(forms.ModelForm):
         Method to save the Order object.
         """
         order = super().save(commit=False)
-        order.user = self.cleaned_data['user']
         order.address = self.cleaned_data['address']
-        order.status = self.cleaned_data['status']
-        order.transaction_id = self.cleaned_data['transaction_id']
         order.payment_method = self.cleaned_data['payment_method']
         order.code_discount = self.cleaned_data['code_discount']
         order.finally_price = self.cleaned_data['finally_price']
-        order.time_accepted_order = self.cleaned_data['time_accepted_order']
-        order.accepted_order = self.cleaned_data['accepted_order']
-        order.time_shipped_order = self.cleaned_data['time_shipped_order']
-        order.shipped_order = self.cleaned_data['shipped_order']
-        order.time_deliver_order = self.cleaned_data['time_deliver_order']
-        order.deliver_order = self.cleaned_data['deliver_order']
-        order.time_rejected_order = self.cleaned_data['time_rejected_order']
-        order.rejected_order = self.cleaned_data['rejected_order']
-        order.time_cancelled_order = self.cleaned_data['time_cancelled_order']
-        order.cancelled_order = self.cleaned_data['cancelled_order']
-        order.order_item = self.cleaned_data['order_item']
         if commit:
             order.save()
         return order
 
 
 class OrderPaymentForm(forms.ModelForm):
+    """
+    Form for creating and updating OrderPayment objects.
+    """
+
     class Meta:
         model = OrderPayment
         fields = [
@@ -305,6 +301,9 @@ class OrderPaymentForm(forms.ModelForm):
         }
 
     def clean_expiration_date(self):
+        """
+        Custom validator for expiration_date field to ensure it is in the future.
+        """
         expiration_date = self.cleaned_data.get('expiration_date')
 
         if not isinstance(expiration_date, datetime.date):
