@@ -3,6 +3,9 @@ from apps.product.models import Product, Comment, Brand, Category, Media, AddToI
 
 
 class MediaInline(admin.StackedInline):
+    """
+    Class to create a inline for the media model
+    """
     model = Media
     can_delete = False
     verbose_name_plural = 'Media'
@@ -26,6 +29,9 @@ class MediaInline(admin.StackedInline):
 
 
 class DiscountInline(admin.StackedInline):
+    """
+    Class to create a inline for the discount model
+    """
     model = Discount
     can_delete = False
     verbose_name_plural = 'Discounts %'
@@ -204,6 +210,9 @@ class AddToInventoryAdmin(admin.ModelAdmin):
 
 @admin.register(Inventory)
 class InventoryAdmin(admin.ModelAdmin):
+    """
+    Admin panel configuration for Inventory model.
+    """
     list_display = ('name', 'quantity', 'available', 'create_time', 'update_time', 'is_deleted', 'is_active')
     search_fields = ('name', 'create_time', 'update_time')
     ordering = ('-create_time', '-update_time')
@@ -229,6 +238,9 @@ class InventoryAdmin(admin.ModelAdmin):
 
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
+    """
+    Admin panel configuration for Comment model.
+    """
     list_display = ('user', 'product', 'comment', 'reply', 'is_reply')
     search_fields = ('user__username', 'product__name', 'reply', 'is_reply', 'comment')
     ordering = ('-create_time', '-update_time')
@@ -254,6 +266,9 @@ class CommentAdmin(admin.ModelAdmin):
 
 @admin.register(Wishlist)
 class WishlistAdmin(admin.ModelAdmin):
+    """
+    Admin panel configuration for Wishlist model.
+    """
     list_display = ('user', 'product', 'order', 'quantity', 'total_price', 'create_time', 'update_time')
     search_fields = ('user__username', 'product')
     ordering = ('-create_time', '-update_time')
@@ -279,6 +294,9 @@ class WishlistAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
+    """
+    Admin panel configuration for Product model.
+    """
     readonly_fields = ('create_time', 'update_time', 'is_active', 'is_deleted')
     list_display = (
         'name', 'brand', 'category', 'description', 'price', 'size', 'color', 'material', 'weight',
