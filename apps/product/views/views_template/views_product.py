@@ -10,9 +10,14 @@ from apps.product.permission.template_permission_seller_or_admin import CRUD
 
 
 class ProductCreateView(CRUD.SellerOrAdminCreatePermissionRequiredMixinView):
+    """
+    Create a new product.
+    """
 
     def setup(self, request, *args, **kwargs):
-        """Initialize the success_url."""
+        """
+        Handle the GET and POST requests for creating a new product.
+        """
         self.form_class = forms.ProductCreateForm  # noqa
         self.next_page_product_create = reverse_lazy('product_create')  # noqa
         self.template_product_create = 'product/product/product_create.html'  # noqa
@@ -21,9 +26,15 @@ class ProductCreateView(CRUD.SellerOrAdminCreatePermissionRequiredMixinView):
         return super().setup(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
+        """
+        Render the form for creating a new product.
+        """
         return render(request, self.template_product_create, {'form': self.form_class()})
 
     def post(self, request, *args, **kwargs):
+        """
+        Handle POST requests to create a new product. Validates the form data and creates a new product if the form is valid.
+        """
         form = self.form_class(self.request_post, self.request_files)
         if form.is_valid():  # noqa
             product = form.save(commit=False)
@@ -40,14 +51,23 @@ class ProductCreateView(CRUD.SellerOrAdminCreatePermissionRequiredMixinView):
 
 
 class AdminOrSellerProductListView(CRUD.SellerOrAdminOrSupervisorDetailPermissionRequiredMixinView, generic.ListView):
+    """
+    List all products for admin or seller.
+    """
     model = forms.Product  # noqa
 
     def setup(self, request, *args, **kwargs):
+        """
+        function to set up the view before rendering.
+        """
         self.context_object_name = 'product'
         self.template_name = 'user/detail/admin_or_seller/admin_or_seller_product.html'
         return super().setup(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
+        """
+        function to get the context data for the view.
+        """
         context = super().get_context_data(**kwargs)  # noqa
         products = forms.Product.objects.all()
         get_product = forms.Product.objects.filter(brand__user=self.request.user)
@@ -63,16 +83,24 @@ class AdminOrSellerProductListView(CRUD.SellerOrAdminOrSupervisorDetailPermissio
 
 
 class ProductDetailView(generic.DetailView):
+    """
+    Detail view for a product.
+    """
     http_method_names = ['get']  # noqa
     model = forms.Product
 
     def setup(self, request, *args, **kwargs):
+        """
+        function to set up the view before rendering.
+        """
         self.context_object_name = 'profile'
         self.template_name = 'product/product/product.html'
         return super().setup(request, *args, **kwargs)
 
     def get_object(self, queryset=None):
-        """Return the product instance based on the URL kwargs."""
+        """
+        function to get the object for the view.
+        """
         queryset = self.get_queryset()  # noqa
         pk = self.kwargs.get(self.pk_url_kwarg)
         if pk is not None:
@@ -84,6 +112,9 @@ class ProductDetailView(generic.DetailView):
         return obj
 
     def get_context_data(self, **kwargs):
+        """
+        function to get the context data for the view.
+        """
         context = super().get_context_data(**kwargs)
         products = self.object
 
@@ -119,10 +150,14 @@ class ProductDetailView(generic.DetailView):
 
 
 class ProductUpdateView(CRUD.SellerOrAdminProductUpdateOrDeletePermissionRequiredMixinView):
+    """
+    Update a product.
+    """
 
     def setup(self, request, *args, **kwargs):
-        """Initialize the success_url and retrieve the product instance."""
-
+        """
+        function to set up the view before rendering.
+        """
         self.form_class = forms.ProductUpdateForm  # noqa
         self.template_product_update = 'product/product/product_update.html'  # noqa
         self.request_files = request.FILES  # noqa
@@ -130,10 +165,16 @@ class ProductUpdateView(CRUD.SellerOrAdminProductUpdateOrDeletePermissionRequire
         return super().setup(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
+        """
+        Render the form for updating a product.
+        """
         form = self.form_class(instance=self.product_instance)
         return render(request, self.template_product_update, {'form': form, 'product': self.product_instance})
 
     def post(self, request, *args, **kwargs):
+        """
+        Handle POST requests to update a product. Validates the form data and updates the product if the form is valid.
+        """
         form = self.form_class(self.request_post, self.request_files, instance=self.product_instance)  # noqa
         if form.is_valid():  # noqa
             product = form.save(commit=False)
