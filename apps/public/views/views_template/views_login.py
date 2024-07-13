@@ -115,6 +115,9 @@ class UserLoginPhoneNumberView(MustBeLogoutCustomView):
 
 
 class UserLoginUsernameOrEmailView(MustBeLogoutCustomView):
+    """
+    Custom view for user login via username or email.
+    """
     http_method_names = ['get', 'post']
 
     def setup(self, request, *args, **kwargs):
@@ -127,9 +130,18 @@ class UserLoginUsernameOrEmailView(MustBeLogoutCustomView):
         return super().setup(request, *args, **kwargs)
 
     def get(self, request):
+        """
+        for GET requests, render the login form with an instance of the UserLoginUsernameOrEmailForm.
+        """
         return render(request, self.template_login, {'form': self.form()})
 
     def post(self, request):
+        """
+        for POST requests, process the login form submission.
+        If the form is valid, check if the user exists with the provided username or email.
+        If the user exists, log them in, generate and store access and refresh tokens, and redirect to the home page.
+        If the user does not exist, display an error message and redirect back to the login page.
+        """
         form = self.form(request.POST)
         if form.is_valid():
             email_or_username = form.cleaned_data['username_or_email']  # noqa
@@ -179,7 +191,9 @@ class UserLoginEmailView(MustBeLogoutCustomView):
         return super().setup(request, *args, **kwargs)
 
     def send_otp_email(self, email, otp):
-
+        """
+        Sends an OTP code to the provided email address.
+        """
         user = forms.User.objects.get(email=email)
         if user:
             subject = 'Your OTP for Verification'
@@ -196,9 +210,15 @@ class UserLoginEmailView(MustBeLogoutCustomView):
             return redirect(self.next_page_login_email)
 
     def get(self, request):
+        """
+        Handles GET requests to display the login email form.
+        """
         return render(request, self.template_login_email, {'form': self.form_class()})
 
     def post(self, request):
+        """
+        Handles POST requests to process the login email form submission.
+        """
         form = self.form_class(request.POST)
         if form.is_valid():
             email = form.cleaned_data['email']
