@@ -9,8 +9,13 @@ from apps.core.permission.template_permission_admin import CRUD
 
 
 class InventoryCreateView(CRUD.AdminPermissionRequiredMixinView):
+    """
+    Create a new inventory.
+    """
     def setup(self, request, *args, **kwargs):
-        """Initialize the success_url."""
+        """
+        Handle the GET and POST requests for creating a new inventory.
+        """
         self.form_class = forms.InventoryCreateForm  # noqa
         self.next_page_inventory_create = reverse_lazy('inventory_create')  # noqa
         self.template_inventory_create = 'product/inventory/inventory_create.html'  # noqa
@@ -18,9 +23,15 @@ class InventoryCreateView(CRUD.AdminPermissionRequiredMixinView):
         return super().setup(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
+        """
+        Render the form for creating a new inventory.
+        """
         return render(request, self.template_inventory_create, {'form': self.form_class()})
 
     def post(self, request, *args, **kwargs):
+        """
+        Handle the POST request for creating a new inventory.
+        """
         form = self.form_class(self.request_post)  # noqa
         if form.is_valid():  # noqa
             inventory = form.save(commit=False)
@@ -32,18 +43,30 @@ class InventoryCreateView(CRUD.AdminPermissionRequiredMixinView):
 
 
 class AdminInventoryListView(CRUD.AdminPermissionRequiredMixinView, generic.ListView):
+    """
+    class to handle the list view for warehouse keeper entries
+    """
     http_method_names = ['get']  # noqa
     model = forms.Inventory
 
     def setup(self, request, *args, **kwargs):
+        """
+        function to set up the view before rendering.
+        """
         self.context_object_name = 'inventory'
         self.template_name = 'user/detail/admin/admin_inventory.html'
         return super().setup(request, *args, **kwargs)
 
     def get_queryset(self):
+        """
+        function to get the queryset for the view.
+        """
         return forms.Inventory.objects.all()
 
     def get_context_data(self, **kwargs):
+        """
+        function to get the context data for the view.
+        """
         context = super().get_context_data(**kwargs)  # noqa
         inventory = forms.Inventory.objects.all()
         if self.request.user.is_superuser or self.request.user.is_staff:
@@ -56,16 +79,24 @@ class AdminInventoryListView(CRUD.AdminPermissionRequiredMixinView, generic.List
 
 
 class InventoryDetailView(CRUD.AdminPermissionRequiredMixinView, generic.DetailView):
+    """
+    Detail view for a warehouse keeper.
+    """
     http_method_names = ['get']  # noqa
     model = forms.Inventory
 
     def setup(self, request, *args, **kwargs):
+        """
+        function to set up the view before rendering.
+        """
         self.context_object_name = 'inventory'
         self.template_name = 'product/inventory/inventory.html'
         return super().setup(request, *args, **kwargs)
 
     def get_object(self, queryset=None):
-        """Return the inventory instance based on the URL kwargs."""  # noqa
+        """
+        function to get the object for the view.
+        """
         queryset = self.get_queryset()  # noqa
         pk = self.kwargs.get(self.pk_url_kwarg)
         if pk is not None:
@@ -77,6 +108,9 @@ class InventoryDetailView(CRUD.AdminPermissionRequiredMixinView, generic.DetailV
         return obj
 
     def get_context_data(self, **kwargs):
+        """
+        function to get the context data for the view.
+        """
         context = super().get_context_data(**kwargs)
         inventory = forms.Inventory.objects.all()
         context['inventory'] = inventory
