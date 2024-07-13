@@ -247,7 +247,7 @@ class Address(mixin_model.TimestampsStatusFlagMixin):
         """
         String representation of the address object
         """
-        return f'{self.user} - {self.address_name}'
+        return f'{self.address_name} - {self.street}'
 
     class Meta:
         """

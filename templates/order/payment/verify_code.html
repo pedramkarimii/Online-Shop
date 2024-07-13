@@ -1,0 +1,29 @@
+{% extends "base/base.html" %} {% block title %}
+    <title>Verify Code</title>
+{% endblock %}
+{% block content %}
+
+    <div class="bg-gradient-to-r  from-blue-800 from-10% via-sky-500 via-30% to-emerald-00 to-90% text-center flex flex-col justify-between ">
+        <form action="" method="post" novalidate>
+
+            <h1 class="text-4xl mt-4 font-bold mb-6">Verify Code</h1>
+            <div class="text-gray-800">
+                <div>
+                    {% csrf_token %}
+                    <dive>
+                        <label for="password" class="mt-4 block text-sm font-medium text-gray-700">OTP CODE</label>
+                        <input id="password" name="code" type="password" required
+                               class="mt-1  pt-1 py-1 px-1 l focus:ring-indigo-500 focus:border-indigo-500 shadow-sm sm:text-sm border-gray-300 rounded-md">
+                    </dive>
+                </div>
+                <input type="submit" value="send"
+                       class="bg-blue-600 text-white mt-4 mx-2 px-6 py-2 rounded hover:bg-blue-400">
+
+
+            </div>
+            <br><br><br><br>
+        </form>
+    </div>
+
+
+{% endblock %}

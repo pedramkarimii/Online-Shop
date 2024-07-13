@@ -9,9 +9,9 @@ from django.utils.translation import gettext_lazy as _
 class OrderItem(mixin_model.TimestampsStatusFlagMixin):
     """Model representing an item within an order."""
 
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="user_order_items")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_order_items")
     product = models.ForeignKey('product.Product', on_delete=models.CASCADE, related_name="product_order_items")
-    order = models.ForeignKey('Order', on_delete=models.CASCADE, related_name="order_order_items")
+    # order = models.ForeignKey('Order', on_delete=models.CASCADE, related_name="order_order_items")
     total_price = models.IntegerField(default=0)
     quantity = models.PositiveIntegerField(default=1, validators=[validators.QuantityValidators()],
                                            verbose_name=_('Quantity'))
@@ -28,13 +28,13 @@ class OrderItem(mixin_model.TimestampsStatusFlagMixin):
         verbose_name_plural = 'Order Items'
         indexes = [
             models.Index(
-                fields=('user', 'product', 'order'), name='order_item')]
+                fields=('user', 'product'), name='order_item')]
 
 
 class Order(mixin_model.TimestampsStatusFlagMixin):
     """Model representing an order placed by a user."""
-
-    address = models.OneToOneField(Address, on_delete=models.CASCADE, related_name="address_order")
+    order_item = models.ManyToManyField(OrderItem, related_name="order_items", verbose_name=_('Order Items'))
+    address = models.ForeignKey(Address, on_delete=models.CASCADE, related_name="address_order")
     status = models.CharField(max_length=20, choices=validators.StatusChoice.CHOICES,
                               validators=[validators.StatusValidator()],
                               verbose_name=_('Status'))
@@ -63,7 +63,7 @@ class Order(mixin_model.TimestampsStatusFlagMixin):
 
     def __str__(self):
         """Return a string representation of the Order."""
-        return f' {self.address} - {self.status}'
+        return f' {self.transaction_id} - {self.payment_method} - {self.finally_price} '
 
     class Meta:
         """Additional metadata about the Order model."""
@@ -81,7 +81,7 @@ class OrderPayment(models.Model):
     order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name="order_payments")
     amount = models.SmallIntegerField(default=0, validators=[validators.AmountValidator()],
                                       verbose_name=_('Amount'))
-    cardholder_name = models.CharField(max_length=100, validators=[validators.CardholderNameValidator()],
+    cardholder_name = models.CharField(max_length=100, validators=[validators.NameValidator()],
                                        verbose_name=_('Cardholder Name'))
     card_number = models.CharField(max_length=12, validators=[validators.CardNumberValidator()],
                                    verbose_name=_('Card Number'))
@@ -89,10 +89,10 @@ class OrderPayment(models.Model):
     cvv = models.CharField(max_length=4, validators=[validators.CVVValidator()],
                            verbose_name=_('CVV'))
 
-    status = models.CharField(max_length=20,
-                              choices=[(status.value, status.name.capitalize()) for status in
-                                       mixin_model.PaymentStatusMixin],
-                              default=mixin_model.PaymentStatusMixin.PENDING.value, verbose_name=_('Status'))
+    status = models.CharField(max_length=20, verbose_name=_('Status'))
+    transaction_payment = models.CharField(max_length=36,  unique=True,
+                                           default=mixin_model.generate_transaction_id,
+                                           verbose_name=_('Transaction Payment'))
     payment_time = models.DateTimeField(auto_now_add=True, editable=False, verbose_name=_('Payment Time'))
     is_paid = models.BooleanField(default=False)
     is_failed = models.BooleanField(default=False)

@@ -1,5 +1,7 @@
-from datetime import timedelta
+import os
+from celery import Celery
 from pathlib import Path
+from datetime import timedelta
 from decouple import config  # noqa
 
 USE_TZ = True
@@ -62,6 +64,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
+        'apps.account.users_auth.authenticate.JWTAuthentication',
     ]
 }
 # Applications
@@ -69,6 +72,7 @@ APPLICATIONS = ["account", "order", "product", "core"]
 
 # Serving
 STATIC_URL = "storage/static/"
+# STATIC_ROOT = BASE_DIR / "storage/static/"
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "storage/media"
 
@@ -79,21 +83,15 @@ JWT_AUTH_ENCRYPT_KEY = b'32 bytes'
 JWT_AUTH_GET_USER_BY_ACCESS_TOKEN = True
 JWT_AUTH_CACHE_USING = True
 
-# CELERY
-CELERY_TIMEZONE = TIME_ZONE
-CELERY_BROKER_URL = config("CELERY_BROKER_URL")
-CELERY_BROKER_BACKEND = config("CELERY_BROKER_BACKEND")
-CELERY_RESULT_BACKEND = config("CELERY_RESULT_BACKEND")
-
-# AWS
-DEFAULT_FILE_STORAGE = config("DEFAULT_FILE_STORAGE")
-AWS_ACCESS_KEY_ID = config("AWS_ACCESS_KEY_ID")
-AWS_SECRET_ACCESS_KEY = config("AWS_SECRET_ACCESS_KEY")
-AWS_S3_ENDPOINT_URL = config("AWS_S3_ENDPOINT_URL")
-AWS_STORAGE_BUCKET_NAME = config("AWS_STORAGE_BUCKET_NAME")
-AWS_SERVICE_NAME = config("AWS_SERVICE_NAME")
-AWS_S3_FILE_OVERWRITE = config("AWS_S3_FILE_OVERWRITE", cast=bool, default=False)
-AWS_LOCAL_STORAGE = f"{BASE_DIR}storage/aws/"
+# AWS S3 Configuration
+DEFAULT_FILE_STORAGE = config('DEFAULT_FILE_STORAGE')
+AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
+AWS_S3_ENDPOINT_URL = config('AWS_S3_ENDPOINT_URL')
+AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME')
+AWS_S3_FILE_OVERWRITE = config('AWS_S3_FILE_OVERWRITE', cast=bool, default=False)
+AWS_SERVICE_NAME = config('AWS_SERVICE_NAME', default='s3')
+AWS_LOCAL_STORAGE = f"{BASE_DIR}/storage/aws/"
 
 # Mode Handling:
 if DEBUG:
@@ -109,6 +107,7 @@ if DEBUG:
         "rest_framework",
         "storages",
         "django_celery_beat",
+        "django_celery_results",
         # Application
         *list(map(lambda app: f"apps.{app}", APPLICATIONS)),
     ]

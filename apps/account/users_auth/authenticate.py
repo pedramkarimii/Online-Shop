@@ -13,8 +13,18 @@ from apps.account.users_auth.constants import USER_ID
 
 
 class JWTAuthentication(BaseJWTAuthentication):
+    """Custom authentication backend for authenticating users via email."""
 
     def authenticate(self, request: Request) -> Optional[Tuple[AuthUser, Token]]:
+        """
+        Custom authentication method to authenticate a user using JWT tokens.
+        Args:
+        - request (Request): The HTTP request object.
+        Returns:
+        - Optional[Tuple[AuthUser, Token]]: Tuple containing authenticated user and token if authentication succeeds, None otherwise.
+        Raises:
+        - InvalidToken: If the token is invalid or authentication fails.
+        """
         header = self.get_header(request)
         if header is None:
             return None
@@ -35,6 +45,13 @@ class JWTAuthentication(BaseJWTAuthentication):
         return self.get_user(validated_token), validated_token
 
     def get_user(self, validated_token: Token) -> AuthUser:
+        """
+        Retrieve the authenticated user based on the validated token.
+        Args:
+        - validated_token (Token): The validated token object.
+        Returns:
+        - AuthUser: Authenticated user object.
+        """
         if app_setting.get_user_by_access_token:
             return get_user_by_access_token(token=validated_token)
         return User.objects.get(id=validated_token[USER_ID])

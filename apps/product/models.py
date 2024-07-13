@@ -227,7 +227,7 @@ class Comment(mixin_model.TimestampsStatusFlagMixin):
 
 class Wishlist(mixin_model.TimestampsStatusFlagMixin):
     """Model representing a user's favorite or basket products."""
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='user_wishlist')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_wishlist')
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_wishlist')
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='order_wishlist', null=True,
                               blank=True)

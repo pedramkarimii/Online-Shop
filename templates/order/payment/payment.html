@@ -1,0 +1,32 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title %}
+    <title>Order Payment</title>
+{% endblock %}
+
+{% block content %}
+    <div class="max-w-2xl mx-auto py-12">
+        <div class="bg-gray-300  shadow-lg rounded-lg p-10">
+            <h2 class="text-4xl font-bold mb-10 text-center text-gray-800">Order Payment</h2>
+
+            <form action="{% url 'payment_order' %}" method="POST">
+                {% csrf_token %}
+                <div class="grid grid-cols-1 gap-6 ">
+                    {{ form }}
+                    <!-- Hidden Fields -->
+                </div>
+                <div class="mt-10 text-center">
+                    <button type="submit"
+                            class="bg-red-500 hover:bg-red-900 text-white font-bold py-3 px-8 rounded-full focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:scale-105">
+                        Cancel
+                    </button>
+                    <a href="http://127.0.0.1:8000/payment-order"><button type="submit"
+                            class="bg-blue-500 hover:bg-blue-900 text-white font-bold py-3 px-8 rounded-full focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:scale-105">
+                        Payment
+                    </button></a>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
