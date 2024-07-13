@@ -25,59 +25,58 @@
             <div class="row">
                 <div class="col-md-7">
 
-                        <div class="form-group mt-12">
-                            <label for="code_discount">Discount Code</label>
-                            {{ form.code_discount }}
+{#                    <div class="form-group mt-12">#}
+{#                        <label for="code_discount">Discount Code</label>#}
+{#                        {{ form.code_discount }}#}
+{#                    </div>#}
+{#                    <a href="http://127.0.0.1:8000/discount-cod-wishlist/">#}
+{#                        <button type="submit" class="mb-12 primary-btn order-submit">Check Discount</button>#}
+{#                    </a>#}
+
+                    <div class="shipping-details">
+                        <div class="section-title">
+                            <h3 class="title">Create Address</h3>
                         </div>
-                    <a href="http://127.0.0.1:8000/discount-cod-wishlist/"><button type="submit" class="mb-12 primary-btn order-submit">Check Discount</button></a>
-                        
-                        <div class="shipping-details">
-                            <div class="section-title">
-                                <h3 class="title">Create Address</h3>
-                            </div>
-                            <div class="input-checkbox">
-                                <input type="checkbox" id="shiping-address">
-                                <label for="shiping-address">
-                                    <span></span>
-                                    Do you want to create an address?
-                                </label>
-                                <div class="caption">
-                                    <div class="form-group">
-                                        <input class="input" type="text" name="first-name" placeholder="First Name">
-                                    </div>
-                                    <div class="form-group">
-                                        <input class="input" type="text" name="last-name" placeholder="Last Name">
-                                    </div>
-                                    <div class="form-group">
-                                        <input class="input" type="email" name="email" placeholder="Email">
-                                    </div>
-                                    <div class="form-group">
-                                        <input class="input" type="text" name="address" placeholder="Address">
-                                    </div>
-                                    <div class="form-group">
-                                        <input class="input" type="text" name="city" placeholder="City">
-                                    </div>
-                                    <div class="form-group">
-                                        <input class="input" type="text" name="country" placeholder="Country">
-                                    </div>
-                                    <div class="form-group">
-                                        <input class="input" type="text" name="zip-code" placeholder="ZIP Code">
-                                    </div>
-                                    <div class="form-group">
-                                        <input class="input" type="tel" name="tel" placeholder="Telephone">
-                                    </div>
+                        <div class="input-checkbox">
+                            <input type="checkbox" id="shiping-address">
+                            <label for="shiping-address">
+                                <span></span>
+                                Do you want to create an address?
+                            </label>
+                            <div class="caption">
+                                <div class="form-group">
+                                    <input class="input" type="text" name="first-name" placeholder="First Name">
+                                </div>
+                                <div class="form-group">
+                                    <input class="input" type="text" name="last-name" placeholder="Last Name">
+                                </div>
+                                <div class="form-group">
+                                    <input class="input" type="email" name="email" placeholder="Email">
+                                </div>
+                                <div class="form-group">
+                                    <input class="input" type="text" name="address" placeholder="Address">
+                                </div>
+                                <div class="form-group">
+                                    <input class="input" type="text" name="city" placeholder="City">
+                                </div>
+                                <div class="form-group">
+                                    <input class="input" type="text" name="country" placeholder="Country">
+                                </div>
+                                <div class="form-group">
+                                    <input class="input" type="text" name="zip-code" placeholder="ZIP Code">
+                                </div>
+                                <div class="form-group">
+                                    <input class="input" type="tel" name="tel" placeholder="Telephone">
                                 </div>
                             </div>
                         </div>
-                        
-
-                       
-                    
+                    </div>
                 </div>
 
                 <div class="col-md-5 order-details">
-                <form method="post" action="{% url 'add_order' pk=1 %}">
+                    <form method="post" action="{% url 'add_order' pk=request.user.id %}">
                         {% csrf_token %}
+                    
                         <div class="billing-details">
                             <div class="section-title">
                                 <h3 class="title">Select Address</h3>
@@ -86,11 +85,11 @@
                                 {{ form.address }}
                             </div>
                         </div>
-    <input type="hidden" name="order_item_id" value="{{ pk_product }}">
-     {{ form.finally_price }}
-    <input type="hidden" name="finally_price" id="sum_total_price" value="{{ sum_total_price }}">
+                        <input type="hidden" name="order_item_id" value="{{ pk_product }}">
+                        <input type="hidden" name="user" value="{{ request.user }}">
+                        {{ form.finally_price }}
+                        <input type="hidden" name="finally_price" id="sum_total_price" value="{{ sum_total_price }}">
 
-                        
 
                         <div class="shipping-details mt-12">
                             <div class="section-title">
@@ -98,77 +97,86 @@
                             </div>
                             {{ form.payment_method }}
                         </div>
-                        
-                    <div class="section-title text-center">
-                        <h3 class="title">Your Order</h3>
-                    </div>
-                    <div class="order-summary">
-                        <div class="order-col">
-                            <div><strong>Product</strong></div>
-                            <div><strong>Total</strong></div>
+
+                        <div class="section-title text-center">
+                            <h3 class="title">Your Order</h3>
                         </div>
-                        <div class="order-products">
-                            	
-                            
+                        <div class="order-summary">
+                            <div class="order-col">
+                                <div><strong>Product</strong></div>
+                                <div><strong>Total</strong></div>
+                            </div>
+                            <div class="order-products">
+
+
                                 {% for product_id, product in products.items %}
                                     <div class="order-col">
-                                <div>{{ product.quantity }}x {{ product.name }}</div>
-                                <div>${{ product.total }}</div>
+                                        <div>{{ product.quantity }}x {{ product.name }}</div>
+                                        <div>${{ product.total }}</div>
+                                    </div>
+                                {% endfor %}
                             </div>
-                            {% endfor %}
-                        </div>
 
-                        <div class="order-col">
-                            <div>Discount</div>
-                            <div><strong>$100</strong></div>
+                            <div class="order-col">
+                                <div>Discount</div>
+                                <div><strong>$100</strong></div>
+                            </div>
+                            <div class="order-col mb-12">
+                                <div><strong>Total</strong></div>
+                                <div><strong class="order-total">${{ sum_total_price }}</strong></div>
+                            </div>
+                        <div class="shipping-details mt-12">
+                            <div class="section-title">
+                                <h3 class="title">Code Discount</h3>
+                            </div>
+                            {{ form.code_discount }}
                         </div>
-                        <div class="order-col mb-12" >
-                            <div><strong>Total</strong></div>
-                            <div><strong class="order-total" >${{ sum_total_price }}</strong></div>
+{#                            <button onclick="window.location.href='{% url 'add_order' pk=request.user.id %}'" type="submit"#}
+                            <button onclick="window.location.href='{% url 'payment_order' %}'" type="submit"
+                                    class="center-block primary-btn order-submit">Place Order
+                            </button>
                         </div>
-                         <button type="submit" class="center-block primary-btn order-submit">Place Order</button>
-                    </div>
-                </form>
-                    
+                    </form>
+
                 </div>
             </div>
         </div>
     </div>
 
-   
-<script>
-    $(document).ready(function() {
-        $('#apply-coupon-btn').click(function(event) {
-            event.preventDefault();
-            var couponCode = $('#coupon').val();
-            var totalPrice = $('.total-price-all').text().replace('$', '').trim();  // Updated selector and cleaned up the price
 
-            console.log("Applying coupon with the following details:");
-            console.log("Coupon Code:", couponCode);
-            console.log("Total Price:", totalPrice);
+    <script>
+        $(document).ready(function () {
+            $('#apply-coupon-btn').click(function (event) {
+                event.preventDefault();
+                var couponCode = $('#coupon').val();
+                var totalPrice = $('.total-price-all').text().replace('$', '').trim();  // Updated selector and cleaned up the price
 
-            $.ajax({
-                url: '/discount-cod-wishlist/',
-                type: 'POST',
-                data: {
-                    'code_discount': couponCode,
-                    'total_price': totalPrice,
-                    'csrfmiddlewaretoken': '{{ csrf_token }}'
-                },
-                success: function(response) {
-                    console.log("Response received:", response);
-                    if (response.success) {
-                        alert('Coupon applied successfully!');
-                    } else {
-                        alert('Failed to apply coupon.');
+                console.log("Applying coupon with the following details:");
+                console.log("Coupon Code:", couponCode);
+                console.log("Total Price:", totalPrice);
+
+                $.ajax({
+                    url: '/discount-cod-wishlist/',
+                    type: 'POST',
+                    data: {
+                        'code_discount': couponCode,
+                        'total_price': totalPrice,
+                        'csrfmiddlewaretoken': '{{ csrf_token }}'
+                    },
+                    success: function (response) {
+                        console.log("Response received:", response);
+                        if (response.success) {
+                            alert('Coupon applied successfully!');
+                        } else {
+                            alert('Failed to apply coupon.');
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.log("Error occurred:", error);
+                        alert('An error occurred: ' + error);
                     }
-                },
-                error: function(xhr, status, error) {
-                    console.log("Error occurred:", error);
-                    alert('An error occurred: ' + error);
-                }
+                });
             });
         });
-    });
-</script>
+    </script>
 {% endblock %}
