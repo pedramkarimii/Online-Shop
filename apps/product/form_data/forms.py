@@ -5,6 +5,9 @@ from apps.product.models import Brand, Product, Comment, Category, Discount, Add
 
 
 class BrandCreateForm(forms.ModelForm):
+    """
+    Form for creating a new brand.
+    """
 
     def __init__(self, *args, **kwargs):
         """
@@ -104,6 +107,9 @@ class BrandCreateForm(forms.ModelForm):
         return brand
 
     def logo_picture(self, user_id, commit=True):
+        """
+        Creates a brand instance with the logo picture.
+        """
         brand = Brand.objects.get(user_id=user_id)
         if 'logo' in self.files:
             brand.logo = self.files['logo']
@@ -114,11 +120,17 @@ class BrandCreateForm(forms.ModelForm):
 
 
 class BrandUpdateForm(BrandCreateForm):
+    """
+    Form for updating an existing brand.
+    """
     def __init__(self, *args, **kwargs):
         self.brand_instance = kwargs.pop('brand_instance', None)
         super().__init__(*args, **kwargs)
 
     def save(self, commit=True):
+        """
+        Saves the updated brand instance.
+        """
         brand = super().save(commit=False)  # noqa
         brand.name = self.cleaned_data['name']
         brand.phone_number = self.cleaned_data['phone_number']
@@ -143,6 +155,9 @@ class BrandUpdateForm(BrandCreateForm):
 
 
 class CategoryCreateForm(forms.ModelForm):
+    """
+    Form for creating a new category.
+    """
 
     def __init__(self, *args, **kwargs):
         """
@@ -208,6 +223,9 @@ class CategoryCreateForm(forms.ModelForm):
         }
 
     def category_pictures(self, category_id, commit=True):
+        """
+        Creates a category instance with the category picture.
+        """
         category = Category.objects.get(category_id=category_id)
         if 'category_picture' in self.files:
             category.category_picture = self.files['category_picture']
@@ -231,12 +249,20 @@ class CategoryCreateForm(forms.ModelForm):
 
 
 class CategoryUpdateForm(CategoryCreateForm):
+    """
+    Form for updating an existing category.
+    """
     def __init__(self, *args, **kwargs):
+        """
+        Initializes the form fields with instance data.
+        """
         self.category_instance = kwargs.pop('category_instance', None)
         super().__init__(*args, **kwargs)
 
     def save(self, commit=True):
-
+        """
+        Saves the updated category instance.
+        """
         category = super().save(commit=False)  # noqa
         category.name = self.cleaned_data['name']
         category.parent_category = self.cleaned_data['parent_category']
@@ -258,7 +284,13 @@ class CategoryUpdateForm(CategoryCreateForm):
 
 
 class ProductCreateForm(forms.ModelForm):
+    """
+    Form for creating a new product.
+    """
     def __init__(self, *args, **kwargs):
+        """
+        Initializes the form fields.
+        """
         super().__init__(*args, **kwargs)
         self.fields['product_picture'].widget.attrs['multiple'] = True
 
@@ -475,11 +507,20 @@ class ProductCreateForm(forms.ModelForm):
 
 
 class ProductUpdateForm(ProductCreateForm):
+    """
+    Form for updating a product.
+    """
     def __init__(self, *args, **kwargs):
+        """
+        Initializes the form with the product instance to be updated.
+        """
         self.product_instance = kwargs.pop('product_instance', None)
         super().__init__(*args, **kwargs)
 
     def save(self, commit=True):  # noqa
+        """
+        Saves the updated product instance.
+        """
         product = super().save(commit=False)  # noqa
 
         product.category = self.cleaned_data['category']
@@ -532,7 +573,13 @@ class ProductUpdateForm(ProductCreateForm):
 
 
 class CommentCreateForm(forms.ModelForm):
+    """
+    Form for creating a comment.
+    """
     def __init__(self, *args, **kwargs):
+        """
+        Initializes the form with the post ID for which the comment is being created.
+        """
         post_id = kwargs.pop('post_id', None)
         super().__init__(*args, **kwargs)
         if post_id:
@@ -617,6 +664,9 @@ class CommentCreateForm(forms.ModelForm):
 
 
 class DiscountCreateForm(forms.ModelForm):
+    """
+    Form for creating a discount.
+    """
     product = forms.ModelChoiceField(queryset=Product.objects.all().filter(is_active=True, is_deleted=False),
                                      required=False, widget=forms.Select(
             attrs={'class': 'form-select mt-1 pt-2 py-2 px-4 focus:ring-indigo-500 focus:border-indigo-500 '
@@ -722,13 +772,21 @@ class DiscountCreateForm(forms.ModelForm):
 
 
 class DiscountUpdateForm(DiscountCreateForm):
+    """
+    Form for updating a discount.
+    """
     def __init__(self, *args, **kwargs):
+        """
+        Initializes the form with the discount instance to be updated.
+        """
         self.discount_instance = kwargs.pop('discount_instance', None)
         super().__init__(*args, **kwargs)
 
     def save(self, commit=True):
+        """
+        Saves the discount with the updated fields.
+        """
         discount = super().save(commit=False)  # noqa
-
         discount.product = self.cleaned_data['product']
         discount.category = self.cleaned_data['category']
         discount.percentage_discount = self.cleaned_data['percentage_discount']
@@ -757,6 +815,9 @@ class DiscountUpdateForm(DiscountCreateForm):
 
 
 class WishlistAddForm(forms.ModelForm):
+    """
+    Form for adding a product to a wishlist.
+    """
     class Meta:
         model = Wishlist
         fields = ['product', 'order', 'quantity', 'total_price']
@@ -820,7 +881,13 @@ class WishlistAddForm(forms.ModelForm):
 
 
 class WishlistUpdateForm(WishlistAddForm):
+    """
+    Form for updating a product in a wishlist.
+    """
     def __init__(self, *args, **kwargs):
+        """
+        Initializes the form with the inventory instance to be updated.
+        """
         self.add_to_wishlist_instance = kwargs.pop('add_to_wishlist_instance', None)
         super().__init__(*args, **kwargs)
 
@@ -848,6 +915,9 @@ class WishlistUpdateForm(WishlistAddForm):
 
 
 class AddToInventoryCreateForm(forms.ModelForm):
+    """
+    Form for creating a new AddToInventory object.
+    """
     inventory = forms.ModelChoiceField(queryset=Inventory.objects.all().filter(is_active=True, is_deleted=False),
                                        widget=forms.Select(
                                            attrs={
@@ -869,6 +939,9 @@ class AddToInventoryCreateForm(forms.ModelForm):
                                                'rounded-md'}))
 
     def __init__(self, *args, **kwargs):
+        """
+        Initializes the form with the inventory instance to be updated.
+        """
         super(AddToInventoryCreateForm, self).__init__(*args, **kwargs)
         self.fields['inventory'].label_from_instance = lambda obj: f'{obj.name}'
 
@@ -930,13 +1003,21 @@ class AddToInventoryCreateForm(forms.ModelForm):
 
 
 class AddToInventoryUpdateForm(AddToInventoryCreateForm):
+    """
+    Form for updating an existing AddToInventory object.
+    """
     def __init__(self, *args, **kwargs):
+        """
+        Initializes the form with the inventory instance to be updated.
+        """
         self.add_to_inventory_instance = kwargs.pop('add_to_inventory_instance', None)
         super().__init__(*args, **kwargs)
 
     def save(self, commit=True):
+        """
+        Saves the updated AddToInventory object.
+        """
         add_to_inventory = super().save(commit=False)
-
         add_to_inventory.inventory = self.cleaned_data['inventory']
         add_to_inventory.product = self.cleaned_data['product']
         add_to_inventory.quantity = self.cleaned_data['quantity']
@@ -956,6 +1037,9 @@ class AddToInventoryUpdateForm(AddToInventoryCreateForm):
 
 
 class InventoryCreateForm(forms.ModelForm):
+    """
+    Form for creating a new Inventory object.
+    """
     class Meta:
         model = Inventory
         fields = ['name', 'quantity', 'description']
@@ -1005,8 +1089,10 @@ class InventoryCreateForm(forms.ModelForm):
         }
 
     def save(self, commit=True):
+        """
+        Saves the new Inventory object.
+        """
         inventory = super().save(commit=False)
-
         inventory.name = self.cleaned_data['name']
         inventory.quantity = self.cleaned_data['quantity']
         inventory.description = self.cleaned_data['description']
@@ -1016,13 +1102,21 @@ class InventoryCreateForm(forms.ModelForm):
 
 
 class InventoryUpdateForm(InventoryCreateForm):
+    """
+    Form for updating an existing Inventory object.
+    """
     def __init__(self, *args, **kwargs):
+        """
+        Initializes the form with the inventory instance to be updated.
+        """
         self.inventory_instance = kwargs.pop('inventory_instance', None)
         super().__init__(*args, **kwargs)
 
     def save(self, commit=True):
+        """
+        Saves the updated Inventory object.
+        """
         inventory = super().save(commit=False)
-
         inventory.name = self.cleaned_data['name']
         inventory.quantity = self.cleaned_data['quantity']
         inventory.description = self.cleaned_data['description']
