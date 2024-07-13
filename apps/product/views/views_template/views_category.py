@@ -9,9 +9,13 @@ from apps.core.permission.template_permission_admin import CRUD
 
 
 class CategoryCreateView(CRUD.AdminPermissionRequiredMixinView):
-
+    """
+    Create a new category.
+    """
     def setup(self, request, *args, **kwargs):
-        """Initialize the success_url."""
+        """
+        Handle the GET and POST requests for creating a new category.
+        """
         self.form_class = forms.CategoryCreateForm  # noqa
         self.next_page_home = reverse_lazy('home')  # noqa
         self.next_page_category_create = reverse_lazy('category_create')  # noqa
@@ -21,9 +25,15 @@ class CategoryCreateView(CRUD.AdminPermissionRequiredMixinView):
         return super().setup(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
+        """
+        Handle GET requests to the view. Renders the form for creating a new category.
+        """
         return render(request, self.template_category_create, {'form': self.form_class()})
 
     def post(self, request, *args, **kwargs):
+        """
+        Handle POST requests to the view. Validates the form data and creates a new category if the form is valid.
+        """
         form = self.form_class(self.request_post, self.request_files)  # noqa
         if forms.Category.objects.filter(name=self.request_post.get('name')).exists():
             messages.error(request, _(f'Category already exists.'), extra_tags='error')
@@ -38,18 +48,30 @@ class CategoryCreateView(CRUD.AdminPermissionRequiredMixinView):
 
 
 class AdminCategoryListView(CRUD.AdminPermissionRequiredMixinView, generic.ListView):
+    """
+    List all categories for admin.
+    """
     http_method_names = ['get']  # noqa
     model = forms.Category
 
     def setup(self, request, *args, **kwargs):
+        """
+        function to set up the view before rendering.
+        """
         self.context_object_name = 'category'
         self.template_name = 'user/detail/admin/admin_categories.html'
         return super().setup(request, *args, **kwargs)
 
     def get_queryset(self):
+        """
+        function to get the queryset for the view.
+        """
         return forms.Category.objects.all()
 
     def get_context_data(self, **kwargs):
+        """
+        function to get the context data for the view.
+        """
         context = super().get_context_data(**kwargs)  # noqa
         categories = forms.Category.objects.all()
         if self.request.user.is_superuser or self.request.user.is_staff:
@@ -62,17 +84,25 @@ class AdminCategoryListView(CRUD.AdminPermissionRequiredMixinView, generic.ListV
 
 
 class CategoryDetailView(generic.DetailView):
+    """
+    Detail view for a category.
+    """
     http_method_names = ['get']  # noqa
     model = forms.Category
 
     def setup(self, request, *args, **kwargs):
+        """
+        function to set up the view before rendering.
+        """
         self.context_object_name = 'category'
         self.template_name = 'product/category/categories.html'
         self.form_class_search = forms.SearchForm  # noqa
         return super().setup(request, *args, **kwargs)
 
     def get_object(self, queryset=None):
-        """Return the category instance based on the URL kwargs."""  # noqa
+        """
+        function to get the object for the view.
+        """
         queryset = self.get_queryset()  # noqa
         pk = self.kwargs.get(self.pk_url_kwarg)
         if pk is not None:
@@ -84,6 +114,9 @@ class CategoryDetailView(generic.DetailView):
         return obj
 
     def get_context_data(self, **kwargs):
+        """
+        function to get the context data for the view.
+        """
         context = super().get_context_data(**kwargs)
         category = self.object
         related_products = category.category_products.all().filter(is_deleted=False)
@@ -129,6 +162,9 @@ class CategoryDetailView(generic.DetailView):
 
 
 class CategoryUpdateView(CRUD.AdminPermissionRequiredMixinView):
+    """
+    View for updating a category.
+    """
 
     def setup(self, request, *args, **kwargs):
         """Initialize the success_url and retrieve the category instance."""
@@ -141,10 +177,16 @@ class CategoryUpdateView(CRUD.AdminPermissionRequiredMixinView):
         return super().setup(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
+        """
+        Display the form for updating the category.
+        """
         form = self.form_class(instance=self.category_instance)
         return render(request, self.template_category_update, {'form': form, 'category': self.category_instance})
 
     def post(self, request, *args, **kwargs):
+        """
+        Handle the POST request for updating the category.
+        """
         form = self.form_class(self.request_post, self.request_files, instance=self.category_instance)  # noqa
         if form.is_valid():  # noqa
             category = form.save(commit=False)
