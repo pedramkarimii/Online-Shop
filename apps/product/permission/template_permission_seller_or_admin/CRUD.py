@@ -5,8 +5,17 @@ from apps.product.models import Product, Brand, Category, AddToInventory, Discou
 
 
 class MainPermissionRequiredMixinView(PermissionRequiredMixin, HttpsOptionNotLogoutMixin):
+    """
+    Defines a view mixin class that combines permission checking and HTTPS options for user sessions.
+    """
 
     def dispatch(self, request, *args, **kwargs):
+        """
+        Overrides the dispatch method to check permissions and fetch instances of various
+        models based on the URL parameter `pk`. If an instance is found, it assigns it to an
+        instance variable. If permission is denied, it redirects the user and displays an error message.
+        """
+
         try:  # noqa
             self.discount_code_instance = get_object_or_404(CodeDiscount, pk=kwargs['pk'])  # noqa
 
@@ -49,20 +58,30 @@ class MainPermissionRequiredMixinView(PermissionRequiredMixin, HttpsOptionNotLog
 
     def get_permission_required(self):
         """
-        Returns the list of permissions required to access the view.
+        Returns the required permission for the view, which is set by subclasses.
         """
+
         return self.permission_required
 
 
 class SellerOrAdminCreatePermissionRequiredMixinView(MainPermissionRequiredMixinView):
+    """
+    Defines a permission class for creating operations, checking if the user is authenticated and
+    either a superuser, staff, or belongs to the 'Seller' group.
+    """
+
     http_method_names = ['get', 'post']
 
     def has_permission(self):
+        """
+        Checks if the user is authenticated and either a superuser, staff, or belongs to the 'Seller' group.
+        Returns True if the user has permission, False otherwise.
+        """
+
         if self.request.user.is_authenticated and self.request.user.is_active and (
                 self.request.user.is_superuser
                 or self.request.user.is_staff
                 or self.request.user.groups.filter(name='Seller').exists()
-
         ):
             return True
 
@@ -70,6 +89,11 @@ class SellerOrAdminCreatePermissionRequiredMixinView(MainPermissionRequiredMixin
 
 
 class SellerOrAdminOrSupervisorDetailPermissionRequiredMixinView(MainPermissionRequiredMixinView):
+    """
+    Defines a permission class for viewing details, checking if the user is authenticated and either
+    a superuser, staff, or belongs to either the 'Seller' or 'Supervisor' group.
+    """
+
     http_method_names = ['get']
     permission_required = (
         'Supervisor',
@@ -88,6 +112,11 @@ class SellerOrAdminOrSupervisorDetailPermissionRequiredMixinView(MainPermissionR
 
 
 class SellerOrAdminBrandUpdateOrDeletePermissionRequiredMixinView(MainPermissionRequiredMixinView):  # noqa
+    """
+    Defines a permission class for updating or deleting brands, checking if the user is authenticated
+    and either a superuser, staff, or if the user is the owner of the brand being accessed.
+    """
+
     http_method_names = ['get', 'post']  # noqa
 
     def has_permission(self):
@@ -106,6 +135,10 @@ class SellerOrAdminBrandUpdateOrDeletePermissionRequiredMixinView(MainPermission
 
 
 class SellerOrAdminProductUpdateOrDeletePermissionRequiredMixinView(MainPermissionRequiredMixinView):  # noqa
+    """
+    Defines a permission class for updating or deleting products, checking if the user is authenticated
+    and either a superuser, staff, or if the user is the owner of the brand associated with the product being accessed.
+    """
 
     http_method_names = ['get', 'post']  # noqa
 

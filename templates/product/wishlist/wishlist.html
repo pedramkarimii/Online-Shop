@@ -60,10 +60,12 @@
                                             <td><h2 class="pt-8 mt-8 total-price"> ${{ product_data.total_price }} </h2>
                                             </td>
                                             <td>
-                                                <button onclick="dataProductPkDelete({{ product_data.product }}"
-                                                        class="  mt-12 bg-red-500 hover:bg-red-700 text-white font-bold p-2 rounded">
-                                                    Delete
-                                                </button>
+                                                <a href="#" class="font-bold text-red-700">
+                                                {% csrf_token %}
+                                                    <button onclick="dataProductPkToDelete({{ pk_product }}, event)" class="mt-12 bg-red-500 hover:bg-red-700 text-white font-bold p-2 rounded product-delete" data-product-id="{{ pk_product }}">
+    Delete
+</button>
+                                                </a>
                                             </td>
                                         </tr>
                                     {% endfor %}
@@ -89,11 +91,10 @@
                                         <td class="product-name">
                                             <h2 class="h5 text-black pt-8 mt-8 "> {{ item.name }}</h2>
                                         </td>
-                                    
-                                    	
-                                    
+
+
                                         <td><h2 class="  pt-8 mt-8  product-price-cookies"> ${{ item.price }} </h2></td>
-                                   
+
                                         <td class="quantity-product-change">
                                             <div class=" ml-48 input-group mb-3 d-flex align-items-center  quantity-container"
                                                  style="max-width: 120px;">
@@ -103,7 +104,8 @@
                                                         −
                                                     </button>
                                                 </div>
-                                                <input type="text" class=" form-control text-center quantity-amount-cookies"
+                                                <input type="text"
+                                                       class=" form-control text-center quantity-amount-cookies"
                                                        value="{{ item.quantity }}"
                                                        aria-label="Example text with button addon"
                                                        aria-describedby="button-addon1">
@@ -115,13 +117,16 @@
                                                 </div>
                                             </div>
                                         </td>
-                                        <td><h2 class="pt-8 mt-8 total-price-cookies"> ${{ item.total_price }} </h2></td>
-                                        <td><a href="#" class="  font-bold text-red-700">
-                                            <button
-                                                    class="  mt-12 bg-red-500 hover:bg-red-700 text-white font-bold p-2 rounded">
-                                                Delete
-                                            </button>
-                                        </a></td>
+                                        <td><h2 class="pt-8 mt-8 total-price-cookies"> ${{ item.total_price }} </h2>
+                                        </td>
+                                         <td>
+                                                <a href="#" class="font-bold text-red-700">
+                                                {% csrf_token %}
+                                                    <button onclick="dataProductCookiesPkToDelete({{ item.product }}, event)" class="mt-12 bg-red-500 hover:bg-red-700 text-white font-bold p-2 rounded product-delete-cookies" data-product-id-cookies="{{ item.product }}">
+                                                    Delete
+                                                </button>
+                                                </a>
+                                            </td>
                                     </tr>
                                 {% endfor %}
 
@@ -136,59 +141,103 @@
             <div class="row">
                 <div class="col-md-6">
                     <div class="row mb-5">
-                        <div class="col-md-6 mb-3 mb-md-0">
-                            <button class="btn btn-black btn-sm btn-block">Update Cart</button>
+                            <button class="btn ml-4 mt-44 btn-black btn-sm btn-block">Add To Basket</button>
                         </div>
-                        <div class="col-md-6">
-                            <button class="btn btn-outline-black btn-sm btn-block">Continue Shopping</button>
-                        </div>
+{#                        <div class="col-md-6">#}
+{#                            <button class="btn btn-outline-black btn-sm btn-block">Continue Shopping</button>#}
+{#                        </div>#}
                     </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <label class="text-black h4" for="coupon">Coupon</label>
-                            <p>Enter your coupon code if you have one.</p>
-                        </div>
-                        <div class="col-md-8 mb-3 mb-md-0">
-                            <input type="text" class="form-control py-3" id="coupon" placeholder="Coupon Code">
-                        </div>
-                        <div class="col-md-4">
-                            <button class="btn btn-black">Apply Coupon</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 pl-5">
-                    <div class="row justify-content-end">
+                    
+{#                    {% if request.user.is_authenticated %}#}
+{#                    <div class="row">#}
+{#    <div class="col-md-12">#}
+{#        <label class="text-black h4" for="coupon">Coupon</label>#}
+{#        <p>Enter your coupon code if you have one.</p>#}
+{#    </div>#}
+{#    <div class="col-md-8 mb-3 mb-md-0">#}
+{#        <input type="text" class="form-control py-3" id="coupon" placeholder="Coupon Code">#}
+{#    </div>#}
+{#    {% if wishlist_items.items %}#}
+{##}
+{##}
+{#                                    {% for product_id, product_data in wishlist_items.items %}#}
+{#                                    {% if forloop.first %}#}
+{#    <div class="col-md-8 mb-3 mb-md-0">#}
+{#        <input type="hidden" class="form-control py-3" id="total-price" value={{ sum_total_price }}> <!-- Hidden input for total price -->#}
+{#    </div>#}
+{#     {% endif %}#}
+{#                                    {% endfor %}#}
+{#                                {% endif %}#}
+{#                                {% if wishlist_items_cookies %}#}
+{#    {% for key, item in wishlist_items_cookies.items %}#}
+{#        {% if forloop.first %}#}
+{#        <div class="col-md-8 mb-3 mb-md-0">#}
+{#        <input type="hidden" class="form-control py-3" id="total-price" value={{ sum_total_price }}> <!-- Hidden input for total price -->#}
+{#    </div>#}
+{#     {% endif %}#}
+{#    {% endfor %}#}
+{#{% endif %}#}
+{#    <div class="col-md-4">#}
+{#        <a href="http://127.0.0.1:8000/discount-cod-wishlist/">#}
+{#        <button class="btn btn-black" id="apply-coupon-btn">Apply Coupon</button> <!-- Removed data-pk attribute -->#}
+{#    </a>#}
+{#    </div>#}
+{#</div>#}
+{#</div>{% endif %}#}
+
+
+                <div class="col-md-6 pl-14">
+                    <div class="">
                         <div class="col-md-7">
                             <div class="row">
-                                <div class="col-md-12 text-right border-bottom mb-5">
-                                    <h3 class="text-black h4 text-uppercase mr-8 pr-8">Cart Totals</h3>
+                                <div class="col-md-12 text-center border-bottom mb-5">
+                                    <h3 class="text-black h4 text-uppercase ">Cart Totals</h3>
                                 </div>
                             </div>
-                            {#                            <div class="row mb-3">#}
-                            {#                                <div class="col-md-6">#}
-                            {#                                    <span class="text-black">Subtotal</span>#}
-                            {#                                </div>#}
-                            {#                                <div class="col-md-6 text-right">#}
-                            {#                                    <strong class="text-black">$230.00</strong>#}
-                            {#                                </div>#}
-                            {#                            </div>#}
+{#                            <div class="row mb-3">#}
+{#                                <div class="col-md-6">#}
+{#                                    <span class="text-black">Discount</span>#}
+{#                                </div>#}
+{#                                <div class="col-md-6 text-right">#}
+{#                                    <strong class="text-black">$230.00</strong>#}
+{#                                </div>#}
+{#                            </div>#}
                             <div class="row mb-5">
                                 <div class="col-md-6">
-                                    <span class="text-black mr-8 pr-8">Total Price All Product</span>
+                                    <span class="text-black mr-2 pr-2">Total Price</span>
                                 </div>
-                                <div class="col-md-6 text-right">
+                                {% if wishlist_items.items %}
 
-                                    <strong class="text-black mr-8 pr-8 total-price-cookies">${{ sum_total_price }}</strong>
-                                </div>
-                            </div>
+
+                                    {% for product_id, product_data in wishlist_items.items %}
+                                    {% if forloop.first %}
+                                        <div class="col-md-6 text-right">
+
+                                            <strong class="text-black  total-price-all ">${{ sum_total_price }}</strong>
+                                        </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endif %}
+                                {% if wishlist_items_cookies %}
+    {% for key, item in wishlist_items_cookies.items %}
+        {% if forloop.first %}
+            <div class="col-md-6 text-right">
+                <strong class="text-black mr-2 pr-2 total-price ">${{ sum_total_price }}</strong>
+            </div>
+        {% endif %}
+    {% endfor %}
+{% endif %}
+
+
 
                             <div class="row">
-                                <div class="col-md-12 mr-8 pr-8">
+                                <div class="col-md-12 mt-14 mr-2 pr-2">
 
-                                    <button class="btn btn-black btn-lg py-3 btn-block mr-8 pr-8"
-                                            onclick="window.location='checkout.html'">Proceed To Checkout
-                                    </button>
+                                    <a href="http://127.0.0.1:8000/checkout" > <button class="btn btn-black btn-lg py-3 btn-block mr-2 pr-2"
+                                           >Proceed To Checkout
+                                    </button> </a>
                                 </div>
+                                
                             </div>
                         </div>
                     </div>
@@ -222,72 +271,160 @@
     {#            decreaseButton.addEventListener("click", decreaseQuantity);#}
     {#        });#}
     {#    </script>#}
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    
+    
+    
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
 
+<script>
+function dataProductPkToDelete(productId, event) {
+    event.preventDefault();  // Prevent the default link behavior
+
+    console.log("Deleting product with ID:", productId);
+
+    // Verify if jQuery is loaded
+    if (typeof $ === 'undefined') {
+        console.error("jQuery is not loaded.");
+        return;
+    }
+
+    // Verify the productId
+    console.log("Product ID to delete:", productId);
+
+    // Perform the AJAX request
+    $.ajax({
+        url: `/wishlist-delete/${productId}/`,
+        type: 'POST',
+        data: {
+            'csrfmiddlewaretoken': $('input[name="csrfmiddlewaretoken"]').val()
+        },
+        success: function(response) {
+            console.log("AJAX request successful. Response:", response);
+            if (response.success) {
+                // Hide the row of the deleted product if the request is successful
+                $(`td[data-product-id='${productId}']`).hide();
+                alert("Product successfully removed from wishlist!");
+            } else {
+                alert("Failed to remove product from wishlist.");
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error("AJAX request failed. Status:", status, "Error:", error);
+            alert("An error occurred. Please try again.");
+        }
+    });
+}
+</script>
+
+
+    
+<script>
+function dataProductCookiesPkToDelete(productId, event) {
+    event.preventDefault();  // Prevent the default link behavior
+
+    console.log("Deleting product with ID:", productId);
+
+    // Verify if jQuery is loaded
+    if (typeof $ === 'undefined') {
+        console.error("jQuery is not loaded.");
+        return;
+    }
+
+    // Verify the productId
+    console.log("Product ID to delete:", productId);
+
+    // Perform the AJAX request
+    $.ajax({
+        url: `/wishlist-delete/${productId}/`,
+        type: 'POST',
+        data: {
+            'csrfmiddlewaretoken': $('input[name="csrfmiddlewaretoken"]').val()
+        },
+        success: function(response) {
+            console.log("AJAX request successful. Response:", response);
+            if (response.success) {
+                // Hide the row of the deleted product if the request is successful
+                $(`td[data-product-id-cookies='${productId}']`).hide();
+                alert("Product successfully removed from wishlist!");
+            } else {
+                alert("Failed to remove product from wishlist.");
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error("AJAX request failed. Status:", status, "Error:", error);
+            alert("An error occurred. Please try again.");
+        }
+    });
+}
+</script>
+    
+    
+    
     <script>
-// Function to handle decreasing quantity
-function dataProductPkNegative(productPk, event) {
-    event.preventDefault();
-    var currentQuantity = parseInt($('.quantity-amount').val());
-    var productPrice = getProductPrice($('.product-price').text().trim());
-    if (!isNaN(productPrice)) {
-        var totalPrice = parseFloat($('.total-price').text().trim().substring(1)); // Extracting numerical value from the text
-        if (!isNaN(totalPrice)) {
-            var newTotalPrice = totalPrice - productPrice; // Adding product price to total price
-            console.log("Product Price:", productPrice);
-            console.log("Total Price:", totalPrice);
-            console.log("New Total Price:", newTotalPrice);
-            var newQuantity = currentQuantity - 1;
-            $('.quantity-amount').val(newQuantity);
-            updateQuantityInDB(productPk, newQuantity, newTotalPrice);
-        } else {
-            console.error("Error: Total Price is not a valid number.");
+        // Function to handle decreasing quantity
+        function dataProductPkNegative(productPk, event) {
+            event.preventDefault();
+            var currentQuantity = parseInt($('.quantity-amount').val());
+            var productPrice = getProductPrice($('.product-price').text().trim());
+            if (!isNaN(productPrice)) {
+                var totalPrice = parseFloat($('.total-price').text().trim().substring(1)); // Extracting numerical value from the text
+                if (!isNaN(totalPrice)) {
+                    var newTotalPrice = totalPrice - productPrice; // Adding product price to total price
+                    console.log("Product Price:", productPrice);
+                    console.log("Total Price:", totalPrice);
+                    console.log("New Total Price:", newTotalPrice);
+                    var newQuantity = currentQuantity - 1;
+                    $('.quantity-amount').val(newQuantity);
+                    updateQuantityInDB(productPk, newQuantity, newTotalPrice);
+                } else {
+                    console.error("Error: Total Price is not a valid number.");
+                }
+            } else {
+                console.error("Error: Product Price is not a valid number.");
+            }
         }
-    } else {
-        console.error("Error: Product Price is not a valid number.");
-    }
-}
 
 
-// Function to handle increasing quantity
-function dataProductPkPositive(productPk, event) {
-    event.preventDefault();
-    var currentQuantity = parseInt($('.quantity-amount').val());
-    var productPrice = getProductPrice($('.product-price').text().trim());
-    if (!isNaN(productPrice)) {
-        var totalPrice = parseFloat($('.total-price').text().trim().substring(1)); // Extracting numerical value from the text
-        if (!isNaN(totalPrice)) {
-            var newTotalPrice = totalPrice + productPrice; // Adding product price to total price
-            console.log("Product Price:", productPrice);
-            console.log("Total Price:", totalPrice);
-            console.log("New Total Price:", newTotalPrice);
-            var newQuantity = currentQuantity + 1;
-            $('.quantity-amount').val(newQuantity);
-            updateQuantityInDB(productPk, newQuantity, newTotalPrice);
-        } else {
-            console.error("Error: Total Price is not a valid number.");
+        // Function to handle increasing quantity
+        function dataProductPkPositive(productPk, event) {
+            event.preventDefault();
+            var currentQuantity = parseInt($('.quantity-amount').val());
+            var productPrice = getProductPrice($('.product-price').text().trim());
+            if (!isNaN(productPrice)) {
+                var totalPrice = parseFloat($('.total-price').text().trim().substring(1)); // Extracting numerical value from the text
+                if (!isNaN(totalPrice)) {
+                    var newTotalPrice = totalPrice + productPrice; // Adding product price to total price
+                    console.log("Product Price:", productPrice);
+                    console.log("Total Price:", totalPrice);
+                    console.log("New Total Price:", newTotalPrice);
+                    var newQuantity = currentQuantity + 1;
+                    $('.quantity-amount').val(newQuantity);
+                    updateQuantityInDB(productPk, newQuantity, newTotalPrice);
+                } else {
+                    console.error("Error: Total Price is not a valid number.");
+                }
+            } else {
+                console.error("Error: Product Price is not a valid number.");
+            }
         }
-    } else {
-        console.error("Error: Product Price is not a valid number.");
-    }
-}
 
-// Function to extract numerical value of product price from text
-function getProductPrice(text) {
-    var priceRegex = /\$([0-9,]+(?:\.[0-9]{1,2})?)/g; // Regular expression to find prices
-    var prices = text.match(priceRegex);
-    if (prices && prices.length > 0) {
-        var lastPrice = prices[prices.length - 1]; // Get the last found price
-        var priceMatches = lastPrice.match(/\$([0-9,]+(?:\.[0-9]{1,2})?)/);
-        if (priceMatches && priceMatches.length > 1) {
-            return parseFloat(priceMatches[1].replace(',', '')); // Extract numerical value and remove commas
+        // Function to extract numerical value of product price from text
+        function getProductPrice(text) {
+            var priceRegex = /\$([0-9,]+(?:\.[0-9]{1,2})?)/g; // Regular expression to find prices
+            var prices = text.match(priceRegex);
+            if (prices && prices.length > 0) {
+                var lastPrice = prices[prices.length - 1]; // Get the last found price
+                var priceMatches = lastPrice.match(/\$([0-9,]+(?:\.[0-9]{1,2})?)/);
+                if (priceMatches && priceMatches.length > 1) {
+                    return parseFloat(priceMatches[1].replace(',', '')); // Extract numerical value and remove commas
+                }
+            }
+            return NaN; // Return NaN if no valid price is found
         }
-    }
-    return NaN; // Return NaN if no valid price is found
-}
-
-
 
 
         function updateQuantityInDB(productPk, newQuantity, newTotalPrice) {
@@ -329,68 +466,66 @@ function getProductPrice(text) {
         }
     </script>
     <script>
-// Function to handle decreasing quantity
-function dataProductPkNegativeCookies(productPkCookies, event) {
-    event.preventDefault();
-    var currentQuantityCookies = parseInt($('.quantity-amount-cookies').val());
-    var productPriceCookies = getProductPriceCookies($('.product-price-cookies').text().trim());
-    if (!isNaN(productPriceCookies)) {
-        var totalPriceCookies = parseFloat($('.total-price-cookies').text().trim().substring(1)); // Extracting numerical value from the text
-        if (!isNaN(totalPriceCookies)) {
-            var newTotalPriceCookies = totalPriceCookies - productPriceCookies; // Adding product price to total price
-            console.log("Product Price:", productPriceCookies);
-            console.log("Total Price:", totalPriceCookies);
-            console.log("New Total Price:", newTotalPriceCookies);
-            var newQuantityCookies = currentQuantityCookies - 1;
-            $('.quantity-amount-cookies').val(newQuantityCookies);
-            updateQuantityInDB(productPkCookies, newQuantityCookies, newTotalPriceCookies);
-        } else {
-            console.error("Error: Total Price is not a valid number.");
+        // Function to handle decreasing quantity
+        function dataProductPkNegativeCookies(productPkCookies, event) {
+            event.preventDefault();
+            var currentQuantityCookies = parseInt($('.quantity-amount-cookies').val());
+            var productPriceCookies = getProductPriceCookies($('.product-price-cookies').text().trim());
+            if (!isNaN(productPriceCookies)) {
+                var totalPriceCookies = parseFloat($('.total-price-cookies').text().trim().substring(1)); // Extracting numerical value from the text
+                if (!isNaN(totalPriceCookies)) {
+                    var newTotalPriceCookies = totalPriceCookies - productPriceCookies; // Adding product price to total price
+                    console.log("Product Price:", productPriceCookies);
+                    console.log("Total Price:", totalPriceCookies);
+                    console.log("New Total Price:", newTotalPriceCookies);
+                    var newQuantityCookies = currentQuantityCookies - 1;
+                    $('.quantity-amount-cookies').val(newQuantityCookies);
+                    updateQuantityInDB(productPkCookies, newQuantityCookies, newTotalPriceCookies);
+                } else {
+                    console.error("Error: Total Price is not a valid number.");
+                }
+            } else {
+                console.error("Error: Product Price is not a valid number.");
+            }
         }
-    } else {
-        console.error("Error: Product Price is not a valid number.");
-    }
-}
 
 
-// Function to handle increasing quantity
-function dataProductPkPositiveCookies(productPkCookies, event) {
-    event.preventDefault();
-    var currentQuantityCookies = parseInt($('.quantity-amount-cookies').val());
-    var productPriceCookies = getProductPriceCookies($('.product-price-cookies').text().trim());
-    if (!isNaN(productPriceCookies)) {
-        var totalPriceCookies = parseFloat($('.total-price-cookies').text().trim().substring(1)); // Extracting numerical value from the text
-        if (!isNaN(totalPriceCookies)) {
-            var newTotalPriceCookies = totalPriceCookies + productPriceCookies; // Adding product price to total price
-            console.log("Product Price:", productPriceCookies);
-            console.log("Total Price:", totalPriceCookies);
-            console.log("New Total Price:", newTotalPriceCookies);
-            var newQuantityCookies = currentQuantityCookies + 1;
-            $('.quantity-amount-cookies').val(newQuantityCookies);
-            updateQuantityInDBCookies(productPkCookies, newQuantityCookies, newTotalPriceCookies);
-        } else {
-            console.error("Error: Total Price is not a valid number.");
+        // Function to handle increasing quantity
+        function dataProductPkPositiveCookies(productPkCookies, event) {
+            event.preventDefault();
+            var currentQuantityCookies = parseInt($('.quantity-amount-cookies').val());
+            var productPriceCookies = getProductPriceCookies($('.product-price-cookies').text().trim());
+            if (!isNaN(productPriceCookies)) {
+                var totalPriceCookies = parseFloat($('.total-price-cookies').text().trim().substring(1)); // Extracting numerical value from the text
+                if (!isNaN(totalPriceCookies)) {
+                    var newTotalPriceCookies = totalPriceCookies + productPriceCookies; // Adding product price to total price
+                    console.log("Product Price:", productPriceCookies);
+                    console.log("Total Price:", totalPriceCookies);
+                    console.log("New Total Price:", newTotalPriceCookies);
+                    var newQuantityCookies = currentQuantityCookies + 1;
+                    $('.quantity-amount-cookies').val(newQuantityCookies);
+                    updateQuantityInDBCookies(productPkCookies, newQuantityCookies, newTotalPriceCookies);
+                } else {
+                    console.error("Error: Total Price is not a valid number.");
+                }
+            } else {
+                console.error("Error: Product Price is not a valid number.");
+            }
         }
-    } else {
-        console.error("Error: Product Price is not a valid number.");
-    }
-}
 
-// Function to extract numerical value of product price from text
-function getProductPriceCookies(text) {
-    var priceRegexCookies = /\$([0-9,]+(?:\.[0-9]{1,2})?)/g; // Regular expression to find prices
-    var pricesCookies = text.match(priceRegexCookies);
-    if (pricesCookies && pricesCookies.length > 0) {
-        var lastPriceCookies = pricesCookies[pricesCookies.length - 1]; // Get the last found price
-        var priceMatchesCookies = lastPriceCookies.match(/\$([0-9,]+(?:\.[0-9]{1,2})?)/);
-        if (priceMatchesCookies && priceMatchesCookies.length > 1) {
-            return parseFloat(priceMatchesCookies[1].replace(',', '')); // Extract numerical value and remove commas
+        // Function to extract numerical value of product price from text
+        function getProductPriceCookies(text) {
+            var priceRegexCookies = /\$([0-9,]+(?:\.[0-9]{1,2})?)/g; // Regular expression to find prices
+            var pricesCookies = text.match(priceRegexCookies);
+            if (pricesCookies && pricesCookies.length > 0) {
+                var lastPriceCookies = pricesCookies[pricesCookies.length - 1]; // Get the last found price
+                var priceMatchesCookies = lastPriceCookies.match(/\$([0-9,]+(?:\.[0-9]{1,2})?)/);
+                if (priceMatchesCookies && priceMatchesCookies.length > 1) {
+                    return parseFloat(priceMatchesCookies[1].replace(',', '')); // Extract numerical value and remove commas
+                }
+            }
+            return NaN; // Return NaN if no valid price is found
         }
-    }
-    return NaN; // Return NaN if no valid price is found
-}
-
-
 
 
         function updateQuantityInDBCookies(productPkCookies, newQuantityCookies, newTotalPriceCookies) {
@@ -419,7 +554,7 @@ function getProductPriceCookies(text) {
             $('.total-price-cookies').text("$" + newTotalPriceCookies.toFixed(2));
         }
 
-       function getCSRFToken() {
+        function getCSRFToken() {
             var cookies = document.cookie.split(';');
             for (var i = 0; i < cookies.length; i++) {
                 var cookie = cookies[i].trim();
@@ -433,10 +568,43 @@ function getProductPriceCookies(text) {
     </script>
 
 
+{#<script>#}
+{#    $(document).ready(function() {#}
+{#        $('#apply-coupon-btn').click(function(event) {#}
+{#            event.preventDefault();#}
+{#            var couponCode = $('#coupon').val();#}
+{#            var totalPrice = $('.total-price-all').text().replace('$', '').trim();  // Updated selector and cleaned up the price#}
+{##}
+{#            console.log("Applying coupon with the following details:");#}
+{#            console.log("Coupon Code:", couponCode);#}
+{#            console.log("Total Price:", totalPrice);#}
+{##}
+{#            $.ajax({#}
+{#    url: '/discount-cod-wishlist/',#}
+{#    type: 'POST',#}
+{#    data: {#}
+{#        'code_discount': couponCode,#}
+{#        'total_price': totalPrice,#}
+{#        'csrfmiddlewaretoken': '{{ csrf_token }}'#}
+{#    },#}
+{#    success: function(response) {#}
+{#        console.log("Response received:", response);#}
+{#        if (response.success) {#}
+{#            alert('Coupon applied successfully!');#}
+{#        } else {#}
+{#            alert('Failed to apply coupon: ' + response.error);#}
+{#        }#}
+{#    },#}
+{#    error: function(xhr, status, error) {#}
+{#        console.log("Error occurred:", error);#}
+{#        alert('An error occurred: ' + error);#}
+{#    }#}
+{# });#}
+{##}
+{#        });#}
+{#    });#}
+{#</script>#}
 
 
 
-    {#    <script href="{% static 'js/bootstrap.bundle.min.js' %}"></script>#}
-    {#    <script href="{% static 'js/tiny-slider.js' %}"></script>#}
-    {#    <script href="{% static 'js/custom.js' %}"></script>#}
 {% endblock %}

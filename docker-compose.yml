@@ -1,27 +1,30 @@
 services:
-  db:
-    container_name: postgres
-    image: postgres:alpine
-    restart: on-failure
-    environment:
-      POSTGRES_DB: your_database_name
-      POSTGRES_USER: your_database_user
-      POSTGRES_PASSWORD: 1234
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - main
-
   redis:
     container_name: redis
     image: redis:alpine
-    restart: on-failure
+    restart: always
     ports:
-      - "6379:6379"
+      - "6380:6379"
     networks:
       - main
+    volumes:
+      - ./volumes/redis/:/var/lib/redis/data/
+
+  db:
+    container_name: postgres
+    image: postgres:alpine
+    restart: always
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_PORT=${DB_PORT}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - ./volumes/db/:/var/lib/postgresql/data/
+    networks:
+      - main
+    depends_on:
+      - redis
 
   rabbitmq:
     container_name: rabbitmq
@@ -29,17 +32,19 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
-    restart: on-failure
+    restart: always
     networks:
       - main
+    volumes:
+      - ./volumes/rabbitmq/:/var/lib/rabbitmq/data/
+    depends_on:
+      - redis
 
   celery-worker:
-    build:
-      context: .
-      dockerfile: utility/Dockerfile
+    image: celery:4
     container_name: celery-worker
-    restart: on-failure
-    command: celery worker -A config -l info --force-root=True
+    restart: always
+    command: celery -A config worker -l info -force-root=True
     volumes:
       - ./apps:/code/apps
       - ./config:/code/config
@@ -56,31 +61,71 @@ services:
       context: .
       dockerfile: utility/Dockerfile
     container_name: app
-    restart: on-failure
-    command: sh -c "\
-      rm -rf db.sqlite3 && \
-      find . -path '*/migrations/*.py' -not -name '__init__.py' -delete && \
-      python manage.py makemigrations && \
-      python manage.py migrate && \
-      echo \"from django.contrib.auth import get_user_model; \
-      User = get_user_model(); \
-      User.objects.create_superuser(phone_number='09128355747', username='pedramkarimi', email='pedram.9060@gmail.com', password='qwertyQ@1')\" | python manage.py shell && \
-      gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 4 --threads 4"
+    restart: always
+    command: >
+      sh -c "
+        rm -rf db.sqlite3 && 
+        find . -path '*/migrations/*.py' -not -name '__init__.py' -delete && 
+        python manage.py wait_for_db &&
+        python manage.py wait_for_redis &&
+        python manage.py makemigrations --noinput && 
+        python manage.py migrate --noinput && 
+        python manage.py collectstatic --noinput &&
+        python manage.py shell -c "
+          from django.contrib.auth import get_user_model;
+          User = get_user_model();
+          User.objects.create_superuser(
+            phone_number='09128355747',
+            username='pedramkarimi',
+            email='pedram.9060@gmail.com',
+            password='qwertyQ@1'
+          )
+        \" && \
+        gunicorn --bind 0.0.0.0:${API_PORT} config.wsgi:application --log-level ${API_LOG_LEVEL} --workers ${API_WORKERS} --threads ${API_THREADS} --access-logfile 'logs/backend.logs' --error-logfile 'logs/errors.logs'""
     volumes:
-      - ./apps:/code/apps
-      - ./config:/code/config
-      - ./utility:/code/utility
+      - ./utility:/app/utility
+      - ./logs/application/:/app/logs/
+      - ./volumes/storage/:/app/storage/
     depends_on:
       - db
       - redis
       - rabbitmq
-    expose:
-      - "8000"
+      - celery-worker
     networks:
       - main
+
+  nginx:
+    build:
+      context: ./utility/nginx/
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "443:443"
+      - "80:80"
+    volumes:
+      - ./logs/nginx/:/var/log/nginx/
+      - ./volumes/storage/:/shared/
+      - ./utility/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./volumes/nginx/proxy_dhparams/:/vol/proxy/
+      - ./volumes/certbot/www/:/vol/www/
+      - ./volumes/certbot/certs/:/etc/letsencrypt/
+      - ./utility/nginx/default-ssl.conf.template:/etc/nginx/default-ssl.conf.template
+      - ./utility/nginx/default.conf.template:/etc/nginx/default.conf.template
+      - ./utility/nginx/entrypoint.sh:/entrypoint.sh
+    depends_on:
+      - app
+
+  certbot:
+    build:
+      context: ./utility/certbot/
+      dockerfile: Dockerfile
+    command: echo "Certbot | Skipping ..."
+    volumes:
+      - ./volumes/certbot/www/:/vol/www/
+      - ./volumes/certbot/certs/:/etc/letsencrypt/
+    depends_on:
+      - nginx
 
 networks:
   main:
 
-volumes:
-  postgres_data:

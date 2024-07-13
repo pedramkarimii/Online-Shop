@@ -6,6 +6,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import DetailView
 from apps.core.mixin.mixin_views_template import HttpsOptionNotLogoutMixin as MustBeLogingCustomView
+from apps.order.models import Order, OrderItem
+from apps.product.models import Product
 
 
 class ProfileCreateView(MustBeLogingCustomView):
@@ -64,6 +66,9 @@ class ProfileUpdateView(MustBeLogingCustomView):
     http_method_names = ['get', 'post']
 
     def setup(self, request, *args, **kwargs):
+        """
+        Initialize the form, next page1, page2, template name.
+        """
         self.profile_instance = get_object_or_404(forms.Profile, pk=kwargs['pk'])  # noqa
         self.form_class = forms.ProfileUpdateForm  # noqa
         self.template_chnage_info_profile = 'user/profile/change_info_profile.html'  # noqa
@@ -72,10 +77,16 @@ class ProfileUpdateView(MustBeLogingCustomView):
         return super().setup(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
+        """
+        Renders the form for updating the user's profile.
+        """
         form = self.form_class(instance=self.profile_instance)
         return render(request, self.template_chnage_info_profile, {'form': form, 'profile': self.profile_instance})
 
     def post(self, request, *args, **kwargs):
+        """
+        Handles form submission for updating the user's profile.
+        """
         form = self.form_class(self.request_post, self.request_files, instance=self.profile_instance)  # noqa
         if form.is_valid():  # noqa
             profile = form.save(commit=False)
@@ -91,14 +102,23 @@ class ProfileDetailView(MustBeLogingCustomView, DetailView):
     model = forms.Profile  # Set the model
 
     def setup(self, request, *args, **kwargs):
+        """
+        Initialize the context object name and template name.
+        """
         self.context_object_name = 'profile'
         self.template_name = 'user/profile/profile.html'
         return super().setup(request, *args, **kwargs)
 
     def get_object(self, queryset=None):
+        """
+        Returns the profile instance for the current user.
+        """
         return self.request.user.profile
 
     def get_context_data(self, **kwargs):
+        """
+        Adds additional context data for rendering the template.
+        """
         context = super().get_context_data(**kwargs)
         profile = self.object
 
@@ -109,11 +129,20 @@ class ProfileDetailView(MustBeLogingCustomView, DetailView):
             Q(bronze=self.request.user) |
             Q(seller=self.request.user)
         ).values_list('code_discount', flat=True)
-
         code_discounts = forms.CodeDiscount.objects.filter(id__in=user_cods_discount)
-
+        orders = Order.objects.filter(order_item__user=self.request.user).distinct()
+        products = Product.objects.all()
+        order_items = OrderItem.objects.filter(order_items__order_item__product__in=
+                                               products.all())
+        unique_product_names = set()
+        for order_item in order_items:
+            if order_item.user == self.request.user:
+                unique_product_names.add(order_item.product.name)
+        name_product_in_order = ','.join(unique_product_names)
+        context['name_product_in_order'] = name_product_in_order
         context['cods_discount'] = code_discounts
         context['profile'] = profile
+        context['orders'] = orders
 
         context['addresses'] = addresses
 

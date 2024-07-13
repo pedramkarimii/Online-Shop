@@ -4,6 +4,9 @@ from apps.product.models import Product, Wishlist
 
 
 class WishlistProductSerializer(serializers.ModelSerializer):
+    """
+    Serializer for creating a new wishlist product.
+    """
     class Meta:
         model = Wishlist
         fields = [
@@ -44,6 +47,9 @@ class WishlistProductSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
+    """
+    Serializer for creating a new product.
+    """
     product_picture = serializers.ImageField(source='product_picture.url', read_only=True)
 
     class Meta:

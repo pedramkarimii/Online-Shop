@@ -104,6 +104,7 @@ class ProfileInline(admin.StackedInline):
 
 @admin.register(UserAuth)
 class UserAuthModelAdmin(admin.ModelAdmin):
+    """Admin configuration for UserAuth model."""
     list_display = ['user_id', 'token_type', 'uuid', 'create_time', 'update_time', 'is_active', 'is_deleted']
     list_filter = ['user_id', 'token_type', 'is_active']
     search_fields = ['user_id', 'token_type', 'is_active']
@@ -129,6 +130,7 @@ class UserAuthModelAdmin(admin.ModelAdmin):
 
 @admin.register(Role)
 class RoleAdmin(admin.ModelAdmin):
+    """Admin configuration for Role model."""
     list_display = ['code_discount', 'golden', 'silver', 'bronze',
                     'create_time', 'update_time', 'is_active', 'is_deleted']
     list_filter = ['code_discount', 'golden', 'silver', 'bronze', 'create_time', 'is_active']
@@ -153,6 +155,8 @@ class RoleAdmin(admin.ModelAdmin):
 
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
+    """Admin configuration for Profile model."""
+
     list_display = ['user', 'name', 'last_name', 'gender', 'age', 'profile_picture', 'create_time', 'update_time',
                     'is_active',
                     'is_deleted']

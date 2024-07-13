@@ -41,7 +41,8 @@ class AddressCreateView(MustBeLogingCustomView):
             address = form.save(commit=False)
             address.user = request.user
             address.save()
-            messages.success(request, _(f'Your address has been created successfully {address.address_name}.'), extra_tags='success')
+            messages.success(request, _(f'Your address has been created successfully {address.address_name}.'),
+                             extra_tags='success')
             return redirect(self.next_page_home)
         else:
             messages.error(
@@ -52,16 +53,22 @@ class AddressCreateView(MustBeLogingCustomView):
 
 
 class AddressDetailView(MustBeLogingCustomView, DetailView):
+    """
+    View to display the details of a user's address.
+    """
     http_method_names = ['get']  # noqa
     model = forms.Address
 
     def setup(self, request, *args, **kwargs):
+        """
+        Initialize the context object name and template name.
+        """
         self.context_object_name = 'address'
         self.template_name = 'user/address/address.html'
         return super().setup(request, *args, **kwargs)
 
     def get_object(self, queryset=None):
-        """Return the Address instance based on the URL kwargs."""  # noqa
+        """ Return the Address instance based on the URL kwargs."""  # noqa
         queryset = self.get_queryset()  # noqa
         pk = self.kwargs.get(self.pk_url_kwarg)
         if pk is not None:
@@ -80,9 +87,15 @@ class AddressDetailView(MustBeLogingCustomView, DetailView):
 
 
 class AddressUpdateView(MustBeLogingCustomView):
+    """
+    View for updating user addresses.
+    """
     http_method_names = ['get', 'post']
 
     def setup(self, request, *args, **kwargs):
+        """
+
+        """
         self.address_instance = get_object_or_404(forms.Address, pk=kwargs['pk'])  # noqa
         self.form_class = forms.UpdateAddressForm  # noqa
         self.next_page_home = reverse_lazy('home')  # noqa
@@ -92,10 +105,16 @@ class AddressUpdateView(MustBeLogingCustomView):
         return super().setup(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
+        """
+        Renders the form for updating the user's address.
+        """
         form = self.form_class(instance=self.address_instance)
         return render(request, self.template_address_update, {'form': form, 'address': self.address_instance})
 
     def post(self, request, *args, **kwargs):
+        """
+        Handles form submission for updating the user's address.
+        """
         form = self.form_class(self.request_post, self.request_files, instance=self.address_instance)  # noqa
         if form.is_valid():  # noqa
             address = form.save(commit=False)

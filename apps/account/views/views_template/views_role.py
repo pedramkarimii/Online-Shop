@@ -9,6 +9,18 @@ from apps.core.permission.template_permission_admin import CRUD
 
 
 class RoleCreateView(CRUD.AdminPermissionRequiredMixinView):
+    """
+    View for creating a new role. Inherits from CRUD.AdminPermissionRequiredMixinView.
+    Attributes:
+    - form_class: The form class to use for role creation.
+    - next_page_product_create: URL to redirect after role creation.
+    - template_role_create: Template to render for role creation.
+    - request_post: POST data from the request.
+    Methods:
+    - setup: Initializes attributes such as form_class, next_page_product_create, template_role_create, and request_post.
+    - get: Handles GET request for role creation page.
+    - post: Handles POST request for creating a new role.
+    """
 
     def setup(self, request, *args, **kwargs):
         """Initialize the success_url."""
@@ -19,9 +31,11 @@ class RoleCreateView(CRUD.AdminPermissionRequiredMixinView):
         return super().setup(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
+        """Handle GET request for role creation page."""
         return render(request, self.template_role_create, {'form': self.form_class()})
 
     def post(self, request, *args, **kwargs):
+        """Handle POST request for creating a new role."""
         form = self.form_class(self.request_post)
         if form.is_valid():
             print(form.cleaned_data)
@@ -36,18 +50,30 @@ class RoleCreateView(CRUD.AdminPermissionRequiredMixinView):
 
 
 class AdminRoleListView(CRUD.AdminPermissionRequiredMixinView, generic.ListView):
+    """
+    View for listing all roles. Inherits from CRUD.AdminPermissionRequiredMixinView and generic.ListView.
+    Attributes:
+    - model: The model used for listing roles.
+    Methods:
+    - setup: Initializes attributes such as context_object_name and template_name.
+    - get_queryset: Retrieves the queryset of roles to be listed.
+    - get_context_data: Adds context data based on user permissions.
+    """
     http_method_names = ['get']  # noqa
     model = forms.Role
 
     def setup(self, request, *args, **kwargs):
+        """Initialize attributes for role list view."""
         self.context_object_name = 'role'
         self.template_name = 'user/detail/admin/admin_role.html'
         return super().setup(request, *args, **kwargs)
 
     def get_queryset(self):
+        """Retrieve all roles for listing."""
         return forms.Role.objects.all()
 
     def get_context_data(self, **kwargs):
+        """Add context data based on user permissions."""
         context = super().get_context_data(**kwargs)  # noqa
         roles = forms.Role.objects.all()
         if self.request.user.is_superuser or self.request.user.is_staff:
@@ -60,10 +86,20 @@ class AdminRoleListView(CRUD.AdminPermissionRequiredMixinView, generic.ListView)
 
 
 class RoleDetailView(CRUD.AdminPermissionRequiredMixinView, generic.DetailView):
+    """
+    View for displaying details of a role. Inherits from CRUD.AdminPermissionRequiredMixinView and generic.DetailView.
+    Attributes:
+    - model: The model used for role details.
+    Methods:
+    - setup: Initializes attributes such as context_object_name and template_name.
+    - get_object: Retrieves the role object based on URL kwargs.
+    - get_context_data: Adds context data for role details view.
+    """
     http_method_names = ['get']  # noqa
     model = forms.Role
 
     def setup(self, request, *args, **kwargs):
+        """Initialize attributes for role detail view."""
         self.context_object_name = 'role'
         self.template_name = 'user/role/role.html'
         return super().setup(request, *args, **kwargs)
@@ -81,6 +117,7 @@ class RoleDetailView(CRUD.AdminPermissionRequiredMixinView, generic.DetailView):
         return obj
 
     def get_context_data(self, **kwargs):
+        """Add context data for role details view."""
         context = super().get_context_data(**kwargs)
         role = forms.Role.objects.all()
         context['role'] = role
@@ -88,6 +125,18 @@ class RoleDetailView(CRUD.AdminPermissionRequiredMixinView, generic.DetailView):
 
 
 class RoleUpdateView(CRUD.AdminPermissionRequiredMixinView):
+    """
+    View for updating a role. Inherits from CRUD.AdminPermissionRequiredMixinView.
+    Attributes:
+    - form_class: The form class to use for role update.
+    - next_page_product_create: URL to redirect after role update.
+    - template_role_update: Template to render for role update.
+    - request_post: POST data from the request.
+    Methods:
+    - setup: Initializes attributes such as form_class, next_page_product_create, template_role_update, and request_post.
+    - get: Handles GET request for role update page.
+    - post: Handles POST request for updating a role.
+    """
 
     def setup(self, request, *args, **kwargs):
         """Initialize the success_url."""
@@ -98,10 +147,12 @@ class RoleUpdateView(CRUD.AdminPermissionRequiredMixinView):
         return super().setup(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
+        """Handle GET request for role update page."""
         form = self.form_class(instance=self.role_instance)
         return render(request, self.template_role_update, {'form': form, 'role': self.role_instance})
 
     def post(self, request, *args, **kwargs):
+        """Handle POST request for updating a role."""
         form = self.form_class(self.request_post, instance=self.role_instance)
         if form.is_valid():
             print(form.cleaned_data)
@@ -116,6 +167,15 @@ class RoleUpdateView(CRUD.AdminPermissionRequiredMixinView):
 
 
 class RoleDeleteView(CRUD.AdminPermissionRequiredMixinView, generic.DetailView):
+    """
+    View for deleting a role. Inherits from CRUD.AdminPermissionRequiredMixinView and generic.DetailView.
+    Attributes:
+    - model: The model used for role deletion.
+    - template_name: Template to render for role deletion.
+    Methods:
+    - get: Handles GET request for role deletion confirmation page.
+    - post: Handles POST request for soft deletion of a role.
+    """
     model = forms.Role
     template_name = 'user/role/role_delete.html'
 
