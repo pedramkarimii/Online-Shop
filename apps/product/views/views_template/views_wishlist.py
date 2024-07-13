@@ -11,8 +11,26 @@ from apps.product.mixin import ProductDiscountMixin
 
 
 class WishlistAddProductView(mixin.ProductDiscountMixin):
+    """
+    Class for adding products to the wishlist.
+    Inherits from ProductDiscountMixin to handle product discounts.
+    Attributes:
+    form_class (forms.WishlistForm): Form class for adding products to the wishlist.
+    product_instance (forms.Product): Instance of the product being added to the wishlist.
+    latest_discount (forms.Discount): Latest discount available for the product.
+    request_post (dict): POST data received in the request.
+    Methods:
+    add_product_to_wishlist_authenticated(): Handles the addition of a product to the wishlist for authenticated users.
+    """
 
     def add_product_to_wishlist_authenticated(self):
+        """
+        function to handle the addition of a product to the wishlist for authenticated users.
+        if the form is valid, it creates or updates the wishlist item for the authenticated user.
+        if the form is invalid, it returns an error response with the form errors.
+        Returns:
+        JsonResponse: Response containing success or error message.
+        """
         form = self.form_class(self.request_post)
 
         if form.is_valid():
@@ -43,12 +61,22 @@ class WishlistAddProductView(mixin.ProductDiscountMixin):
 
 
 class WishlistShowProductView(generic.ListView):
+    """
+    class to handle the show view for wishlist entries
+    """
+
     def get(self, request, *args, **kwargs):  # noqa
+        """
+        function to handle get request on the view. Renders the wishlist page.
+        """
         if not request.user.is_authenticated:
             return self.show_product_from_wishlist_cookie(request)
         return self.show_product_from_wishlist_authenticated(request)
 
     def show_product_from_wishlist_cookie(self, request):  # noqa
+        """
+        function to handle the show view for wishlist entries for unauthenticated users.
+        """
         wishlist_items_cookies = {}
         sum_total_price = 0
         img_url = set()
@@ -69,6 +97,9 @@ class WishlistShowProductView(generic.ListView):
                        'sum_total_price': sum_total_price})
 
     def show_product_from_wishlist_authenticated(self, request):  # noqa
+        """
+        function to handle the show view for wishlist entries for authenticated users.
+        """
         wishlist_items = forms.Wishlist.objects.filter(user=request.user)
         wishlist_data = {}
         sum_total_price = 0
@@ -96,8 +127,13 @@ class WishlistShowProductView(generic.ListView):
 
 
 class WishlistUpdateProductView(WishlistAddProductView):
+    """
+    Class for updating products in the wishlist. Inherits from WishlistAddProductView.
+    """
     def setup(self, request, *args, **kwargs):
-        """Initialize the success_url."""  # noqa
+        """
+        function to set up the view before rendering.
+        """
         self.product_instance = get_object_or_404(forms.Product, pk=kwargs['pk'])  # noqa
         self.signer = Signer()  # noqa
         self.user_authenticated = request.user.is_authenticated  # noqa
@@ -111,13 +147,20 @@ class WishlistUpdateProductView(WishlistAddProductView):
         return super().setup(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):  # noqa
+        """
+        function to handle post request on the view. Updates a product in the wishlist for authenticated users.
+        if the form is valid, it updates the wishlist item for the authenticated user.
+        if the form is invalid, it returns an error response with the form errors.
+        """
         if not self.user_authenticated:
             return self.update_product_from_wishlist_cookie(request)
         else:
             return self.update_product_from_wishlist_authenticated(request)
 
     def update_product_from_wishlist_authenticated(self, request):
-
+        """
+        function to handle the update view for wishlist entries for authenticated users.
+        """
         if self.user_authenticated:
             new_quantity = int(self.request_quantity)
             new_total_price = int(self.request_total_price)
@@ -132,13 +175,15 @@ class WishlistUpdateProductView(WishlistAddProductView):
             return JsonResponse({'success': False})
 
     def update_product_from_wishlist_cookie(self, request):
+        """
+        function to handle the update view for wishlist entries for unauthenticated users.
+        """
         new_quantity = int(self.request_quantity)
         new_total_price = int(self.request_total_price)
 
         product_discount = self.calculate_product_discount(self.product_instance, self.latest_discount)
         cookie_key = f"product_wishlist{self.signed_product_id}"
         if cookie_key in self.request.COOKIES:
-            # product_data = json.loads(request.COOKIES[cookie_key])
             product_data = {
                 'product': self.product_instance.pk,
                 'name': self.product_instance.name,
@@ -157,8 +202,13 @@ class WishlistUpdateProductView(WishlistAddProductView):
 
 
 class WishlistDeleteProductView(WishlistAddProductView):
+    """
+    Class for deleting products from the wishlist. Inherits from WishlistAddProductView.
+    """
     def setup(self, request, *args, **kwargs):
-        """Initialize the success_url."""  # noqa
+        """
+        function to set up the view before rendering.
+        """
         self.product_instance = get_object_or_404(forms.Product, pk=kwargs['pk'])  # noqa
         self.signer = Signer()  # noqa
         self.user_authenticated = request.user.is_authenticated  # noqa
@@ -166,12 +216,20 @@ class WishlistDeleteProductView(WishlistAddProductView):
         return super().setup(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):  # noqa
+        """
+        function to handle post request on the view. Deletes a product from the wishlist for authenticated users.
+        if the form is valid, it deletes the wishlist item for the authenticated user.
+        if the form is invalid, it returns an error response with the form errors.
+        """
         if not self.user_authenticated:
             return self.delete_product_from_wishlist_cookie(request)
         else:
             return self.delete_product_from_wishlist_authenticated(request)
 
     def delete_product_from_wishlist_authenticated(self, request):
+        """
+        function to handle the delete view for wishlist entries for authenticated users.
+        """
         product = self.product_instance
         if self.user_authenticated:
             with transaction.atomic():
@@ -182,6 +240,9 @@ class WishlistDeleteProductView(WishlistAddProductView):
             return JsonResponse({'success': False})
 
     def delete_product_from_wishlist_cookie(self, request):
+        """
+        function to handle the delete view for wishlist entries for unauthenticated users.
+        """
         cookie_key = f"product_wishlist{self.signed_product_id}"
         if cookie_key in self.request.COOKIES:
             response = JsonResponse({'success': True})
