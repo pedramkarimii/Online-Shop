@@ -64,6 +64,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
+        'apps.account.users_auth.authenticate.JWTAuthentication',
     ]
 }
 # Applications
@@ -71,6 +72,7 @@ APPLICATIONS = ["account", "order", "product", "core"]
 
 # Serving
 STATIC_URL = "storage/static/"
+# STATIC_ROOT = BASE_DIR / "storage/static/"
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "storage/media"
 
