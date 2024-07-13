@@ -125,7 +125,7 @@ services:
       - ./volumes/certbot/certs/:/etc/letsencrypt/
     depends_on:
       - nginx
-      
+
 networks:
   main:
 
