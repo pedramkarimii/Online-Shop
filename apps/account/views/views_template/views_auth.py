@@ -1,3 +1,6 @@
+from decouple import config  # noqa
+from django.conf import settings
+from django.core.mail import send_mail
 from datetime import datetime
 import redis
 import pytz
@@ -31,7 +34,7 @@ class LoginVerifyCodeView(MustBeLogoutCustomView):
         self.next_page_login = reverse_lazy('login')  # noqa
         self.next_page_home = reverse_lazy('home')  # noqa
         self.template_verifycode = 'public/home/login/verify_code.html'  # noqa
-        self.redis_client = redis.StrictRedis(host='127.0.0.1', port=6379, db=0)  # noqa
+        self.redis_client = redis.StrictRedis(host=config('REDIS_HOST'), port=config('REDIS_PORT'), db=0)  # noqa
         return super().setup(request, *args, **kwargs)
 
     def get(self, request):
@@ -99,6 +102,18 @@ class UserRegisterView(MustBeLogoutCustomView):
         self.code_generator = CodeGenerator()  # noqa
         return super().setup(request, *args, **kwargs)
 
+    def send_otp_email(self, email, otp):
+        """
+        Sends an OTP code to the provided email address.
+        """
+        subject = 'Your OTP for Verification'
+        message = f'Your OTP for login is (Expiry date two minutes): {otp}'
+        from_email = settings.EMAIL_HOST_USER
+        recipient_list = [email]
+        send_mail(subject, message, from_email, recipient_list)
+        messages.success(self.request, _('Code sent to your Email'), extra_tags='success')
+        return redirect(self.next_page_verify_code)
+
     def get(self, request):
         """
        Handle GET requests to display the user registration form.
@@ -114,19 +129,22 @@ class UserRegisterView(MustBeLogoutCustomView):
         """
 
         form = self.form_class(request.POST)
-        print(form.errors)
         if form.is_valid():
-
-            phone_number = form.cleaned_data['phone_number']
-            self.code_generator.generate_and_store_code(phone_number)
+            instance_email = form.cleaned_data['email']
             request.session['user_registration_info'] = {
-                'phone_number': phone_number,
+                'phone_number': form.cleaned_data['phone_number'],
                 'email': form.cleaned_data['email'],
                 'username': form.cleaned_data['username'],
                 'password': form.cleaned_data['password2'],
             }
-            messages.success(request, _('Code sent to your phone number'), extra_tags='success')
-            return redirect(self.next_page_verify_code)
+            otp = self.code_generator.generate_and_store_code(instance_email)
+            if otp and instance_email:
+                stored_code = otp.decode('utf-8') if isinstance(otp, bytes) else otp
+                self.send_otp_email(instance_email, stored_code)
+                return redirect(self.next_page_verify_code)
+            else:
+                messages.error(request, _('Code is expired or wrong Code'), extra_tags='error')
+                return redirect(self.next_page_register_user)
         else:
             messages.error(request, _('Form is not valid'), extra_tags='error')
             return redirect(self.next_page_register_user)
@@ -145,7 +163,6 @@ class UserRegistrationVerifyCodeView(MustBeLogoutCustomView):
         self.next_page_login_verify_code = reverse_lazy('verify_code')  # noqa
         self.next_page_user_create = reverse_lazy('user_create')  # noqa
         self.template_verifycode = 'public/home/login/verify_code.html'  # noqa
-        self.redis_client = redis.StrictRedis(host='127.0.0.1', port=6379, db=0)  # noqa
         return super().setup(request, *args, **kwargs)
 
     def get(self, request):
@@ -163,33 +180,25 @@ class UserRegistrationVerifyCodeView(MustBeLogoutCustomView):
         If the code is expired or invalid, displays error messages and redirects back to verification page.
         """
         user_session = request.session['user_registration_info']
-        code_instance = self.redis_client.get(user_session['phone_number'])
-
         form = self.form_class(request.POST)
         if form.is_valid():
-            if not code_instance:  # noqa
+            if not user_session['email']:
                 messages.error(request, _('Code is expired'), extra_tags='error')
-            try:
-                stored_code = code_instance.decode('utf-8')
-            except AttributeError:
-                return redirect(self.next_page_login_verify_code)
 
             current_time = datetime.now(tz=pytz.timezone('Asia/Tehran'))
             expiration_time = current_time + timezone.timedelta(minutes=2)
-            if request.POST['code'] == stored_code and expiration_time > current_time:  # noqa
+            if request.POST['code']  and expiration_time > current_time:  # noqa
                 User.objects.create_user(
                     phone_number=user_session['phone_number'],
                     email=user_session['email'],
                     username=user_session['username'],
                     password=user_session['password'],
                 )
-                self.redis_client.delete(code_instance)
                 messages.success(request, _('User created successfully'), extra_tags='success')
                 return redirect(self.next_page_login)
-            elif expiration_time < current_time:
-                self.redis_client.delete(code_instance)
+            else:
                 messages.error(request, _('Code is expired'), extra_tags='error')
-                return redirect(self.next_page_login_verify_code)
+                return redirect(self.next_page_user_create)
         else:
             messages.error(request, _('Code is not valid'), extra_tags='error')
             return redirect(self.next_page_login_verify_code)
@@ -215,7 +224,7 @@ class LoginVerifyCodeEmailView(MustBeLogoutCustomView):
         self.next_page_success_login = reverse_lazy('success_login')  # noqa
         self.next_page_login_verify_code = reverse_lazy('login_verify_code_email')  # noqa
         self.template_verifycode = 'public/home/login/verify_code.html'  # noqa
-        self.redis_client = redis.StrictRedis(host='127.0.0.1', port=6379, db=0)  # noqa
+        self.redis_client = redis.StrictRedis(host=config('REDIS_HOST'), port=config('REDIS_PORT'), db=0)  # noqa
         return super().setup(request, *args, **kwargs)
 
     def get(self, request):
