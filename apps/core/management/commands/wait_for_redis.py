@@ -1,7 +1,7 @@
+from decouple import config # noqa
 from time import sleep
 from redis import Redis
 from redis.exceptions import ConnectionError, BusyLoadingError
-from django.conf import settings
 from django.core.management import BaseCommand
 
 
@@ -15,8 +15,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.stdout.write('Waiting for redis ...')
 
-        if not settings.DEBUG:
-            redis_connection = Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT)
+        if not config("DEBUG"):
+            redis_connection = Redis(host=config('REDIS_HOST'), port=config('REDIS_PORT'))
 
             while True:
                 try:
