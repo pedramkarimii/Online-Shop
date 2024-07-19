@@ -9,6 +9,6 @@ done
 
 echo "Getting certificate ..."
 
-certbot certonly --webroot -w "/vol/www/" -d "pedramkarimi.me" \
+certbot certonly --webroot -w "/vol/www/" -d "onlineshoppedramkarimi.ir" \
   --email "pedram.9060@gmail.com" --force-renewal \
   --rsa-key-size 4096 --agree-tos --noninteractive
