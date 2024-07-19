@@ -9,7 +9,7 @@ if [ ! -f "/vol/proxy/ssl-dhparams.pem" ]; then
 fi
 
 echo "Checking for fullchain.pem"
-if [ ! -f "/etc/letsencrypt/live/pedramkarimi.me/fullchain.pem" ]; then
+if [ ! -f "/etc/letsencrypt/live/onlineshoppedramkarimi.ir/fullchain.pem" ]; then
   echo "No SSL certification, HTTP Mode Enabled !"
   cat /etc/nginx/default.conf.template > /etc/nginx/conf.d/default.conf
 else
