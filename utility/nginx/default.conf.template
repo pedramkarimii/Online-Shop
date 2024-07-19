@@ -1,6 +1,6 @@
 server {
     listen 80;
-    server_name pedramkarimi.me;
+    server_name onlineshoppedramkarimi.ir;
 
     location /.well-known/acme-challenge/ {
         root /vol/www/;
