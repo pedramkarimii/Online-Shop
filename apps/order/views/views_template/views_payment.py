@@ -1,3 +1,4 @@
+from decouple import config # noqa
 from time import timezone
 from django.contrib import messages
 from django.db import transaction
@@ -64,7 +65,7 @@ class PaymentVerifyCodeView(MustBeLogingCustomView):
         self.next_page_payment_verify_code = reverse_lazy('payment_verify_code')  # noqa
         self.next_page_payment_success = reverse_lazy('payment_success')  # noqa
         self.template_payment_verify_code = 'order/payment/verify_code.html'  # noqa
-        self.redis_client = redis.StrictRedis(host='127.0.0.1', port=6379, db=0)  # noqa
+        self.redis_client = redis.StrictRedis(host=config('REDIS_HOST'), port=config('REDIS_PORT'), db=0)  # noqa
         return super().setup(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
