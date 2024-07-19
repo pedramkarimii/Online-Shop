@@ -1,27 +1,27 @@
 server {
     listen 80;
-    server_name pedramkarimi.me;
+    server_name onlineshoppedramkarimi.ir;
 
     location /.well-known/acme-challenge/ {
         root /var/www/certbot;
     }
 
     location / {
-        return 301 https://pedramkarimi.me$request_uri;
+        return 301 https://onlineshoppedramkarimi.ir.me$request_uri;
     }
 }
 
 server {
     listen 443 ssl;
-    server_name pedramkarimi.me;
+    server_name onlineshoppedramkarimi.ir;
 
     # slow connection:
     client_body_timeout 5s;
     client_header_timeout 5s;
 
     # lets encrypt parameters:
-    ssl_certificate /etc/letsencrypt/live/pedramkarimi.me/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/pedramkarimi.me/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/onlineshoppedramkarimi.ir/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/onlineshoppedramkarimi.ir/privkey.pem;
 
     # ssl configs which has been given from certbot
     ssl_session_cache shared:le_nginx_SSL:10m;
