@@ -1,3 +1,4 @@
+from decouple import config # noqa
 import redis
 from kavenegar import *
 import random
@@ -7,7 +8,7 @@ import random
 
 class CodeGenerator:
     def __init__(self):
-        self.redis_client = redis.StrictRedis(host='127.0.0.1', port=6379, db=0)
+        self.redis_client = redis.StrictRedis(host=config('REDIS_HOST'), port=config('REDIS_PORT'), db=0)
 
     def generate_and_store_code(self, phone_number):
         """
