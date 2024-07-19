@@ -8,5 +8,4 @@ WORKDIR /app
 COPY . .
 
 RUN pip install -U pip
-RUN pip install -r requirements.txt --index-url=https://pypi.org/simple/
 RUN pip install -r requirements.txt
