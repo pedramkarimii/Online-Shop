@@ -71,9 +71,11 @@ REST_FRAMEWORK = {
 APPLICATIONS = ["account", "order", "product", "core"]
 
 # Serving
-STATIC_URL = "storage/static/"
-# STATIC_ROOT = BASE_DIR / "storage/static/"
-MEDIA_URL = "media/"
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "volumes/storage/static"
+STATICFILES_DIRS = [BASE_DIR / "storage/static"]
+
+MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "storage/media"
 
 # TOKEN Handling
@@ -111,7 +113,6 @@ if DEBUG:
         # Application
         *list(map(lambda app: f"apps.{app}", APPLICATIONS)),
     ]
-    STATICFILES_DIRS = [BASE_DIR / "storage/static"]
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
