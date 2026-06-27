@@ -1,71 +1,59 @@
-aioredis==2.0.1
-amqp==5.2.0
-asgiref==3.8.1
-async-timeout==4.0.3
-attrs==23.2.0
-billiard==4.2.0
-boto3==1.34.103
-botocore==1.34.103
-celery==5.4.0
-certifi==2026.6.17
-cfgv==3.4.0
-charset-normalizer==3.3.2
-click==8.1.7
-click-didyoumean==0.3.1
-click-plugins==1.1.1
-click-repl==0.3.0
-cron-descriptor==1.4.3
-distlib==0.3.8
-Django==5.2.15
-django-celery-beat==2.8.1
-django-celery-results==2.6.0
-django-jazzmin==3.0.0
-django-storages==1.14.3
-django-timezone-field==6.1.0
-djangorestframework==3.17.1
-djangorestframework-simplejwt==5.5.1
-filelock==3.29.4
-gunicorn==22.0.0
-h11==0.16.0
-identify==2.5.36
-idna==3.18
-isort==5.13.2
-jmespath==1.0.1
-kavenegar==1.1.2
-kombu==5.3.7
-model-bakery==1.18.0
-nodeenv==1.8.0
-outcome==1.3.0
-packaging==24.1
-pillow==12.2.0
-platformdirs==4.2.1
-pre-commit==3.7.0
-prompt-toolkit==3.0.43
-psycopg2-binary==2.9.9
-pycryptodome==3.20.0
-PyJWT==2.13.0
-PySocks==1.7.1
-python-crontab==3.0.0
-python-dateutil==2.9.0
-python-decouple==3.8
-pytz==2024.1
-PyYAML==6.0.1
-redis==5.0.4
-requests==2.34.2
-ruff==0.4.3
-s3transfer==0.10.1
-selenium==4.20.0
-setuptools==78.1.1
-six==1.16.0
-sniffio==1.3.1
-sortedcontainers==2.4.0
-sqlparse==0.5.4
-trio==0.25.0
-trio-websocket==0.11.1
-typing_extensions==4.11.0
-tzdata==2024.1
-urllib3==2.7.0
-vine==5.1.0
-virtualenv==20.36.1
-wcwidth==0.2.13
-wsproto==1.2.0
+amqp==5.3.1 ; python_version >= "3.12" and python_version < "4.0"
+asgiref==3.11.1 ; python_version >= "3.12" and python_version < "4.0"
+attrs==26.1.0 ; python_version >= "3.12" and python_version < "4.0"
+billiard==4.2.4 ; python_version >= "3.12" and python_version < "4.0"
+boto3==1.34.103 ; python_version >= "3.12" and python_version < "4.0"
+botocore==1.34.162 ; python_version >= "3.12" and python_version < "4.0"
+celery==5.4.0 ; python_version >= "3.12" and python_version < "4.0"
+certifi==2026.6.17 ; python_version >= "3.12" and python_version < "4.0"
+cffi==2.0.0 ; python_version >= "3.12" and python_version < "4.0" and os_name == "nt" and implementation_name != "pypy"
+charset-normalizer==3.4.7 ; python_version >= "3.12" and python_version < "4.0"
+click-didyoumean==0.3.1 ; python_version >= "3.12" and python_version < "4.0"
+click-plugins==1.1.1.2 ; python_version >= "3.12" and python_version < "4.0"
+click-repl==0.3.0 ; python_version >= "3.12" and python_version < "4.0"
+click==8.4.2 ; python_version >= "3.12" and python_version < "4.0"
+colorama==0.4.6 ; python_version >= "3.12" and python_version < "4.0" and platform_system == "Windows"
+cron-descriptor==2.1.0 ; python_version >= "3.12" and python_version < "4.0"
+django-celery-beat==2.8.1 ; python_version >= "3.12" and python_version < "4.0"
+django-celery-results==2.6.0 ; python_version >= "3.12" and python_version < "4.0"
+django-jazzmin==3.0.0 ; python_version >= "3.12" and python_version < "4.0"
+django-storages==1.14.3 ; python_version >= "3.12" and python_version < "4.0"
+django-timezone-field==7.2.2 ; python_version >= "3.12" and python_version < "4.0"
+django==5.2.15 ; python_version >= "3.12" and python_version < "4.0"
+djangorestframework-simplejwt==5.5.1 ; python_version >= "3.12" and python_version < "4.0"
+djangorestframework==3.17.1 ; python_version >= "3.12" and python_version < "4.0"
+gunicorn==22.0.0 ; python_version >= "3.12" and python_version < "4.0"
+h11==0.16.0 ; python_version >= "3.12" and python_version < "4.0"
+idna==3.18 ; python_version >= "3.12" and python_version < "4.0"
+jmespath==1.1.0 ; python_version >= "3.12" and python_version < "4.0"
+kavenegar==1.1.2 ; python_version >= "3.12" and python_version < "4.0"
+kombu==5.6.2 ; python_version >= "3.12" and python_version < "4.0"
+outcome==1.3.0.post0 ; python_version >= "3.12" and python_version < "4.0"
+packaging==26.2 ; python_version >= "3.12" and python_version < "4.0"
+pillow==12.2.0 ; python_version >= "3.12" and python_version < "4.0"
+prompt-toolkit==3.0.52 ; python_version >= "3.12" and python_version < "4.0"
+psycopg2-binary==2.9.12 ; python_version >= "3.12" and python_version < "4.0"
+pycparser==3.0 ; python_version >= "3.12" and python_version < "4.0" and os_name == "nt" and (implementation_name != "pypy" and implementation_name != "PyPy")
+pycryptodome==3.20.0 ; python_version >= "3.12" and python_version < "4.0"
+pyjwt==2.13.0 ; python_version >= "3.12" and python_version < "4.0"
+pysocks==1.7.1 ; python_version >= "3.12" and python_version < "4.0"
+python-crontab==3.3.0 ; python_version >= "3.12" and python_version < "4.0"
+python-dateutil==2.9.0.post0 ; python_version >= "3.12" and python_version < "4.0"
+python-decouple==3.8 ; python_version >= "3.12" and python_version < "4.0"
+pytz==2024.1 ; python_version >= "3.12" and python_version < "4.0"
+redis==5.0.4 ; python_version >= "3.12" and python_version < "4.0"
+requests==2.34.2 ; python_version >= "3.12" and python_version < "4.0"
+s3transfer==0.10.4 ; python_version >= "3.12" and python_version < "4.0"
+selenium==4.20.0 ; python_version >= "3.12" and python_version < "4.0"
+six==1.17.0 ; python_version >= "3.12" and python_version < "4.0"
+sniffio==1.3.1 ; python_version >= "3.12" and python_version < "4.0"
+sortedcontainers==2.4.0 ; python_version >= "3.12" and python_version < "4.0"
+sqlparse==0.5.5 ; python_version >= "3.12" and python_version < "4.0"
+trio-websocket==0.12.2 ; python_version >= "3.12" and python_version < "4.0"
+trio==0.33.0 ; python_version >= "3.12" and python_version < "4.0"
+typing-extensions==4.15.0 ; python_version >= "3.12" and python_version < "4.0"
+tzdata==2026.2 ; python_version >= "3.12" and python_version < "4.0"
+urllib3==2.7.0 ; python_version >= "3.12" and python_version < "4.0"
+vine==5.1.0 ; python_version >= "3.12" and python_version < "4.0"
+wcwidth==0.8.1 ; python_version >= "3.12" and python_version < "4.0"
+wsproto==1.3.2 ; python_version >= "3.12" and python_version < "4.0"
