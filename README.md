@@ -1,137 +1,202 @@
 # Online Shop
 
-Online Shop is an e-commerce web application built with Django, offering users a seamless shopping experience. This
-project incorporates various features and technologies to facilitate product browsing, purchasing, and management.
+A Dockerized Django e-commerce application with product and inventory management, role-aware user flows, order and payment handling, wishlist APIs, background tasks, and S3-compatible object storage.
 
-## Features
+## Highlights
 
-- **User Authentication and Authorization**: Users can create accounts, log in, and securely access features like order
-  placement and profile management.
+* Role-aware authentication, profiles, addresses, and account management
+* Product catalog with categories, brands, inventory, media, discounts, comments, and wishlists
+* Order creation, payment flow, and verification endpoints
+* Django REST Framework endpoints for wishlist operations
+* Asynchronous jobs with Celery and RabbitMQ
+* Redis for caching and Celery result storage
+* PostgreSQL persistence
+* S3-compatible object storage integration through `boto3` and `django-storages`
+* Docker Compose environment with health checks and non-root application containers
+* Locked dependencies managed with Poetry; `requirements.txt` is generated from `poetry.lock`
 
-- **Product Browsing and Search**: Browse products by categories and use a robust search feature to find items quickly.
+## Architecture
 
-- **Shopping Cart Management**: Add, remove, and adjust quantities of products in the shopping cart.
+```mermaid
+flowchart LR
+    Client[Browser / API Client] --> App[Django + Gunicorn]
+    App --> DB[(PostgreSQL)]
+    App --> Redis[(Redis)]
+    App --> Broker[RabbitMQ]
+    Broker --> Worker[Celery Worker]
+    Worker --> Storage[S3-Compatible Object Storage]
+    Nginx[Nginx / TLS] --> App
+```
 
-- **Streamlined Checkout Process**: Guided steps for entering shipping details, selecting payment methods, and reviewing
-  orders.
+## Technology Stack
 
-- **Asynchronous Task Processing**: Celery handles tasks like sending order confirmation emails without impacting
-  application responsiveness.
+| Area                     | Tools                                             |
+| ------------------------ | ------------------------------------------------- |
+| Backend                  | Python 3.12, Django, Django REST Framework        |
+| Database                 | PostgreSQL                                        |
+| Async processing         | Celery, RabbitMQ                                  |
+| Caching / result backend | Redis                                             |
+| Storage                  | `boto3`, `django-storages`, S3-compatible storage |
+| Authentication           | Django authentication, JWT via SimpleJWT          |
+| Runtime                  | Gunicorn, Docker, Docker Compose                  |
+| Tooling                  | Poetry, Ruff, isort, pre-commit                   |
+| Admin                    | Django Jazzmin                                    |
 
-- **Caching for Performance**: Redis caches frequently accessed data to improve performance and reduce database load.
+## Project Structure
 
-- **Responsive Design**: Ensures a consistent user experience across devices.
+```text
+apps/
+├── account/      # users, roles, authentication, addresses, tokens
+├── core/         # shared utilities, OTP/SMS helpers, management commands
+├── order/        # carts, orders, payments, payment verification
+├── product/      # catalog, inventory, brands, categories, discounts, wishlists
+└── public/       # public pages, home page, login flows
 
-## List of technologies, frameworks, libraries, and tools Used
+config/           # Django settings, URLs, Celery configuration
+utility/
+├── bucket/       # object-storage integration and related tasks
+└── bin/          # Docker entrypoint scripts
+```
 
-- **Python**: High-level programming language known for its simplicity and versatility.
+## Local Development with Docker
 
-- **Django**: Web framework for rapid development of secure and maintainable websites.
+### 1. Clone the repository
 
-- **Django Rest Framework**: Toolkit for building Web APIs quickly and efficiently.
+```bash
+git clone https://github.com/pedramkarimii/Online-Shop.git
+cd Online-Shop
+```
 
-- **python-decouple**: Library for separating settings from code for better configuration management.
+### 2. Create local environment configuration
 
-- **Pillow**: Python Imaging Library for image processing tasks.
+```bash
+cp .env.example .env
+```
 
-- **Django-Jazzmin**: Customizable admin panel for Django projects.
+Edit `.env` and replace development placeholders before starting the stack. Never commit `.env`.
 
-- **Psycopg2-Binary**: PostgreSQL adapter for Python.
+When PostgreSQL port `5432` is already in use, set a different host port in `.env`:
 
-- **Pytz**: Library for working with time zones in Python.
+```env
+POSTGRES_HOST_PORT=55432
+```
 
-- **Selenium**: Browser automation framework for web application testing.
+### 3. Validate Compose configuration
 
-- **Isort**: Python import sorter for organizing import statements.
+```bash
+docker compose config --quiet
+```
 
-- **Ruff**: Tool for fixing linting errors in Python code.
+### 4. Start application services
 
-- **Pre-Commit**: Framework for managing pre-commit hooks in Git repositories.
+```bash
+docker compose up --build app celery-worker
+```
 
-- **Docker**: Containerization platform for packaging and deploying applications.
+The application is available at:
 
-- **Redis**: In-memory data structure store commonly used for caching and message queuing.
+```text
+http://127.0.0.1:8000/
+```
 
-- **Celery**: Distributed task queue for asynchronous task processing in web applications.
+Stop the local stack with:
 
-- **Tailwind CSS**: Utility-first CSS framework for building responsive and customizable user interfaces.
+```bash
+docker compose down
+```
 
-- **AJAX Fetch**: Technique for making asynchronous HTTP requests from web pages using JavaScript.
+## Poetry Workflow
 
-## Entity-Relationship Diagram for Online Shop
+Install runtime and development dependencies:
 
-![ERD](ERD/ERD_Online_Shop.pdf)
+```bash
+poetry install --with dev
+```
 
-## Setup
+Run Django checks:
 
-### Prerequisites
+```bash
+poetry run python manage.py check
+poetry run python manage.py makemigrations --check --dry-run
+```
 
-- Python (version >= 3.6)
-- Django (version >= 3.0)
-- Django Rest Framework (version >= 3.0)
-- python-decouple (version >= 3.8)
-- pillow (version >= 10.3.0)
-- django-jazzmin (version >= 2.6.1)
-- psycopg2-binary (version >= 2.9.9)
-- pytz (version >= 2024.1)
-- selenium (version >= 4.19.0)
-- isort (version >= 5.13.2)
-- ruff (version >= 0.3.7)
-- pre-commit (version >= 3.7.0)
+Run linting:
 
-### Installation and Usage
+```bash
+poetry run ruff check .
+```
 
-1. **Clone the Repository**:
+Generate runtime requirements from the lock file:
 
-    ```bash
-    git clone https://github.com/pedramkarimii/Online-Shop.git
-    ```
+```bash
+poetry export \
+  --only main \
+  --format requirements.txt \
+  --without-hashes \
+  --output requirements.txt
+```
 
-2. **Navigate to the Project Directory**:
+`requirements.txt` must remain synchronized with `poetry.lock`.
 
-    ```bash
-    cd Online-Shop
-    ```
+## Verification Commands
 
-3. **Install Dependencies**:
+Run dependency consistency checks inside the application image:
 
-    ```bash
-    pip install -r requirements.txt
-    ```
+```bash
+docker compose build app
 
-4. **Set Up Django Environment**:
+docker compose run --rm --no-deps \
+  --entrypoint sh \
+  app \
+  -c 'python -m pip check && python manage.py check'
+```
 
-    ```bash
-    . utility/cleaner.sh
-    ```
+Run Django migrations as a plan without applying changes:
 
-5. **Start the Development Server**:
+```bash
+docker compose up -d db
 
-    ```bash
-    python manage.py runserver
-    ```
+docker compose run --rm --no-deps \
+  --entrypoint sh \
+  app \
+  -c 'python manage.py migrate --plan'
+```
 
-6. **Access the Application**:
+## Tests
 
-   Visit `http://127.0.0.1:8000/` in your web browser.
+The repository contains model, view, token, and Selenium-oriented test modules across the account, order, product, and public applications.
 
-## How to Fork the Project
+Run Django tests with configured services available:
 
-To fork the Tiny Instagram project and contribute to it:
+```bash
+poetry run python manage.py test
+```
 
-1. **Fork the Repository**: Click the "Fork" button at the top right of the GitHub repository page to create a copy of
-   the project in your GitHub account.
-2. **Clone Your Forked Repository**: Clone your forked repository to your local machine using Git.
-3. **Make Changes and Improvements**: Make changes and improvements to the project as needed, such as adding new
-   features, fixing bugs, or enhancing documentation.
-4. **Commit and Push Changes**: Commit your changes to your forked repository and push them to GitHub.
-5. **Create a Pull Request**: Create a pull request to propose your changes and merge them into the main repository.
+Selenium-focused tests require a compatible browser and WebDriver environment.
 
-## Contributors
+## Security Notes
 
-- Pedram Karimi (@pedramkarimii) - Owner
+* Real credentials are excluded from version control through `.gitignore`.
+* `.env.example` contains placeholders only.
+* Docker application containers run as a non-root user.
+* Dependency versions are locked with Poetry.
+* Run an audit against runtime dependencies:
+
+```bash
+pip-audit -r requirements.txt
+```
+
+## Entity Relationship Diagram
+
+[Open the ERD document](ERD/ERD_Online_Shop.pdf)
+
+## Contributing
+
+1. Create a branch from `develop`.
+2. Keep `.env` files and secrets out of commits.
+3. Run formatting, linting, and Django checks.
+4. Submit a focused pull request with a clear description.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
+This project is licensed under the MIT License. See [LICENSE](LICENSE).
